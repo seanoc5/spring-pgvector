@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{error/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Error - Internal Server Error</title>
+</head>
+<body>
+    <section>
+        <div class="error-template">
+            <div class="error-code text-danger">
+                <span th:text="${status}">500</span>
+            </div>
+            <h1>Something went wrong!</h1>
+            <div class="error-message">
+                <p th:text="${message}">Sorry, an unexpected error has occurred.</p>
+            </div>
+            <div class="error-details">
+                <div th:if="${path}"><strong>Path:</strong> <span th:text="${path}"></span></div>
+                <div><strong>Timestamp:</strong> <span th:text="${timestamp}"></span></div>
+                <div><strong>Error:</strong> <span th:text="${error}"></span></div>
+                
+                <div th:if="${trace}" class="mt-4">
+                    <p><strong>Stack Trace:</strong></p>
+                    <pre class="bg-light p-3" style="max-height: 300px; overflow-y: auto; font-size: 12px;">
+                        <span th:each="stackTrace : ${trace}" th:text="${stackTrace}"></span>
+                    </pre>
+                </div>
+            </div>
+            <div class="error-actions">
+                <a href="/" class="btn btn-primary btn-lg">
+                    <i class="fas fa-home"></i> Take Me Home
+                </a>
+                <a href="/admin/dashboard" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-envelope"></i> Admin Dashboard
+                </a>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
