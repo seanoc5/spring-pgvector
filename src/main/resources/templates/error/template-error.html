@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" 
+<html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{error/layout :: layout(~{::title}, ~{::section})}">
 <head>
     <title>Error - Template Not Found</title>
@@ -17,7 +17,8 @@
             <div class="error-details">
                 <div th:if="${path}"><strong>Path:</strong> <span th:text="${path}"></span></div>
                 <div><strong>Timestamp:</strong> <span th:text="${timestamp}"></span></div>
-                <div><strong>Error:</strong> <span th:text="${error}"></span></div>
+                <!-- make this word wrapped, with line breaks-->
+                <div><strong>TEST Error:</strong> <span th:utext="${#strings.replace(error, '\n', '<br/>')}" ></span></div>
             </div>
             <div class="error-actions">
                 <a href="/" class="btn btn-primary btn-lg">

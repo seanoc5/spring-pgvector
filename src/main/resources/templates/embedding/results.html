@@ -8,10 +8,10 @@
 <section>
     <div class="container-fluid">
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Embeddings Management</h1>
-            <a href="#" class="d-none d-sm-inline-block btn btn-primary shadow-sm">
-                <i class="fas fa-plus fa-sm text-white-50"></i> Create New Embedding
-            </a>
+            <h1 class="h3 mb-0 text-gray-800">Semantic Search Results</h1>
+<!--            <a href="#" class="d-none d-sm-inline-block btn btn-primary shadow-sm">-->
+<!--                <i class="fas fa-plus fa-sm text-white-50"></i> Create New Embedding-->
+<!--            </a>-->
         </div>
 
         <!-- Embedding Stats Row -->
@@ -22,10 +22,10 @@
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Total Embeddings
+                                    Results:
                                 </div>
 <!--                                <span th:each="embedding : ${embeddings}" th:text="${embedding}">1 2</span>-->
-                                <div th:each="doc : ${embeddedDocuments}" >Doc: <div th:text="${doc}"></div></div>
+                                <div th:each="doc : ${results}" >Doc: <div th:text="${doc}"></div></div>
                             </div>
                             <div class="col-auto">
                                 <i class="fas fa-vector-square fa-2x text-gray-300"></i>

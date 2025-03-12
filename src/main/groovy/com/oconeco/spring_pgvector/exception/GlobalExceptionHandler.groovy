@@ -21,9 +21,7 @@ import java.nio.file.AccessDeniedException
  */
 @ControllerAdvice
 class GlobalExceptionHandler {
-
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class)
-
 
     /**
      * Handle general exceptions.

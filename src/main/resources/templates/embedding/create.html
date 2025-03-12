@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Embeddings - demo</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Create Embeddings</h1>
+        </div>
+
+        <!-- Embedding Stats Row -->
+        <div class="row">
+            <div class="col-xl-6 col-md-8 mb-4">
+                <div class="card stats-card primary h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    New Embedding Information
+                                </div>
+                                <form action="@{/embedding/embed}" method="post">
+                                    <div class="form-group">
+                                        <label for="docid">Document ID</label>
+                                        <input type="text" class="form-control" id="docid" name="docid">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="query">Source</label>
+                                        <input type="text" class="form-control" id="source" name="source" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="document">Document</label>
+                                        <input type="text" class="form-control" id="content" name="content" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Create</button>
+                                </form>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-vector-square fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

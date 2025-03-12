@@ -5,7 +5,7 @@ spring:
     open-in-view: true
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
 
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
@@ -36,7 +36,7 @@ spring:
 #        dimensions: 1024
         dimensions: 768
         index-type: hnsw
-        schema-validation: false
+        schema-validation: true
 #        remove-existing-vector-store-table: true
 
 # IVFFlat (Inverted File Flat) index, HNSW (Hierarchical Navigable Small World) index
@@ -53,3 +53,6 @@ logging:
     com.oconeco: info
   pattern:
     console: "%d{MM-dd HH:mm:ss} %highlight(%-5level) [%-30logger{30}]  -- %msg%n"
+  file:
+    path: logs
+
