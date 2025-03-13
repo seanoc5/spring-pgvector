@@ -1,11 +1,11 @@
 plugins {
 	id 'groovy'
-	id 'org.springframework.boot' version '3.3.9'
+	id 'org.springframework.boot' version '3.4.3'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.oconeco'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.1'
 
 java {
 	toolchain {
@@ -24,8 +24,8 @@ repositories {
 }
 
 ext {
-	set('springAiVersion', "1.0.0-M6")
-	set('springModulithVersion', "1.2.9")
+	set('springAiVersion', "1.0.0-M5")
+//	set('springModulithVersion', "1.2.9")
 }
 
 dependencies {

@@ -64,6 +64,7 @@ class EmbeddingController {
                  Model model) {
         logger.info("============== Embed text: "+  content);
         Document doc = new Document(content);
+//        doc.setI
         List<Document> docs = [doc]
         def md = doc.getMetadata()
         md.put("source", source);
