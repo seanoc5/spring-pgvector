@@ -1,0 +1,15 @@
+### embed doc 1
+GET http://localhost:8080/embedding/embed?content=This is the first test document with very little content&source=idea-client&docId=test1
+
+### embed doc 2
+GET http://localhost:8080/embedding/embed?content=Baseball has been very very good to me&source=idea-client&docId=test2
+
+### embed doc 3
+GET http://localhost:8080/embedding/embed?content=Soccer is a beautiful sport, but it has not been good to me&source=idea-client&docId=test3
+
+### embed doc 1
+GET http://localhost:8080/embedding/embed?content=HOusing in Florida is becoming a hot topic; will it be good for me?&source=idea-client&docId=test
+
+
+
+###
