@@ -6,6 +6,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 
+// todo - delete this test code
 @Controller
 class GreetingController {
 

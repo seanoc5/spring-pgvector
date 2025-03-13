@@ -37,6 +37,7 @@ spring:
         dimensions: 768
         index-type: hnsw
         schema-validation: true
+        initialize-schema: true
 #        remove-existing-vector-store-table: true
 
 # IVFFlat (Inverted File Flat) index, HNSW (Hierarchical Navigable Small World) index
