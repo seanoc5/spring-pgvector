@@ -47,5 +47,4 @@ class EmbeddingService {
         return transformedDocuments
     }
 
-
 }
