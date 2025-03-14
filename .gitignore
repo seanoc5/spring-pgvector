@@ -10,7 +10,9 @@ build/
 *.class
 
 # Log file
+logs/
 *.log
+*.log*.gz
 
 # BlueJ files
 *.ctxt
