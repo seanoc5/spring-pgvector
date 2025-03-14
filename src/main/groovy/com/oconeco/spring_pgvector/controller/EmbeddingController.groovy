@@ -48,12 +48,6 @@ class EmbeddingController {
             documents = vectorStore.similaritySearch(SearchRequest.builder().query("pets").topK(100).build())
         }
 
-/*
-        documents.each {
-            logger.info("Doc (${it.getId()}) [${it.getScore()}]: ${it.getText()}")
-        }
-*/
-
         // Calculate start and end indices for the current page
         int start = pageable.pageNumber * pageable.pageSize
         int end = Math.min(start + pageable.pageSize, documents.size())

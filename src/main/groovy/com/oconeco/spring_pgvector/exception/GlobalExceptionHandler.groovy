@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.NoHandlerFoundException
+import org.springframework.web.servlet.resource.NoResourceFoundException
 import org.thymeleaf.exceptions.TemplateInputException
 
 import jakarta.servlet.http.HttpServletRequest
@@ -55,6 +56,24 @@ class GlobalExceptionHandler {
         modelAndView.addObject("status", HttpStatus.NOT_FOUND.value())
         modelAndView.addObject("error", "Template Not Found")
         modelAndView.addObject("message", ex.getMessage())
+        modelAndView.addObject("path", request.getRequestURI())
+
+        return modelAndView
+    }
+
+    /**
+     * Handle static resource not found exceptions.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    ModelAndView handleNoResourceFoundException(NoResourceFoundException ex, HttpServletRequest request) {
+        log.error("Static resource not found: {}", ex.getMessage())
+
+        ModelAndView modelAndView = new ModelAndView("error/404")
+        modelAndView.addObject("timestamp", new Date())
+        modelAndView.addObject("status", HttpStatus.NOT_FOUND.value())
+        modelAndView.addObject("error", "Resource Not Found")
+        modelAndView.addObject("message", "The static resource you are looking for could not be found: " + ex.getMessage())
         modelAndView.addObject("path", request.getRequestURI())
 
         return modelAndView

@@ -12,13 +12,12 @@
             </div>
             <h1>Template Not Found</h1>
             <div class="error-message">
-                <p th:text="${message}">The requested template couldn't be found.</p>
+                <p th:utext="${#strings.replace(#strings.escapeXml(message),'&#10;','<br/>')}">The requested template couldn't be found.</p>
             </div>
             <div class="error-details">
                 <div th:if="${path}"><strong>Path:</strong> <span th:text="${path}"></span></div>
                 <div><strong>Timestamp:</strong> <span th:text="${timestamp}"></span></div>
-                <!-- make this word wrapped, with line breaks-->
-                <div><strong>TEST Error:</strong> <span th:utext="${#strings.replace(error, '\n', '<br/>')}" ></span></div>
+                <div><strong>Error:</strong> <span th:utext="${#strings.replace(#strings.escapeXml(error),'&#10;','<br/>')}"></span></div>
             </div>
             <div class="error-actions">
                 <a href="/" class="btn btn-primary btn-lg">

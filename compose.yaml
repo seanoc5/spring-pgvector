@@ -6,7 +6,7 @@ services:
       - '11434'
   # comment this out to use local pgvector
   pgvector:
-    image: 'pgvector/pgvector:pg16'
+    image: 'pgvector/pgvector:pg17'
     environment:
       - 'POSTGRES_DB=spring-pgvevctor'
       - 'POSTGRES_PASSWORD=pass1234'
