@@ -6,13 +6,11 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
-
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
 #    url: jdbc:postgresql://localhost:5436/spring-pgvector
 #    username: postgres
 #    password: pass1234
-
 #  modulith:
 #    events:
 #      jdbc-schema-initialization:
@@ -38,6 +36,10 @@ spring:
         index-type: hnsw
         schema-validation: true
         initialize-schema: true
+  security:
+    user:
+      name: sean
+      password: pass1234
 #        remove-existing-vector-store-table: true
 
 # IVFFlat (Inverted File Flat) index, HNSW (Hierarchical Navigable Small World) index
@@ -52,6 +54,7 @@ logging:
   level:
     root: info
     com.oconeco: info
+#    web: debug
   pattern:
     console: "%d{MM-dd HH:mm:ss} %highlight(%-5level) [%-30logger{30}]  -- %msg%n"
   file:

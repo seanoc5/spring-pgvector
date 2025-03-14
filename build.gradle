@@ -2,6 +2,10 @@ plugins {
 	id 'groovy'
 	id 'org.springframework.boot' version '3.4.3'
 	id 'io.spring.dependency-management' version '1.1.7'
+
+//    id 'groovy'
+//    id 'org.springframework.boot' version '3.4.3'
+//    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.oconeco'
@@ -24,7 +28,7 @@ repositories {
 }
 
 ext {
-	set('springAiVersion', "1.0.0-M5")
+	set('springAiVersion', "1.0.0-M6")
 //	set('springModulithVersion', "1.2.9")
 }
 
@@ -39,6 +43,11 @@ dependencies {
 //	implementation 'org.springframework.modulith:spring-modulith-starter-core'
 //	implementation 'org.springframework.modulith:spring-modulith-starter-jpa'
 	implementation 'org.springframework.session:spring-session-core'
+    implementation 'io.github.wimdeblauwe:htmx-spring-boot:4.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    testImplementation 'org.springframework.security:spring-security-test'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
@@ -51,11 +60,13 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 //	testImplementation 'org.springframework.modulith:spring-modulith-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	
+	// For testing with Docker Compose
+	testImplementation 'org.springframework.boot:spring-boot-docker-compose'
 }
 
 dependencyManagement {
 	imports {
-//		mavenBom "org.springframework.modulith:spring-modulith-bom:${springModulithVersion}"
 		mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
 	}
 }

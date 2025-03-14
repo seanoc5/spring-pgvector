@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- Document Table Fragment -->
+    <div th:fragment="documentTable">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="embeddingsTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Content</th>
+                        <th>Metadata</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="doc : ${page.content}">
+                        <td th:text="${doc.getId()}">Doc ID</td>
+                        <td>
+                            <span th:text="${#strings.abbreviate(doc.getText(), 100)}">Content</span>
+                        </td>
+                        <td th:text="${doc.metadata}">Metadata</td>
+                        <td>
+                            <a th:href="@{/embedding/search(query=${doc.getText()})}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-search fa-sm"></i> Similar
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${page.empty}">
+                        <td colspan="5" class="text-center">No embeddings found</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${!page.empty}" class="d-flex justify-content-center">
+            <nav aria-label="Embedding pagination">
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/embedding/list(page=0, size=${page.size}, search=${searchQuery})}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/embedding/list(page=${currentPage - 1}, size=${page.size}, search=${searchQuery})}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+
+                    <!-- Page numbers -->
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:if="${i >= currentPage - 2 and i <= currentPage + 2}"
+                        th:classappend="${currentPage == i} ? 'active' : ''">
+                        <a class="page-link" th:href="@{/embedding/list(page=${i}, size=${page.size}, search=${searchQuery})}" th:text="${i + 1}">1</a>
+                    </li>
+
+                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/embedding/list(page=${currentPage + 1}, size=${page.size}, search=${searchQuery})}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/embedding/list(page=${totalPages - 1}, size=${page.size}, search=${searchQuery})}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Page size selector -->
+        <div class="d-flex justify-content-center mt-3">
+            <div class="form-inline">
+                <label class="mr-2" for="pageSizeSelect">Items per page:</label>
+                <select id="pageSizeSelect" class="form-control form-control-sm" onchange="changePageSize(this.value, '[[${searchQuery}]]')">
+                    <option value="5" th:selected="${page.size == 5}">5</option>
+                    <option value="10" th:selected="${page.size == 10}">10</option>
+                    <option value="20" th:selected="${page.size == 20}">20</option>
+                    <option value="50" th:selected="${page.size == 50}">50</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

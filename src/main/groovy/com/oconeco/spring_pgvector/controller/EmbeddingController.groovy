@@ -31,30 +31,55 @@ class EmbeddingController {
     }
 
     @GetMapping(["", "/", '/index', '/list'])
-    String list(Model model, @PageableDefault(size = 10, sort = "id") Pageable pageable) {
-        logger.info("Listing embeddings with pagination: page=${pageable.pageNumber}, size=${pageable.pageSize}")
+    String list(Model model,
+                @PageableDefault(size = 10, sort = "id") Pageable pageable,
+                @RequestParam(name = "search", required = false) String searchQuery) {
+        logger.info("Listing embeddings with pagination: page=${pageable.pageNumber}, size=${pageable.pageSize}, search=${searchQuery}")
 
-        // Retrieve all documents from the vector store
-        List<Document> sampleDocuments = vectorStore.similaritySearch(SearchRequest.builder().query("pets").topK(100).build())
-        sampleDocuments.each {
+        // Retrieve documents from the vector store
+        List<Document> documents
+
+        if (searchQuery && !searchQuery.trim().isEmpty()) {
+            // If search query provided, use it to find similar documents
+            documents = vectorStore.similaritySearch(SearchRequest.builder().query(searchQuery).topK(100).build())
+            logger.info("Search query: '${searchQuery}' returned ${documents.size()} results")
+        } else {
+            // Default query if no search term provided
+            documents = vectorStore.similaritySearch(SearchRequest.builder().query("pets").topK(100).build())
+        }
+
+/*
+        documents.each {
             logger.info("Doc (${it.getId()}) [${it.getScore()}]: ${it.getText()}")
         }
+*/
 
         // Calculate start and end indices for the current page
         int start = pageable.pageNumber * pageable.pageSize
-        int end = Math.min(start + pageable.pageSize, sampleDocuments.size())
+        int end = Math.min(start + pageable.pageSize, documents.size())
 
         // Create a sublist for the current page
-        def pageContent = start < sampleDocuments.size() ? sampleDocuments.subList(start, end) : []
+        def pageContent = start < documents.size() ? documents.subList(start, end) : []
 
         // Create a Page object
-        Page<Document> page = new PageImpl<>(pageContent, pageable, sampleDocuments.size())
+        Page<Document> page = new PageImpl<>(pageContent, pageable, documents.size())
 
         model.addAttribute('page', page)
         model.addAttribute('currentPage', pageable.pageNumber)
         model.addAttribute('totalPages', page.totalPages)
+        model.addAttribute('searchQuery', searchQuery ?: "")
+
+        // Check if this is an HTMX request
+        if (isHtmxRequest()) {
+            return "embedding/fragments/document-table :: documentTable"
+        }
 
         return "embedding/list"
+    }
+
+    private boolean isHtmxRequest() {
+        def request = org.springframework.web.context.request.RequestContextHolder.currentRequestAttributes().request
+        return request.getHeader("HX-Request") != null
     }
 
     @GetMapping(["/embed", "/demo"])
@@ -73,21 +98,11 @@ class EmbeddingController {
         def chunks = embeddingService.embedDocuments(docs)
 
 //        var embeddings = embeddingService.embedQuery(content);
-        logger.info("Doc: ${doc} (split into: ${chunks.size()} chunks)");
+        logger.debug("Doc: ${doc} (split into: ${chunks.size()} chunks)");
 
         model.addAttribute('embeddedDocuments',docs)
         return "embedding/demo"
     }
-
-//    @GetMapping("/generic-options")
-//    String embedGenericOptions(@RequestParam(name="content", defaultValue = "This is a test query to embed") String content, Model model) {
-//        logger.info("============== Embed content (generic-options): "+  content);
-//        var embeddings = embeddingService.embedQueryWithOptions(content);
-////        return "Size of the embedding vector: " + embeddings.length;
-//        model.addAttribute('embeddedDocuments',docs)
-//        return "embedding/demo"
-//    }
-
 
     @GetMapping("/search")
     String search(@RequestParam(name="query", defaultValue = "What is a test query") String query, Model model) {
