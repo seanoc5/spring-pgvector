@@ -1,4 +1,10 @@
 spring:
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
+      additional-paths: ["src/main/resources/static/", "src/main/resources/templates/"]
   application:
     name: spring-pgvector
   jpa:
@@ -6,16 +12,15 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://localhost:5436/spring-pgvector
-#    username: postgres
-#    password: pass1234
-#  modulith:
-#    events:
-#      jdbc-schema-initialization:
-#        enabled: true
-
+  datasource:
+    url: jdbc:postgresql://localhost:5436/spring-pgvector
+    username: postgres
+    password: pass1234
+  security:
+    user:
+      name: sean
+      password: pass1234
+#        remove-existing-vector-store-table: true
   ai:
     ollama:
       init:
@@ -36,11 +41,7 @@ spring:
         index-type: hnsw
         schema-validation: true
         initialize-schema: true
-  security:
-    user:
-      name: sean
-      password: pass1234
-#        remove-existing-vector-store-table: true
+
 
 # IVFFlat (Inverted File Flat) index, HNSW (Hierarchical Navigable Small World) index
 #spring.ai.vectorstore.pgvector.index-type=HNSW
@@ -54,9 +55,10 @@ logging:
   level:
     root: info
     com.oconeco: info
+    org.springframework.security: debug
+    org.springframework.web: debug
 #    web: debug
   pattern:
     console: "%d{MM-dd HH:mm:ss} %highlight(%-5level) [%-30logger{30}]  -- %msg%n"
   file:
     path: logs
-
