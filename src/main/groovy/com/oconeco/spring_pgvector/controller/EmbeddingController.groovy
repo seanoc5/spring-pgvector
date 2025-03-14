@@ -1,6 +1,7 @@
-package com.oconeco.spring_pgvector.controller;
+package com.oconeco.spring_pgvector.controller
 
-import org.slf4j.Logger;
+import com.oconeco.spring_pgvector.service.EmbeddingService
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.ai.document.Document
 import org.springframework.ai.vectorstore.SearchRequest
@@ -10,11 +11,11 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.stereotype.Controller
-import org.springframework.ui.Model;
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import com.oconeco.spring_pgvector.service.EmbeddingService;
 
 @RequestMapping("/embedding")
 @Controller
@@ -109,5 +110,32 @@ class EmbeddingController {
         model.addAttribute('results',results)
         logger.info("Found ${results.size()} results")
         return "embedding/results"
+    }
+
+    @GetMapping("/create")
+    String create() {
+        return "embedding/create"
+    }
+
+    @PostMapping("/create")
+    String create(@RequestParam(name="content", required = true) String content,
+                 @RequestParam(name="source", required = true) String source,        //, defaultValue = "testing"
+                 @RequestParam(name="docId", required = true) String docId,
+                 Model model) {
+        logger.info("============== Embed text: "+  content);
+        Document doc = new Document(content);
+//        doc.setI
+        List<Document> docs = [doc]
+        def md = doc.getMetadata()
+        md.put("source", source);
+        md.put("docId", docId);
+
+        def chunks = embeddingService.embedDocuments(docs)
+
+//        var embeddings = embeddingService.embedQuery(content);
+        logger.debug("Doc: ${doc} (split into: ${chunks.size()} chunks)");
+
+        model.addAttribute('embeddedDocuments',docs)
+        return "embedding/demo"
     }
 }
