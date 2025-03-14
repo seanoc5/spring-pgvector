@@ -1,5 +1,6 @@
 package com.oconeco.spring_pgvector.exception
 
+import groovy.util.logging.Slf4j
 import jakarta.servlet.RequestDispatcher
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.boot.web.servlet.error.ErrorController
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping
  * Custom error controller to handle Spring Boot's default error path.
  * This replaces the default WhiteLabel error page and routes to our custom error pages.
  */
+@Slf4j
 @Controller
 class CustomErrorController implements ErrorController {
 
@@ -25,6 +27,12 @@ class CustomErrorController implements ErrorController {
         Object message = request.getAttribute(RequestDispatcher.ERROR_MESSAGE)
         Object exception = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION)
         Object path = request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI)
+        
+        // Log error details
+        log.error("Error processing request: status={}, path={}, message={}", status, path, message)
+        if (exception) {
+            log.error("Exception details:", exception)
+        }
         
         // Add common error attributes to the model
         model.addAttribute("timestamp", new Date())
