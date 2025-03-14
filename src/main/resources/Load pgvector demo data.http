@@ -20,6 +20,8 @@ GET http://localhost:8080/embedding/embed?content=Flood insurance rates in Miami
 GET http://localhost:8080/embedding/embed?content=Duval County is one of largest counties in the state?&source=idea-client&docId=state1
 ###
 GET http://localhost:8080/embedding/embed?content=Dade county contains Miami and MIami Beach?&source=idea-client&docId=state2
+###
+GET http://localhost:8080/embedding/embed?content=Walking step by step is a great way to re-invigorate.&source=idea-client&docId=state2
 
 
 
