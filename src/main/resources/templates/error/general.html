@@ -11,6 +11,20 @@
                 <span th:text="${status}">500</span>
             </div>
             <h1>Something went wrong!</h1>
+            
+            <!-- User-friendly error message for template errors -->
+            <div th:if="${friendlyMessage}" class="alert alert-warning">
+                <h4><i class="fas fa-exclamation-triangle"></i> <span th:text="${friendlyMessage}">Friendly Error Message</span></h4>
+                
+                <div th:if="${missingResource}" class="mt-2">
+                    <strong>Missing Resource:</strong> <code th:text="${missingResource}">resource</code>
+                </div>
+                
+                <div th:if="${suggestedAction}" class="mt-2">
+                    <strong>Suggested Action:</strong> <span th:text="${suggestedAction}">action</span>
+                </div>
+            </div>
+            
             <div class="error-message">
                 <p th:utext="${#strings.replace(#strings.escapeXml(message),'&#10;','<br/>')}">Sorry, an unexpected error has occurred.</p>
             </div>

@@ -1,0 +1,8 @@
+td.document-content {
+    /*max-width: 500px;*/
+    /*overflow: hidden;*/
+    /*text-overflow: ellipsis;*/
+    /*white-space: nowrap;*/
+    /*cursor: pointer;*/
+    white-space: pre-wrap;
+}

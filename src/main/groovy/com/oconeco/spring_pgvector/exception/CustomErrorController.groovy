@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.RequestMapping
+import org.thymeleaf.exceptions.TemplateInputException
 
 /**
  * Custom error controller to handle Spring Boot's default error path.
@@ -45,8 +46,37 @@ class CustomErrorController implements ErrorController {
                     return "error/403"
                 case 500:
                     model.addAttribute("error", "Internal Server Error")
+                    
+                    // Check for specific error types and provide more helpful messages
                     if (exception) {
+                        Throwable rootCause = findRootCause(exception)
                         model.addAttribute("trace", exception.getStackTrace())
+                        
+                        // Check for template-related errors
+                        if (rootCause instanceof TemplateInputException || 
+                            rootCause.toString().contains("template") || 
+                            rootCause.toString().contains("Template")) {
+                            
+                            model.addAttribute("friendlyMessage", "It looks like a template file is missing or has an error.")
+                            
+                            // Extract template name from error message if possible
+                            String errorMsg = rootCause.toString()
+                            if (errorMsg.contains("template")) {
+                                int startIdx = errorMsg.indexOf("template")
+                                int endIdx = errorMsg.indexOf(".html")
+                                if (startIdx > 0 && endIdx > startIdx) {
+                                    String templatePath = errorMsg.substring(startIdx, endIdx + 5)
+                                    model.addAttribute("missingResource", templatePath)
+                                }
+                            }
+                            
+                            // If path contains admin/reports, suggest creating the missing report template
+                            String pathStr = path?.toString() ?: ""
+                            if (pathStr.contains("/admin/reports/")) {
+                                model.addAttribute("suggestedAction", 
+                                    "You may need to create the missing report template for: " + pathStr)
+                            }
+                        }
                     }
                     return "error/general"
                 default:
@@ -59,5 +89,16 @@ class CustomErrorController implements ErrorController {
         model.addAttribute("status", 500)
         model.addAttribute("error", "Unknown Error")
         return "error/general"
+    }
+    
+    /**
+     * Find the root cause of an exception by unwrapping nested exceptions
+     */
+    private Throwable findRootCause(Throwable throwable) {
+        Throwable rootCause = throwable
+        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+            rootCause = rootCause.getCause()
+        }
+        return rootCause
     }
 }

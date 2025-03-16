@@ -11,6 +11,7 @@ import org.springframework.data.web.PageableDefault
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam
 import com.oconeco.spring_pgvector.service.EmbeddingService;
@@ -19,8 +20,6 @@ import com.oconeco.spring_pgvector.service.EmbeddingService;
 @RequestMapping("/embedding")
 @Controller
 class EmbeddingController {
-//    private static final Logger logger = LoggerFactory.getLogger(EmbeddingController.class);
-
     private final EmbeddingService embeddingService;
     private final VectorStore vectorStore;
 
@@ -76,10 +75,10 @@ class EmbeddingController {
         return request.getHeader("HX-Request") != null
     }
 
-    @GetMapping(["/embed", "/demo"])
-    String embed(@RequestParam(name="content", required = true) String content,
-                 @RequestParam(name="source", required = true) String source,        //, defaultValue = "testing"
-                 @RequestParam(name="docId", required = true) String docId,
+    @GetMapping(["/embed"])
+    String embed(@RequestParam(name="content", required = false) String content,
+                 @RequestParam(name="source", required = false) String source,        //, defaultValue = "testing"
+                 @RequestParam(name="docId", required = false) String docId,
                  Model model) {
         log.info("============== Embed text: "+  content);
         Document doc = new Document(content);
@@ -95,7 +94,38 @@ class EmbeddingController {
         log.debug("Doc: ${doc} (split into: ${chunks.size()} chunks)");
 
         model.addAttribute('embeddedDocuments',docs)
-        return "embedding/demo"
+        return "embedding/success"
+    }
+
+    @PostMapping("/embed")
+    String processEmbedding(@RequestParam(name="content", required = true) String content,
+                 @RequestParam(name="source", required = true) String source,
+                 @RequestParam(name="docid", required = false) String docId,
+                 Model model) {
+        log.info("Processing embedding POST request with content: ${content}, source: ${source}, docId: ${docId ?: 'not provided'}")
+
+        // Create a new document with the provided content
+        Document doc = new Document(content)
+
+        // Add metadata to the document
+        def md = doc.getMetadata()
+        md.put("source", source)
+        if (docId) {
+            md.put("docId", docId)
+        }
+
+        // Create a list with the document and embed it
+        List<Document> docs = [doc]
+        def chunks = embeddingService.embedDocuments(docs)
+
+        log.info("Document embedded successfully. Split into ${chunks.size()} chunks")
+
+        // Add attributes to the model for display in the template
+        model.addAttribute('document', doc)
+        model.addAttribute('chunks', chunks)
+        model.addAttribute('success', true)
+
+        return "embedding/success"
     }
 
     @GetMapping("/search")
