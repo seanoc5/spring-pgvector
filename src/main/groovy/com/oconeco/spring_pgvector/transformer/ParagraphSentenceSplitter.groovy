@@ -52,7 +52,8 @@ class ParagraphSentenceSplitter implements DocumentTransformer {
             transformedDocuments << document
             docNo++
             def docId = document.getMetadata().get("docId") ?: document.getId()
-            log.info("\t\t$docNo:$docId) Original document: ${document}")
+            log.info("\t\t$docNo:$docId) metadata:(${document.getMetadata()}) --  doc content size:${document.getText()?.size()}")
+            log.debug("\t\t$docNo:$docId) Original document: ${document}")
             List<Document> splitDocuments = splitDocument(document)
             log.info("\t\t$docNo:$docId) Split into ${splitDocuments.size()} documents")
             transformedDocuments.addAll(splitDocuments)

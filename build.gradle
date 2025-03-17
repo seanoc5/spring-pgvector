@@ -2,14 +2,11 @@ plugins {
 	id 'groovy'
 	id 'org.springframework.boot' version '3.4.3'
 	id 'io.spring.dependency-management' version '1.1.7'
-
-//    id 'groovy'
-//    id 'org.springframework.boot' version '3.4.3'
-//    id 'io.spring.dependency-management' version '1.1.7'
+	id 'application'
 }
 
 group = 'com.oconeco'
-version = '0.1.1'
+version = '0.1.2'
 
 java {
 	toolchain {
@@ -29,19 +26,16 @@ repositories {
 
 ext {
 	set('springAiVersion', "1.0.0-M6")
-//	set('springModulithVersion', "1.2.9")
 }
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.apache.groovy:groovy'
+	implementation 'org.apache.groovy:groovy-all:4.0.24'
 
 	implementation 'org.springframework.ai:spring-ai-ollama-spring-boot-starter'
 	implementation 'org.springframework.ai:spring-ai-pgvector-store-spring-boot-starter'
-//	implementation 'org.springframework.modulith:spring-modulith-starter-core'
-//	implementation 'org.springframework.modulith:spring-modulith-starter-jpa'
 	implementation 'org.springframework.session:spring-session-core'
     implementation 'io.github.wimdeblauwe:htmx-spring-boot:4.0.1'
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -50,6 +44,14 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.apache.opennlp/opennlp-tools
     implementation 'org.apache.opennlp:opennlp-tools:2.5.3'
+    // add a test http client
+//    implementation 'org.apache.httpcomponents:httpcomponents-client:4.5.14'
+//    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
+    // https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.4.2'
+
+    // Apache Commons CSV for parsing CSV files
+    implementation 'org.apache.commons:commons-csv:1.13.0'
 
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -62,6 +64,7 @@ dependencies {
 
     testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
     // For testing with Docker Compose
     testImplementation 'org.springframework.boot:spring-boot-docker-compose'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -75,4 +78,66 @@ dependencyManagement {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// Task to run the CSV importer
+task runCsvImporter(type: JavaExec) {
+    description = 'Run the SAM.gov CSV importer'
+    group = 'application'
+    
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'test.RunCsvImporter'
+}
+
+// Define the main application class
+application {
+    mainClass = 'com.oconeco.SamGovApplication'
+}
+
+// Task to run the main Spring Boot application
+task runMainApp(type: JavaExec) {
+    description = 'Run the main Spring Boot application'
+    group = 'application'
+    
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.oconeco.SamGovApplication'
+}
+
+// Task to run the CSV importer with Spring Boot
+task runCsvImporterApp(type: JavaExec) {
+    description = 'Run the Spring Boot CSV importer application'
+    group = 'application'
+    
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.oconeco.SamGovApplication'
+    args = ['--spring.profiles.active=csv-import']
+}
+
+// Task to run the CSV importer with a specific file
+task runCsvImporterWithFile(type: JavaExec) {
+    description = 'Run the Spring Boot CSV importer with a specific file'
+    group = 'application'
+    
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.oconeco.SamGovApplication'
+    
+    // Default arguments, can be overridden from command line with -Pargs="..."
+    args = ['--spring.profiles.active=csv-import', '--file=' + project.findProperty('csvFile')]
+    
+    // Only run if csvFile property is provided
+    onlyIf {
+        project.hasProperty('csvFile')
+    }
+}
+
+// Task to run the search functionality
+task runSearch(type: JavaExec) {
+    description = 'Run the Spring Boot search functionality'
+    group = 'application'
+    
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.oconeco.SamGovApplication'
+    
+    // Default arguments, can be overridden from command line with -Pargs="..."
+    args = ['--spring.profiles.active=csv-import', '--search=' + (project.findProperty('query') ?: 'software development')]
 }

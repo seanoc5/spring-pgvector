@@ -6,15 +6,11 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://localhost:5436/spring-pgvector
-#    username: postgres
-#    password: pass1234
-#  modulith:
-#    events:
-#      jdbc-schema-initialization:
-#        enabled: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5436/spring-pgvector
+    username: postgres
+    password: pass1234
 
   ai:
     ollama:
@@ -26,7 +22,7 @@ spring:
         options:
 #          model: gte-large
 #          model: nomic-ai/nomic-embed-text-v1.5
-          model: nomic-embed-text
+          model: nomic-embed-text     # 768
 #          model: Snowflake/snowflake-arctic-embed-m-v2.0
     vectorstore:
       pgvector:
@@ -44,6 +40,7 @@ spring:
 
   mvc:
     log-request-details=true: true
+
 logging:
   level:
     root: info
@@ -56,3 +53,7 @@ logging:
   file:
     path: logs
 
+# Custom configuration for SAM.gov opportunities
+sam-gov:
+  csv-file-path: /home/sean/Downloads/ContractOpportunities-20250316-065253.csv
+  vector-dimension: 1536

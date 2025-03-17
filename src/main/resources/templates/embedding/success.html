@@ -76,12 +76,12 @@
                                      th:aria-labelledby="'heading' + ${chunkStat.index}"
                                      data-parent="#chunksAccordion">
                                     <div class="card-body">
-                                        <p th:text="${chunk.text}">Chunk content</p>
+                                        <p th:text="${chunk?.getText()}">Chunk content</p>
                                         <div class="small text-muted">
                                             <strong>Metadata:</strong>
                                             <ul>
-                                                <li th:each="entry : ${chunk.metadata}"
-                                                    th:text="${entry.key} + ': ' + ${entry.value}">
+                                                <li th:each="entry : ${chunk?.metadata}"
+                                                    th:text="${entry?.key} + ': ' + ${entry?.value}">
                                                     Metadata entry
                                                 </li>
                                             </ul>

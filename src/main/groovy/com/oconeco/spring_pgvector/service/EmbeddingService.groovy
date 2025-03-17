@@ -54,10 +54,9 @@ class EmbeddingService {
 
         var transformedDocuments = textSplitter.transform(documents);
         transformedDocuments.each { doc ->
-            log.info("\t\t transformed/split Doc: ${doc}")
+            log.info("\t\t transformed/split Doc id:(${doc.id}) -- metadata:(${doc.getMetadata()}) --  content size:(${doc.getText()?.size()}) ")
         }
-        transformedDocuments <<
-        vectorStore.add(transformedDocuments)
+        transformedDocuments << vectorStore.add(transformedDocuments)
         return transformedDocuments
     }
 
