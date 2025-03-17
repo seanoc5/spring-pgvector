@@ -1,6 +1,6 @@
-package com.oconeco.repository
+package com.oconeco.spring_pgvector.repository
 
-import com.oconeco.entity.Opportunity
+import com.oconeco.spring_pgvector.domain.Opportunity
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -47,7 +47,7 @@ interface OpportunityRepository extends JpaRepository<Opportunity, String> {
     /**
      * Count the total number of opportunities matching a search query.
      */
-    @Query(value = "SELECT COUNT(*) FROM opportunities WHERE search_vector @@ to_tsquery('english', :tsQuery)", 
+    @Query(value = "SELECT COUNT(*) FROM opportunities WHERE search_vector @@ to_tsquery('english', :tsQuery)",
            nativeQuery = true)
     long countByFullTextSearch(@Param("tsQuery") String tsQuery)
 }

@@ -1,4 +1,4 @@
-package com.oconeco
+package com.oconeco.spring_pgvector
 
 import groovy.util.logging.Slf4j
 import org.springframework.boot.SpringApplication

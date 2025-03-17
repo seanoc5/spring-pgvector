@@ -1,7 +1,7 @@
-package com.oconeco.controller
+package com.oconeco.spring_pgvector.controller
 
-import com.oconeco.entity.Opportunity
-import com.oconeco.service.OpportunityService
+import com.oconeco.spring_pgvector.domain.Opportunity
+import com.oconeco.spring_pgvector.service.OpportunityService
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
@@ -32,10 +32,10 @@ class OpportunityController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "lastPublishedDate") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
-        
+
         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy))
-        
+
         Page<Opportunity> opportunities = opportunityService.getAllOpportunities(pageRequest)
         return ResponseEntity.ok(opportunities)
     }
@@ -46,7 +46,7 @@ class OpportunityController {
     @GetMapping("/{noticeId}")
     ResponseEntity<Opportunity> getOpportunityByNoticeId(@PathVariable String noticeId) {
         Opportunity opportunity = opportunityService.getOpportunityByNoticeId(noticeId)
-        
+
         if (opportunity) {
             return ResponseEntity.ok(opportunity)
         } else {
@@ -62,7 +62,7 @@ class OpportunityController {
             @RequestParam String query,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        
+
         try {
             PageRequest pageRequest = PageRequest.of(page, size)
             Page<Map<String, Object>> results = opportunityService.searchOpportunities(query, pageRequest)
@@ -84,13 +84,13 @@ class OpportunityController {
             // Create a temporary file
             File tempFile = File.createTempFile("opportunities", ".csv")
             file.transferTo(tempFile)
-            
+
             // Import the data
             int count = opportunityService.importFromCsv(tempFile)
-            
+
             // Clean up
             tempFile.delete()
-            
+
             return ResponseEntity.ok([
                 status: "success",
                 message: "Successfully imported ${count} opportunities",

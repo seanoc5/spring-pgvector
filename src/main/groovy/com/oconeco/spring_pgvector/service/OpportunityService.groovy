@@ -1,10 +1,9 @@
-package com.oconeco.service
+package com.oconeco.spring_pgvector.service
 
-import com.oconeco.entity.Opportunity
+import com.oconeco.spring_pgvector.domain.Opportunity
 import com.oconeco.repository.OpportunityRepository
 import groovy.util.logging.Slf4j
 import org.apache.commons.csv.CSVFormat
-import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
@@ -13,9 +12,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
-import java.util.stream.Collectors
 
 /**
  * Service for managing SAM.gov contract opportunities.

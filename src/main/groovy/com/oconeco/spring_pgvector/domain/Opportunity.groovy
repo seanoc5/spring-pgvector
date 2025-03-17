@@ -1,4 +1,4 @@
-package com.oconeco.entity
+package com.oconeco.spring_pgvector.domain
 
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp

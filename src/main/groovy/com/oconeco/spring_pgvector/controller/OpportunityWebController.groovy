@@ -1,7 +1,7 @@
-package com.oconeco.controller
+package com.oconeco.spring_pgvector.controller
 
-import com.oconeco.entity.Opportunity
-import com.oconeco.service.OpportunityService
+import com.oconeco.spring_pgvector.domain.Opportunity
+import com.oconeco.spring_pgvector.service.OpportunityService
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
@@ -35,12 +35,12 @@ class OpportunityWebController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "lastPublishedDate") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
-        
+
         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy))
-        
+
         Page<Opportunity> opportunities = opportunityService.getAllOpportunities(pageRequest)
-        
+
         model.addAttribute("opportunities", opportunities)
         model.addAttribute("currentPage", page)
         model.addAttribute("totalPages", opportunities.totalPages)
@@ -48,7 +48,7 @@ class OpportunityWebController {
         model.addAttribute("sortBy", sortBy)
         model.addAttribute("sortDir", sortDir)
         model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc")
-        
+
         return "opportunities/list"
     }
 
@@ -58,7 +58,7 @@ class OpportunityWebController {
     @GetMapping("/{noticeId}")
     String viewOpportunity(@PathVariable String noticeId, Model model) {
         Opportunity opportunity = opportunityService.getOpportunityByNoticeId(noticeId)
-        
+
         if (opportunity) {
             model.addAttribute("opportunity", opportunity)
             return "opportunities/view"
@@ -84,17 +84,17 @@ class OpportunityWebController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             Model model) {
-        
+
         try {
             PageRequest pageRequest = PageRequest.of(page, size)
             Page<Map<String, Object>> results = opportunityService.searchOpportunities(query, pageRequest)
-            
+
             model.addAttribute("query", query)
             model.addAttribute("results", results)
             model.addAttribute("currentPage", page)
             model.addAttribute("totalPages", results.totalPages)
             model.addAttribute("totalItems", results.totalElements)
-            
+
             return "opportunities/search-results"
         } catch (Exception e) {
             log.error "Error searching opportunities: ${e.message}", e
@@ -118,23 +118,23 @@ class OpportunityWebController {
     String importCsv(
             @RequestParam("file") MultipartFile file,
             RedirectAttributes redirectAttributes) {
-        
+
         if (file.empty) {
             redirectAttributes.addFlashAttribute("error", "Please select a CSV file to upload")
             return "redirect:/opportunities/import"
         }
-        
+
         try {
             // Create a temporary file
             File tempFile = File.createTempFile("opportunities", ".csv")
             file.transferTo(tempFile)
-            
+
             // Import the data
             int count = opportunityService.importFromCsv(tempFile)
-            
+
             // Clean up
             tempFile.delete()
-            
+
             redirectAttributes.addFlashAttribute("success", "Successfully imported ${count} opportunities")
             return "redirect:/opportunities"
         } catch (Exception e) {

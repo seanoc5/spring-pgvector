@@ -1,11 +1,10 @@
-package com.oconeco.cli
+package com.oconeco.spring_pgvector
 
-import com.oconeco.service.OpportunityService
+import com.oconeco.spring_pgvector.service.OpportunityService
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
-import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
@@ -24,7 +23,7 @@ class OpportunityCsvImporterRunner implements ApplicationRunner {
     @Override
     void run(ApplicationArguments args) throws Exception {
         log.info "Starting SAM.gov CSV importer..."
-        
+
         // Check if we're in search mode
         if (args.containsOption("search")) {
             String query = args.getOptionValues("search").get(0) ?: "software development"
@@ -32,12 +31,12 @@ class OpportunityCsvImporterRunner implements ApplicationRunner {
             demonstrateSearch(query)
             return
         }
-        
+
         // Check for CSV file path
         if (args.containsOption("file")) {
             String csvFilePath = args.getOptionValues("file").get(0)
             File csvFile = new File(csvFilePath)
-            
+
             if (csvFile.exists()) {
                 log.info "Importing data from CSV file: ${csvFilePath}"
                 int count = opportunityService.importFromCsv(csvFile)
@@ -50,7 +49,7 @@ class OpportunityCsvImporterRunner implements ApplicationRunner {
             printUsage()
         }
     }
-    
+
     /**
      * Demonstrates the search functionality.
      */
@@ -59,10 +58,10 @@ class OpportunityCsvImporterRunner implements ApplicationRunner {
             // Use a small page size for demonstration
             def pageRequest = org.springframework.data.domain.PageRequest.of(0, 10)
             def results = opportunityService.searchOpportunities(query, pageRequest)
-            
+
             log.info "Found ${results.totalElements} total matches for '${query}'"
             log.info "Showing page 1 (${results.numberOfElements} of ${results.totalElements} results):"
-            
+
             results.content.eachWithIndex { result, index ->
                 def opportunity = result.opportunity
                 log.info "Result ${index + 1}:"
@@ -76,13 +75,13 @@ class OpportunityCsvImporterRunner implements ApplicationRunner {
                 log.info "  Status: ${opportunity.activeInactive}"
                 log.info "---"
             }
-            
+
             log.info "Search demonstration completed."
         } catch (Exception e) {
             log.error "Error during search demonstration: ${e.message}", e
         }
     }
-    
+
     /**
      * Prints usage information.
      */
