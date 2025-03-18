@@ -53,6 +53,10 @@ dependencies {
     // Apache Commons CSV for parsing CSV files
     implementation 'org.apache.commons:commons-csv:1.13.0'
 
+    // https://mvnrepository.com/artifact/org.apache.solr/solr-solrj
+    implementation 'org.apache.solr:solr-solrj:9.8.1'
+//    implementation('solr:solr-solrj:9.8.1')
+
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
@@ -80,11 +84,12 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+/*
 // Task to run the CSV importer
 task runCsvImporter(type: JavaExec) {
     description = 'Run the SAM.gov CSV importer'
     group = 'application'
-    
+
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'test.RunCsvImporter'
 }
@@ -98,7 +103,7 @@ application {
 task runMainApp(type: JavaExec) {
     description = 'Run the main Spring Boot application'
     group = 'application'
-    
+
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'com.oconeco.SamGovApplication'
 }
@@ -107,7 +112,7 @@ task runMainApp(type: JavaExec) {
 task runCsvImporterApp(type: JavaExec) {
     description = 'Run the Spring Boot CSV importer application'
     group = 'application'
-    
+
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'com.oconeco.SamGovApplication'
     args = ['--spring.profiles.active=csv-import']
@@ -117,13 +122,13 @@ task runCsvImporterApp(type: JavaExec) {
 task runCsvImporterWithFile(type: JavaExec) {
     description = 'Run the Spring Boot CSV importer with a specific file'
     group = 'application'
-    
+
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'com.oconeco.SamGovApplication'
-    
+
     // Default arguments, can be overridden from command line with -Pargs="..."
     args = ['--spring.profiles.active=csv-import', '--file=' + project.findProperty('csvFile')]
-    
+
     // Only run if csvFile property is provided
     onlyIf {
         project.hasProperty('csvFile')
@@ -134,10 +139,10 @@ task runCsvImporterWithFile(type: JavaExec) {
 task runSearch(type: JavaExec) {
     description = 'Run the Spring Boot search functionality'
     group = 'application'
-    
+
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'com.oconeco.SamGovApplication'
-    
+
     // Default arguments, can be overridden from command line with -Pargs="..."
     args = ['--spring.profiles.active=csv-import', '--search=' + (project.findProperty('query') ?: 'software development')]
-}
+}*/

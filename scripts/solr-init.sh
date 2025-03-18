@@ -5,7 +5,7 @@ set -e
 # 1) Start Solr in the background, in cloud mode, pointing to ZK
 # -------------------------------------------------------------------
 echo "Starting Solr in cloud mode..."
-/docker-entrypoint.sh solr -cloud -z "${ZK_HOST}" &
+/opt/solr/bin/solr -cloud -z "${ZK_HOST}" &
 SOLR_PID=$!
 
 # -------------------------------------------------------------------

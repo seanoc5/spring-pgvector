@@ -61,43 +61,44 @@ services:
   #     - zookeeper3-data:/data
   #     - zookeeper3-datalog:/datalog
 
-  solr:
-    build: .
-    container_name: solr
-    depends_on:
-      - zookeeper1
-    ports:
-      - "8983:8983"
-    environment:
-      # Points Solr at ZooKeeper
-      ZK_HOST: "zookeeper:2181"
-    volumes:
-      # Mount your configsets into the container so the init script can upload them to ZooKeeper
-      - ./solr-config:/opt/solr/server/solr/configsets
-    restart: unless-stopped
+#  solr1:
+##    build: .
+#    container_name: solr1
+#    depends_on:
+#      - zookeeper1
+#    ports:
+#      - "8983:8983"
+#    environment:
+#      # Points Solr at ZooKeeper
+#      ZK_HOST: "zookeeper1:2181"
+#    volumes:
+#      # Mount your configsets into the container so the init script can upload them to ZooKeeper
+##      - solr1-data:/var/solr/data
+#      # - ./solr-config:/opt/solr/server/solr/configsets
+#    restart: unless-stopped
 
 
   # Solr Cloud - Single instance
-#  solr1:
-#    image: 'solr:9.8.1'
-#    container_name: solr1
-#    hostname: solr1
-#    ports:
-#      - '8983:8983'
-#    environment:
-#      - ZK_HOST=zookeeper1:2181
-#      - SOLR_HEAP=8g
-#      - SOLR_MODE=solrcloud
-#    command:
-#      - solr
-#      - -c
-#      - -f
-#    volumes:
-#      - solr1-data:/var/solr
-#      - ./configsets:/opt/solr/server/solr/configsets
-##      - ./solr-config:/opt/solr-config
-#    depends_on:
-#      - zookeeper1
+  solr1:
+    image: 'solr:9.8.1'
+    container_name: solr1
+    hostname: solr1
+    ports:
+      - '8983:8983'
+    environment:
+      - ZK_HOST=zookeeper1:2181
+      - SOLR_HEAP=8g
+      - SOLR_MODE=solrcloud
+    command:
+      - solr
+      - -c
+      - -f
+    volumes:
+      - solr1-data:/var/solr
+      - ./configsets:/opt/solr/server/solr/configsets
+#      - ./solr-config:/opt/solr-config
+    depends_on:
+      - zookeeper1
 
   # Additional Solr instance (commented out)
   # solr2:
