@@ -45,6 +45,8 @@ logging:
   level:
     root: info
     com.oconeco: info
+    com.oconeco.spring_pgvector.service.EmbeddingService: debug
+    com.oconeco.spring_pgvector.transformer.ParagraphSentenceSplitter: debug
 #    org.springframework.security: debug
 #    org.springframework.web: debug
 

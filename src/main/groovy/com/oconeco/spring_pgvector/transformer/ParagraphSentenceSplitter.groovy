@@ -54,18 +54,27 @@ class ParagraphSentenceSplitter implements DocumentTransformer {
             def docId = document.getMetadata().get("docId") ?: document.getId()
             log.info("\t\t$docNo:$docId) metadata:(${document.getMetadata()}) --  doc content size:${document.getText()?.size()}")
             log.debug("\t\t$docNo:$docId) Original document: ${document}")
+
+            // SPLIT DOCUMENT
             List<Document> splitDocuments = splitDocument(document)
             log.info("\t\t$docNo:$docId) Split into ${splitDocuments.size()} documents")
-            transformedDocuments.addAll(splitDocuments)
+            transformedDocuments.addAll( splitDocuments)
         }
 
         return transformedDocuments
     }
 
+
+    /**
+     * Split a document into paragraphs and sentences using blank lines and OpenNLP
+     *
+     * @param document
+     * @return
+     */
     private List<Document> splitDocument(Document document) {
         log.debug("Splitting document: ${document.getId()}")
         String text = document.getText()
-        def metadata = document.getMetadata()
+        Map<String, Object> metadata = document.getMetadata()
         String docId =  metadata.get("docId") ?: document.getId()
         if (text == null || text.trim().isEmpty()) {
             log.warn("Document content is empty, returning original document")
@@ -73,79 +82,91 @@ class ParagraphSentenceSplitter implements DocumentTransformer {
         }
 
         log.debug("\t\t$docId) Splitting document into paragraphs and sentences: ${document.getId()}")
-        List<Document> result = []
+        List<Document> splitParagraphsAndSentences = []
 
         // First split into paragraphs
         String[] paragraphs = paragraphPattern.split(text)
         log.info("\t\t$docId) Split into ${paragraphs.length} paragraphs")
 
-        int index = 0
+        int paragraphIndex = 0
         for (String paragraph : paragraphs) {
-            if (paragraph.trim().isEmpty()) {
-                log.info("\t\t$docId)  Found empty paragraph($index): skipping")
+            Document paraDoc = null
+            if (paragraph.trim()) {
+                paraDoc = new Document(paragraph.trim())
+                paraDoc.metadata.putAll(document.getMetadata())
+                paraDoc.metadata.put('type', 'paragraph')
+                paraDoc.metadata.put('paragraph_index', paragraphIndex)
+                log.debug("\t\t$docId) Paragraph ${paragraphIndex + 1}: ${paraDoc}")
+                splitParagraphsAndSentences << paraDoc
+            } else {
+                log.info("\t\t$docId)  Found empty paragraph($paragraphIndex): skipping")
                 continue
             }
 
             // Then split paragraphs into sentences
             String[] sentences = sentenceDetector.sentDetect(paragraph)
-            log.info("\t\t$docId)  Paragraph ${index + 1} split into ${sentences.length} sentences")
-
-            // Group sentences into chunks based on maxSentencesPerChunk
-            List<List<String>> sentenceChunks = chunkSentences(sentences)
+            log.info("\t\t$docId)  Paragraph ${paragraphIndex + 1} split into ${sentences.length} sentences")
 
             // Create a document for each chunk
             int sentenceIndex = 0
-            for (List<String> chunk : sentenceChunks) {
+            for (String sentence : sentences) {
                 sentenceIndex++
-                String chunkText = String.join(" ", chunk)
-                if (chunkText.trim().isEmpty()) {
+                String trimmedSentence = sentence.trim()
+                if (trimmedSentence) {
+                    // Create a new document with the chunk text
+                    Document sentDoc = new Document(sentence)
+                    sentDoc.metadata.putAll(paraDoc.metadata)
+
+                    // Add metadata about the chunk
+                    sentDoc.metadata.put("paragraph_index", paragraphIndex)
+                    sentDoc.metadata.put("sentence_index", sentenceIndex)
+                    sentDoc.metadata.put("type", 'sentence')
+                    log.debug("\t\t\t\t$docId:$sentenceIndex) Sentence: $sentDoc")
+
+                    splitParagraphsAndSentences.add(sentDoc)
+                } else {
                     log.info("\t\t\t\t$docId:$sentenceIndex) Skipping empty sentence chunk")
                     continue
                 }
 
-                // Create a new document with the chunk text
-                Document newDoc = new Document(chunkText)
-
-                // Add metadata about the chunk
-                newDoc.getMetadata().put("paragraph_index", index)
-                newDoc.getMetadata().put("sentence_count", chunk.size())
-
-                result.add(newDoc)
             }
 
-            index++
+            paragraphIndex++
         }
 
-        log.debug("Created ${result.size()} document chunks")
-        return result
+        log.debug("Created ${splitParagraphsAndSentences.size()} document chunks")
+        return splitParagraphsAndSentences
     }
 
-    private List<List<String>> chunkSentences(String[] sentences) {
-        List<List<String>> chunks = []
-        List<String> currentChunk = []
+
+    /**
+     * Split (paragraph) chunk into sentences using OpenNLP
+     *
+     * @param sentences
+     * @return
+     */
+/*
+    private List<List<String>> chunkSentences(String content) {
+        List<List<String>> sentences = []
 
         for (String sentence : sentences) {
-            if (sentence.trim().isEmpty()) {
+            if (sentence.trim()) {
+                sentences.add([sentence])
+            } else {
+                log.info("\t\tblank sentence: $sentence")
                 continue
             }
 
-            // If adding this sentence would exceed maxSentencesPerChunk and we have at least minSentencesPerChunk,
-            // start a new chunk
-            if (currentChunk.size() >= maxSentencesPerChunk && currentChunk.size() >= minSentencesPerChunk) {
-                chunks.add(currentChunk)
-                currentChunk = []
-            }
-
-            currentChunk.add(sentence)
         }
 
         // Add the last chunk if it's not empty
         if (!currentChunk.isEmpty()) {
-            chunks.add(currentChunk)
+            sentences.add(currentChunk)
         }
 
-        return chunks
+        return sentences
     }
+*/
 
     @Override
     List<Document> apply(List<Document> documents) {

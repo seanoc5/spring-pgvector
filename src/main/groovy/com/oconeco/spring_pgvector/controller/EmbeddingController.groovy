@@ -2,6 +2,7 @@ package com.oconeco.spring_pgvector.controller
 
 import groovy.util.logging.Slf4j;
 import org.springframework.ai.document.Document
+import org.springframework.ai.model.Media
 import org.springframework.ai.vectorstore.SearchRequest
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.data.domain.Page
@@ -76,11 +77,12 @@ class EmbeddingController {
     }
 
     @GetMapping(["/embed"])
-    String embed(@RequestParam(name="content", required = false) String content,
-                 @RequestParam(name="source", required = false) String source,        //, defaultValue = "testing"
-                 @RequestParam(name="docId", required = false) String docId,
+    String embed(@RequestParam(name = "content", required = false) String content,
+                 @RequestParam(name = "source", required = false) String source,        //, defaultValue = "testing"
+                 @RequestParam(name = "docId", required = false) String docId,
+                 @RequestParam(name = "media", required = false, defaultValue = 'text/plain') String media,
                  Model model) {
-        log.info("============== Embed text: "+  content);
+        log.info("============== Embed text: '${content}' source:$source, docId:$docId, media:$media");
         Document doc = new Document(content);
 //        doc.setI
         List<Document> docs = [doc]
@@ -93,26 +95,20 @@ class EmbeddingController {
 //        var embeddings = embeddingService.embedQuery(content);
         log.debug("Doc: ${doc} (split into: ${chunks.size()} chunks)");
 
-        model.addAttribute('embeddedDocuments',docs)
+        model.addAttribute('embeddedDocuments', docs)
         return "embedding/success"
     }
 
     @PostMapping("/embed")
-    String processEmbedding(@RequestParam(name="content", required = true) String content,
-                 @RequestParam(name="source", required = true) String source,
-                 @RequestParam(name="docid", required = false) String docId,
-                 Model model) {
+    String processEmbedding(@RequestParam(name = "content", required = true) String content,
+                            @RequestParam(name = "source", required = true) String source,
+                            @RequestParam(name = "docid", required = true) String docId,
+//                            @RequestParam(name = "media", required = false, defaultValue = 'text/plain') String mediaParam,
+                            Model model) {
         log.info("Processing embedding POST request with content: ${content}, source: ${source}, docId: ${docId ?: 'not provided'}")
 
         // Create a new document with the provided content
-        Document doc = new Document(content)
-
-        // Add metadata to the document
-        def md = doc.getMetadata()
-        md.put("source", source)
-        if (docId) {
-            md.put("docId", docId)
-        }
+        Document doc = new Document(content, [docId:docId, source:source, type:'document'] )
 
         // Create a list with the document and embed it
         List<Document> docs = [doc]
@@ -129,20 +125,20 @@ class EmbeddingController {
     }
 
     @GetMapping("/search")
-    String search(@RequestParam(name="query", defaultValue = "What is a test query") String query, Model model) {
-        log.info("============== Embed query: "+  query);
+    String search(@RequestParam(name = "query", defaultValue = "What is a test query") String query, Model model) {
+        log.info("============== Embed query: " + query);
         var embeddings = embeddingService.embedQuery(query);
         var results = vectorStore.similaritySearch(SearchRequest.builder().query(query).topK(3).build())
         results.each { result ->
             log.info("Result: ${result}")
         }
-        model.addAttribute('results',results)
+        model.addAttribute('results', results)
         log.info("Found ${results.size()} results")
         return "embedding/results"
     }
 
     @GetMapping("/create")
-    String create(){
+    String create() {
         log.info("Show create form...")
         return "embedding/create"
     }

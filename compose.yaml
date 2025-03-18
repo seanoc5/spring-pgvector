@@ -94,11 +94,12 @@ services:
       - -c
       - -f
     volumes:
-      - solr1-data:/var/solr
-      - ./configsets:/opt/solr/server/solr/configsets
-#      - ./solr-config:/opt/solr-config
+      - solr1_data:/var/solr
     depends_on:
       - zookeeper1
+
+    # Optionally, if you need to run an initialization command, you could use an entrypoint script.
+
 
   # Additional Solr instance (commented out)
   # solr2:
@@ -147,7 +148,6 @@ volumes:
   #   name: zookeeper3-data
   # zookeeper3-datalog:
   #   name: zookeeper3-datalog
-  solr1-data:
-    name: solr1-data
+  solr1_data:
   # solr2-data:
   #   name: solr2-data
