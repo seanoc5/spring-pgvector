@@ -18,4 +18,5 @@ class SamGovApplication {
         SpringApplication.run(SamGovApplication, args)
         log.info "SAM.gov Application started successfully"
     }
+
 }

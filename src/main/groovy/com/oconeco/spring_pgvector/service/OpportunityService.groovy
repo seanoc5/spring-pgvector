@@ -1,7 +1,7 @@
 package com.oconeco.spring_pgvector.service
 
 import com.oconeco.spring_pgvector.domain.Opportunity
-import com.oconeco.repository.OpportunityRepository
+import com.oconeco.spring_pgvector.repository.OpportunityRepository
 import groovy.util.logging.Slf4j
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVRecord
