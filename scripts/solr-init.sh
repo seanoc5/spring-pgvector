@@ -45,16 +45,18 @@ if echo "${LIST_OUTPUT}" | grep -q "\"${COLLECTION_NAME}\""; then
   echo "++++++++++++++++++++++ Collection '${COLLECTION_NAME}' already exists. Skipping creation."
 else
   echo "===================== Creating collection '${COLLECTION_NAME}' with config '${CONFIG_NAME}'..."
-#  solr create \
-#    -c "${COLLECTION_NAME}" \
-#    -n "${CONFIG_NAME}" \
-#    -z "${ZK_HOST}" \
+  solr create \
+    -c "${COLLECTION_NAME}" \
+    -n "${CONFIG_NAME}" \
+    -z "${ZK_HOST}" \
   echo "foo .... Collection created."
 fi
 
+# todo -- make this better, more dockerified
+echo "---------------------- Explicitly Stopping Solr (is there a better way?)..."
 solr stop
 
 #echo "Solr initialization completed successfully."
 #echo "Bring Solr to foreground so container doesn't exit..."
-echo "should exit by default...?"
+#echo "should exit by default...?"
 #solr-foreground
