@@ -14,4 +14,4 @@ RUN chmod +x /docker-entrypoint-initdb.d/solr-init.sh && \
 USER solr
 
 # Use the default entrypoint and CMD from the Solr image
-CMD ["solr-foreground"]
+#CMD ["solr-foreground"]

@@ -3,7 +3,7 @@
 
 echo "====================== Starting Solr for upload and config...? ======================"
 # Start Solr in background so we can do config commands
-solr start -cloud -p 8983
+#solr start -cloud -p 8983
 
 COLLECTION_NAME="contracting"
 
@@ -54,4 +54,6 @@ else
   echo "foo .... Collection created."
 fi
 
-echo "Solr initialization completed successfully."
+#echo "Solr initialization completed successfully."
+echo "Bring Solr to foreground so container doesn't exit..."
+solr-foreground
