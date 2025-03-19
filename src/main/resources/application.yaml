@@ -45,13 +45,13 @@ logging:
   level:
     root: info
     com.oconeco: info
-    com.oconeco.spring_pgvector.service.EmbeddingService: debug
-    com.oconeco.spring_pgvector.transformer.ParagraphSentenceSplitter: debug
+#    com.oconeco.spring_pgvector.service.EmbeddingService: debug
+#    com.oconeco.spring_pgvector.transformer.ParagraphSentenceSplitter: debug
 #    org.springframework.security: debug
 #    org.springframework.web: debug
 
   pattern:
-    console: "%d{MM-dd HH:mm:ss} %highlight(%-5level) [%-30logger{30}]  -- %msg%n"
+    console: "%d{MM-dd HH:mm:ss} %highlight(%-5level) [%-40logger{40}]  -- %msg%n"
   file:
     path: logs
 
@@ -61,7 +61,7 @@ logging:
 #  vector-dimension: 1536
 
 solr:
-  host: http://localhost:8983/solr
+  host: localhost
   collection: contracting
   port: 8983
   # Additional configuration options...

@@ -28,7 +28,7 @@ class EmbeddingService {
         this.vectorStore = vectorStore
         this.sentenceDetector = sentenceDetector
         this.solrClient = solrClient
-        log.info "default constructor: EmbeddingService initialized as well as vectorStore: " +
+        log.debug "default constructor: EmbeddingService initialized as well as vectorStore: " +
                 "\n\t\tEmbeddingModel:${embeddingModel.toString()}, " +
                 "\n\t\tVectorStore:$vectorStore, " +
                 "\n\t\tSolrClient:$solrClient, " +
@@ -68,17 +68,12 @@ class EmbeddingService {
         if (documents) {
             // Use our custom ParagraphSentenceSplitter instead of TokenTextSplitter
             var textSplitter = new ParagraphSentenceSplitter(sentenceDetector, 5, 1, true);
-
-
-            // First add the original documents to the list
-//                docsToEmbed.addAll(documents)
-
             // Then add chunks for each document
             documents.each { Document doc ->
                 List<Document> docChunks = textSplitter.transform([doc]);
                 log.info("\t\tDoc chunks: (${docChunks.size()})")
                 docChunks.each { chunk ->
-//                log.info("\t\t transformed/split Doc id:(${chunk.id}) -- metadata:(${chunk.getMetadata()}) --  content size:(${chunk.getText()?.size()}) ")
+                    log.info("\t\t transformed/split Doc id:(${chunk.id}) -- metadata:(${chunk.getMetadata()}) --  content size:(${chunk.getText()?.size()}) ")
                     log.debug("\t\t transformed/split Doc id:(${chunk.id})")
                     docsToEmbed.add(chunk)
                 }
