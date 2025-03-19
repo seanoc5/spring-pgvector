@@ -3,14 +3,14 @@
 
 echo "====================== Starting Solr for upload and config...? ======================"
 # Start Solr in background so we can do config commands
-#solr start -cloud -p 8983
+solr start -cloud -p 8983
 
-COLLECTION_NAME="contracting"
+COLLECTION_NAME="contracts"
 
 # -------------------------------------------------------------------
 # Upload config set to ZooKeeper if not already uploaded
 # -------------------------------------------------------------------
-CONFIG_NAME="contracting"
+CONFIG_NAME="${COLLECTION_NAME}"
 CONFIG_PATH="/opt/solr/server/solr/configsets/${CONFIG_NAME}/conf"
 
 echo "====================== Checking if config '${CONFIG_NAME}' exists in ZooKeeper..."
@@ -26,15 +26,14 @@ else
   echo "====================== Config (${CONFIG_NAME}) uploaded."
 fi
 
-echo "====================== Creating collection '${COLLECTION_NAME}'..."
 sleep 5
 # Wait for Solr to be available
-#echo "====================== Waiting for Solr to be available on port 8983 (collection: ${COLLECTION_NAME})..."
-#until curl -s "http://localhost:8983/solr/admin/info/system" > /dev/null; do
-#  sleep 3
-#  echo "           Still waiting for Solr..."
-#done
-#echo "====================== Solr is up."
+echo "====================== Waiting for Solr to be available on port 8983 (collection: ${COLLECTION_NAME})..."
+until curl -s "http://localhost:8983/solr/admin/info/system" > /dev/null; do
+  sleep 3
+  echo "           Still waiting for Solr..."
+done
+echo "====================== Solr is up."
 
 
 # -------------------------------------------------------------------
@@ -49,11 +48,13 @@ else
 #  solr create \
 #    -c "${COLLECTION_NAME}" \
 #    -n "${CONFIG_NAME}" \
-#    -shards 1 \
-#    -replicationFactor 1
+#    -z "${ZK_HOST}" \
   echo "foo .... Collection created."
 fi
 
+solr stop
+
 #echo "Solr initialization completed successfully."
-echo "Bring Solr to foreground so container doesn't exit..."
-solr-foreground
+#echo "Bring Solr to foreground so container doesn't exit..."
+echo "should exit by default...?"
+#solr-foreground
