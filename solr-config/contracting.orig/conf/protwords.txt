@@ -1,5 +1,0 @@
-# Example protected words list
-# Add words here that should not be stemmed, one per line
-# For example:
-# special
-# corporate

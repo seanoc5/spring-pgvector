@@ -26,7 +26,7 @@ else
   echo "====================== Config (${CONFIG_NAME}) uploaded."
 fi
 
-sleep 5
+#sleep 5
 # Wait for Solr to be available
 echo "====================== Waiting for Solr to be available on port 8983 (collection: ${COLLECTION_NAME})..."
 until curl -s "http://localhost:8983/solr/admin/info/system" > /dev/null; do
@@ -45,10 +45,10 @@ if echo "${LIST_OUTPUT}" | grep -q "\"${COLLECTION_NAME}\""; then
   echo "++++++++++++++++++++++ Collection '${COLLECTION_NAME}' already exists. Skipping creation."
 else
   echo "===================== Creating collection '${COLLECTION_NAME}' with config '${CONFIG_NAME}'..."
-  solr create \
-    -c "${COLLECTION_NAME}" \
-    -n "${CONFIG_NAME}" \
-    -z "${ZK_HOST}" \
+#  solr create \
+#    -c "${COLLECTION_NAME}" \
+#    -n "${CONFIG_NAME}" \
+#    -z "${ZK_HOST}" \
   echo "foo .... Collection created."
 fi
 
@@ -60,3 +60,4 @@ solr stop
 #echo "Bring Solr to foreground so container doesn't exit..."
 #echo "should exit by default...?"
 #solr-foreground
+

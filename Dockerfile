@@ -1,7 +1,7 @@
 # first draft dockerfile to include custom configet: contracting
 FROM solr:9.8
 # Copy in custom config
-COPY solr-config/contracting  /opt/solr/server/solr/configsets/contracting
+#COPY solr-config/contracting  /opt/solr/server/solr/configsets/contracting
 COPY solr-config/contracts  /opt/solr/server/solr/configsets/contracts
 
 # Copy initialization script to the proper location
