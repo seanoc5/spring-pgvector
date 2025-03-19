@@ -74,7 +74,6 @@ services:
       - SOLR_HEAP=2g
     volumes:
       - solr1_data:/var/solr/data
-      - ./scripts/solr-init.sh:/docker-solr-initdb.d/solr-init.sh
     depends_on:
       - zookeeper1
 

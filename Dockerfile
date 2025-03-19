@@ -3,17 +3,15 @@ FROM solr:9.8
 # Copy in custom config
 COPY solr-config/contracting  /opt/solr/server/solr/configsets/contracting
 
-# Set entrypoint to your script
-COPY scripts/solr-init.sh /solr-init.sh
+# Copy initialization script to the proper location
 USER root
-RUN chmod +x /solr-init.sh
+COPY scripts/solr-init.sh /docker-entrypoint-initdb.d/solr-init.sh
+RUN chmod +x /docker-entrypoint-initdb.d/solr-init.sh && \
+    chown solr:solr /docker-entrypoint-initdb.d/solr-init.sh && \
+    mkdir -p /var/solr/data && \
+    chown -R solr:solr /var/solr/data
+
 USER solr
 
-# Create the init directory
-RUN mkdir -p /docker-solr-initdb.d
-
-# Use the default entrypoint from the Solr image
-ENTRYPOINT ["docker-entrypoint.sh"]
-
-# Run Solr in the foreground
+# Use the default entrypoint and CMD from the Solr image
 CMD ["solr-foreground"]
