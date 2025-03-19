@@ -29,12 +29,11 @@ services:
     environment:
       - ZOO_MY_ID=1
       - ZOO_SERVERS=server.1=zookeeper1:2888:3888;2181
-    restart: unless-stopped
 #      - ZOO_SERVERS=server.1=zookeeper1:2888:3888;2181 server.2=zookeeper2:2888:3888;2181 server.3=zookeeper3:2888:3888;2181
+    restart: unless-stopped
     volumes:
       - zookeeper1-data:/data
       - zookeeper1-datalog:/datalog
-
   # Additional Zookeeper instances (commented out)
   # zookeeper2:
   #   image: 'zookeeper:3.8'
@@ -61,45 +60,23 @@ services:
   #     - zookeeper3-data:/data
   #     - zookeeper3-datalog:/datalog
 
-#  solr1:
-##    build: .
-#    container_name: solr1
-#    depends_on:
-#      - zookeeper1
-#    ports:
-#      - "8983:8983"
-#    environment:
-#      # Points Solr at ZooKeeper
-#      ZK_HOST: "zookeeper1:2181"
-#    volumes:
-#      # Mount your configsets into the container so the init script can upload them to ZooKeeper
-##      - solr1-data:/var/solr/data
-#      # - ./solr-config:/opt/solr/server/solr/configsets
-#    restart: unless-stopped
-
-
   # Solr Cloud - Single instance
   solr1:
-    image: 'solr:9.8.1'
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: solr1
     hostname: solr1
     ports:
       - '8983:8983'
     environment:
       - ZK_HOST=zookeeper1:2181
-      - SOLR_HEAP=8g
-      - SOLR_MODE=solrcloud
-    command:
-      - solr
-      - -c
-      - -f
+      - SOLR_HEAP=2g
     volumes:
-      - solr1_data:/var/solr
+      - solr1_data:/var/solr/data
+      - ./scripts/solr-init.sh:/docker-solr-initdb.d/solr-init.sh
     depends_on:
       - zookeeper1
-
-    # Optionally, if you need to run an initialization command, you could use an entrypoint script.
-
 
   # Additional Solr instance (commented out)
   # solr2:
@@ -115,23 +92,7 @@ services:
   #     - solr2-data:/var/solr
   #   depends_on:
   #     - zookeeper1
-
-
-  # suggested by chatgpt...
-#  solr:
-#    build: .
-#    container_name: solr
-#    depends_on:
-#      - zookeeper
-#    ports:
-#      - "8983:8983"
-#    environment:
-#      # Points Solr at ZooKeeper
-#      ZK_HOST: "zookeeper:2181"
-#    volumes:
-#      # Mount your configsets into the container so the init script can upload them to ZooKeeper
-#      - ./configsets:/opt/solr/server/solr/configsets
-#    restart: unless-stopped
+  #    restart: unless-stopped
 
 volumes:
   pgvector-data:
@@ -140,6 +101,7 @@ volumes:
     name: zookeeper1-data
   zookeeper1-datalog:
     name: zookeeper1-datalog
+  solr1_data:
   # zookeeper2-data:
   #   name: zookeeper2-data
   # zookeeper2-datalog:
@@ -148,6 +110,5 @@ volumes:
   #   name: zookeeper3-data
   # zookeeper3-datalog:
   #   name: zookeeper3-datalog
-  solr1_data:
   # solr2-data:
   #   name: solr2-data
