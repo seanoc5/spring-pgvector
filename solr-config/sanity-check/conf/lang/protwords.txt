@@ -1,4 +1,1 @@
-software development
 c++
-spring boot
-spring ai
