@@ -2,7 +2,7 @@
 FROM solr:9.8
 # Copy in custom config
 # testing mount solr configset as volume rather than copy for better test/debug cycling
-#COPY solr-config/contracts  /opt/solr/server/solr/configsets/contracts
+#COPY solr-config/sanity-check  /opt/solr/server/solr/configsets/sanity-check
 
 # make a persistent data directory, chown to solr
 # todo - is there a better approach?

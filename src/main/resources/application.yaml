@@ -55,13 +55,8 @@ logging:
   file:
     path: logs
 
-# Custom configuration for SAM.gov opportunities
-#sam-gov:
-#  csv-file-path: /home/sean/Downloads/ContractOpportunities-20250316-065253.csv
-#  vector-dimension: 1536
-
 solr:
   host: localhost
-  collection: contracts
+  collection: sanity-check
   port: 8983
   # Additional configuration options...

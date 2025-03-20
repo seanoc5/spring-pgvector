@@ -76,7 +76,7 @@ services:
       - solr1_data:/var/solr/data
       - ./scripts/solr-init.sh:/docker-entrypoint-initdb.d/solr-init.sh
       - ./src/main/resources/test-data.csv:/tmp/test-data.csv
-      - ./solr-config/contracts:/opt/solr/server/solr/configsets/contracts    # testing mount solr configset as volume rather than copy for better test/debug cycling
+      - ./solr-config/sanity-check:/opt/solr/server/solr/configsets/sanity-check    # testing mount solr configset as volume rather than copy for better test/debug cycling
     depends_on:
       - zookeeper1
 

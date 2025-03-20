@@ -1,5 +1,15 @@
 java,python,scala,php,ruby,perl,go,rust,software
-coding,programming,software development
+
+# phrases to single tokens
+software development => software_development
+spring ai => spring_ai
+spring-ai => spring_ai
+spring boot => springboot
+spring-boot => springboot
+large language model => llm
+
+
+coding,programming,software_development
 springai,spring-ai
 springboot,spring-boot
 llm,large language model,machine learning,ml,ai

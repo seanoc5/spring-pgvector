@@ -37,16 +37,12 @@
     <fieldType name="text_en" class="solr.TextField" positionIncrementGap="100" multiValued="true">
         <analyzer type="index">
             <tokenizer name="standard"/>
-            <filter class="solr.SynonymGraphFilterFactory"
-                     expand="true"
-                     synonyms="lang/synonyms.txt"
-                     ignoreCase="true"/>
+            <filter class="solr.SynonymGraphFilterFactory" expand="true" synonyms="lang/synonyms.txt" ignoreCase="true"/>
             <filter ignoreCase="true" name="stop" words="lang/stopwords_en.txt"/>
             <filter name="lowercase"/>
             <filter name="englishPossessive"/>
             <filter name="keywordMarker" protected="lang/protwords.txt"/>
             <filter name="porterStem"/>
-<!--            <filter class="solr.EnglishMinimalStemFilterFactory"/>-->
         </analyzer>
         <analyzer type="query">
             <tokenizer name="standard"/>
@@ -56,7 +52,6 @@
             <filter name="englishPossessive"/>
             <filter name="keywordMarker" protected="lang/protwords.txt"/>
             <filter name="porterStem"/>
-<!--            <filter class="solr.EnglishMinimalStemFilterFactory"/>-->
         </analyzer>
     </fieldType>
     <fieldType name="shingle" class="solr.TextField" positionIncrementGap="100">
