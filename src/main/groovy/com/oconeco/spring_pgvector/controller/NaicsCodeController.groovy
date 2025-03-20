@@ -1,7 +1,8 @@
 package com.oconeco.spring_pgvector.controller
 
-import com.oconeco.spring_pgvector.domain.NaiceCode
-import com.oconeco.spring_pgvector.service.NaiceCodeService
+
+import com.oconeco.spring_pgvector.domain.NaicsCode
+import com.oconeco.spring_pgvector.service.NaicsCodeService
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
@@ -16,18 +17,18 @@ import org.springframework.web.multipart.MultipartFile
  * REST controller for managing US Census NAICS codes.
  */
 @RestController
-@RequestMapping("/api/naice-codes")
+@RequestMapping("/api/naics-codes")
 @Slf4j
-class NaiceCodeController {
+class NaicsCodeController {
 
     @Autowired
-    private NaiceCodeService naiceCodeService
+    private NaicsCodeService naicsCodeService
 
     /**
      * Get all NAICS codes with pagination.
      */
     @GetMapping
-    ResponseEntity<Page<NaiceCode>> getAllNaiceCodes(
+    ResponseEntity<Page<NaicsCode>> getAllNaicsCodes(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "code") String sortBy,
@@ -36,19 +37,19 @@ class NaiceCodeController {
         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy))
 
-        Page<NaiceCode> naiceCodes = naiceCodeService.getAllNaiceCodes(pageRequest)
-        return ResponseEntity.ok(naiceCodes)
+        Page<NaicsCode> naicsCodes = naicsCodeService.getAllNaicsCodes(pageRequest)
+        return ResponseEntity.ok(naicsCodes)
     }
 
     /**
      * Get a specific NAICS code by its code.
      */
     @GetMapping("/{code}")
-    ResponseEntity<NaiceCode> getNaiceCodeByCode(@PathVariable String code) {
-        NaiceCode naiceCode = naiceCodeService.getNaiceCodeByCode(code)
+    ResponseEntity<NaicsCode> getNaicsCodeByCode(@PathVariable String code) {
+        NaicsCode naicsCode = naicsCodeService.getNaicsCodeByCode(code)
 
-        if (naiceCode) {
-            return ResponseEntity.ok(naiceCode)
+        if (naicsCode) {
+            return ResponseEntity.ok(naicsCode)
         } else {
             return ResponseEntity.notFound().build()
         }
@@ -58,10 +59,10 @@ class NaiceCodeController {
      * Create a new NAICS code.
      */
     @PostMapping
-    ResponseEntity<Object> createNaiceCode(@RequestBody NaiceCode naiceCode) {
+    ResponseEntity<Object> createNaicsCode(@RequestBody NaicsCode naicsCode) {
         try {
-            NaiceCode createdNaiceCode = naiceCodeService.createNaiceCode(naiceCode)
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdNaiceCode)
+            NaicsCode createdNaicsCode = naicsCodeService.createNaicsCode(naicsCode)
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdNaicsCode)
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body([
                 status: "error",
@@ -80,10 +81,10 @@ class NaiceCodeController {
      * Update an existing NAICS code.
      */
     @PutMapping("/{code}")
-    ResponseEntity<Object> updateNaiceCode(@PathVariable String code, @RequestBody NaiceCode naiceCode) {
+    ResponseEntity<Object> updateNaicsCode(@PathVariable String code, @RequestBody NaicsCode naicsCode) {
         try {
-            NaiceCode updatedNaiceCode = naiceCodeService.updateNaiceCode(code, naiceCode)
-            return ResponseEntity.ok(updatedNaiceCode)
+            NaicsCode updatedNaicsCode = naicsCodeService.updateNaicsCode(code, naicsCode)
+            return ResponseEntity.ok(updatedNaicsCode)
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body([
                 status: "error",
@@ -102,9 +103,9 @@ class NaiceCodeController {
      * Delete a NAICS code.
      */
     @DeleteMapping("/{code}")
-    ResponseEntity<Object> deleteNaiceCode(@PathVariable String code) {
+    ResponseEntity<Object> deleteNaicsCode(@PathVariable String code) {
         try {
-            naiceCodeService.deleteNaiceCode(code)
+            naicsCodeService.deleteNaicsCode(code)
             return ResponseEntity.noContent().build()
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body([
@@ -124,13 +125,13 @@ class NaiceCodeController {
      * Search NAICS codes by title.
      */
     @GetMapping("/search/title")
-    ResponseEntity<Page<NaiceCode>> searchByTitle(
+    ResponseEntity<Page<NaicsCode>> searchByTitle(
             @RequestParam String title,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
         PageRequest pageRequest = PageRequest.of(page, size)
-        Page<NaiceCode> results = naiceCodeService.searchByTitle(title, pageRequest)
+        Page<NaicsCode> results = naicsCodeService.searchByTitle(title, pageRequest)
         return ResponseEntity.ok(results)
     }
 
@@ -138,13 +139,13 @@ class NaiceCodeController {
      * Search NAICS codes by description.
      */
     @GetMapping("/search/description")
-    ResponseEntity<Page<NaiceCode>> searchByDescription(
+    ResponseEntity<Page<NaicsCode>> searchByDescription(
             @RequestParam String description,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
         PageRequest pageRequest = PageRequest.of(page, size)
-        Page<NaiceCode> results = naiceCodeService.searchByDescription(description, pageRequest)
+        Page<NaicsCode> results = naicsCodeService.searchByDescription(description, pageRequest)
         return ResponseEntity.ok(results)
     }
 
@@ -152,13 +153,13 @@ class NaiceCodeController {
      * Search NAICS codes by sector code.
      */
     @GetMapping("/search/sector")
-    ResponseEntity<Page<NaiceCode>> searchBySectorCode(
+    ResponseEntity<Page<NaicsCode>> searchBySectorCode(
             @RequestParam String sectorCode,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
         PageRequest pageRequest = PageRequest.of(page, size)
-        Page<NaiceCode> results = naiceCodeService.searchBySectorCode(sectorCode, pageRequest)
+        Page<NaicsCode> results = naicsCodeService.searchBySectorCode(sectorCode, pageRequest)
         return ResponseEntity.ok(results)
     }
 
@@ -166,13 +167,13 @@ class NaiceCodeController {
      * Search NAICS codes by active status.
      */
     @GetMapping("/search/active")
-    ResponseEntity<Page<NaiceCode>> searchByActiveStatus(
+    ResponseEntity<Page<NaicsCode>> searchByActiveStatus(
             @RequestParam Boolean isActive,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
         PageRequest pageRequest = PageRequest.of(page, size)
-        Page<NaiceCode> results = naiceCodeService.searchByActiveStatus(isActive, pageRequest)
+        Page<NaicsCode> results = naicsCodeService.searchByActiveStatus(isActive, pageRequest)
         return ResponseEntity.ok(results)
     }
 
@@ -180,14 +181,14 @@ class NaiceCodeController {
      * Full-text search for NAICS codes.
      */
     @GetMapping("/search")
-    ResponseEntity<Page<Map<String, Object>>> searchNaiceCodes(
+    ResponseEntity<Page<Map<String, Object>>> searchNaicsCodes(
             @RequestParam String query,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
         try {
             PageRequest pageRequest = PageRequest.of(page, size)
-            Page<Map<String, Object>> results = naiceCodeService.searchNaiceCodes(query, pageRequest)
+            Page<Map<String, Object>> results = naicsCodeService.searchNaicsCodes(query, pageRequest)
             return ResponseEntity.ok(results)
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null)
@@ -204,11 +205,11 @@ class NaiceCodeController {
     ResponseEntity<Map<String, Object>> importFromCsv(@RequestParam("file") MultipartFile file) {
         try {
             // Create a temporary file
-            File tempFile = File.createTempFile("naice_codes", ".csv")
+            File tempFile = File.createTempFile("naics_codes", ".csv")
             file.transferTo(tempFile)
 
             // Import the data
-            int count = naiceCodeService.importFromCsv(tempFile)
+            int count = naicsCodeService.importFromCsv(tempFile)
 
             // Clean up
             tempFile.delete()

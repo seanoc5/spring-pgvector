@@ -39,6 +39,19 @@
                 </ul>
             </li>
             <li>
+                <a href="#naicsSubmenu" data-bs-toggle="collapse" aria-expanded="true" class="dropdown-toggle">
+                    <i class="fas fa-vector-square"></i> NAICS codes
+                </a>
+                <ul class="collapse show list-unstyled" id="naicsSubmenu">
+                    <li>
+                        <a th:href="@{/naics-codes/}"><!--<i class="fas fa-vector-square"></i>--> List naics</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/naics-codes/create}">Create naics</a>
+                    </li>
+                </ul>
+            </li>
+            <li>
                 <a th:href="@{/admin/settings}"><i class="fas fa-cog"></i>Settings (example)</a>
             </li>
             <li>

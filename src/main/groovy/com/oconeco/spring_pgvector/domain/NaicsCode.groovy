@@ -9,13 +9,16 @@ import groovy.transform.ToString
  * Entity representing a US Census NAICS (North American Industry Classification System) code.
  */
 @Entity
-@Table(name = "naice_codes")
+@Table(name = "naics_codes")
 @ToString(includeNames = true, includePackage = false)
-class NaiceCode {
+class NaicsCode {
 
     @Id
     @Column(name = "code")
     String code
+
+    @Column(name = "level")
+    Integer level
 
     @Column(nullable = false)
     String title

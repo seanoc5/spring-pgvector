@@ -1,7 +1,8 @@
 package com.oconeco.spring_pgvector.service
 
-import com.oconeco.spring_pgvector.domain.NaiceCode
-import com.oconeco.spring_pgvector.repository.NaiceCodeRepository
+
+import com.oconeco.spring_pgvector.domain.NaicsCode
+import com.oconeco.spring_pgvector.repository.NaicsCodeRepository
 import groovy.util.logging.Slf4j
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVRecord
@@ -17,98 +18,108 @@ import org.springframework.transaction.annotation.Transactional
  */
 @Service
 @Slf4j
-class NaiceCodeService {
+class NaicsCodeService {
 
     @Autowired
-    private NaiceCodeRepository naiceCodeRepository
+    private NaicsCodeRepository naicsCodeRepository
 
     /**
      * Get all NAICS codes with pagination.
      */
-    Page<NaiceCode> getAllNaiceCodes(Pageable pageable) {
-        return naiceCodeRepository.findAll(pageable)
+    Page<NaicsCode> getAllNaicsCodes(Pageable pageable) {
+        return naicsCodeRepository.findAll(pageable)
     }
 
     /**
      * Get a NAICS code by its code.
      */
-    NaiceCode getNaiceCodeByCode(String code) {
-        return naiceCodeRepository.findById(code).orElse(null)
+    NaicsCode getNaicsCodeByCode(String code) {
+        return naicsCodeRepository.findById(code).orElse(null)
     }
 
     /**
      * Create a new NAICS code.
      */
     @Transactional
-    NaiceCode createNaiceCode(NaiceCode naiceCode) {
-        if (!naiceCode.code) {
+    NaicsCode createNaicsCode(NaicsCode naicsCode) {
+        if (!naicsCode.code) {
             throw new IllegalArgumentException("NAICS code cannot be empty")
         }
-        
-        if (naiceCodeRepository.existsById(naiceCode.code)) {
-            throw new IllegalArgumentException("NAICS code ${naiceCode.code} already exists")
+
+        if (naicsCodeRepository.existsById(naicsCode.code)) {
+            throw new IllegalArgumentException("NAICS code ${naicsCode.code} already exists")
         }
-        
-        return naiceCodeRepository.save(naiceCode)
+
+        return naicsCodeRepository.save(naicsCode)
     }
 
     /**
      * Update an existing NAICS code.
      */
     @Transactional
-    NaiceCode updateNaiceCode(String code, NaiceCode naiceCode) {
-        if (!naiceCodeRepository.existsById(code)) {
+    NaicsCode updateNaicsCode(String code, NaicsCode naicsCode) {
+        if (!naicsCodeRepository.existsById(code)) {
             throw new IllegalArgumentException("NAICS code ${code} not found")
         }
-        
-        naiceCode.code = code  // Ensure the code is not changed
-        return naiceCodeRepository.save(naiceCode)
+
+        naicsCode.code = code  // Ensure the code is not changed
+        return naicsCodeRepository.save(naicsCode)
     }
 
     /**
      * Delete a NAICS code.
      */
     @Transactional
-    void deleteNaiceCode(String code) {
-        if (!naiceCodeRepository.existsById(code)) {
+    void deleteNaicsCode(String code) {
+        if (!naicsCodeRepository.existsById(code)) {
             throw new IllegalArgumentException("NAICS code ${code} not found")
         }
-        
-        naiceCodeRepository.deleteById(code)
+
+        naicsCodeRepository.deleteById(code)
     }
 
     /**
      * Search NAICS codes by title.
      */
-    Page<NaiceCode> searchByTitle(String title, Pageable pageable) {
-        return naiceCodeRepository.findByTitleContainingIgnoreCase(title, pageable)
+    Page<NaicsCode> searchByTitle(String title, Pageable pageable) {
+        return naicsCodeRepository.findByTitleContainingIgnoreCase(title, pageable)
     }
 
     /**
      * Search NAICS codes by description.
      */
-    Page<NaiceCode> searchByDescription(String description, Pageable pageable) {
-        return naiceCodeRepository.findByDescriptionContainingIgnoreCase(description, pageable)
+    Page<NaicsCode> searchByDescription(String description, Pageable pageable) {
+        return naicsCodeRepository.findByDescriptionContainingIgnoreCase(description, pageable)
     }
 
     /**
      * Search NAICS codes by sector code.
      */
-    Page<NaiceCode> searchBySectorCode(String sectorCode, Pageable pageable) {
-        return naiceCodeRepository.findBySectorCode(sectorCode, pageable)
+    Page<NaicsCode> searchBySectorCode(String sectorCode, Pageable pageable) {
+        return naicsCodeRepository.findBySectorCode(sectorCode, pageable)
     }
 
     /**
      * Search NAICS codes by active status.
      */
-    Page<NaiceCode> searchByActiveStatus(Boolean isActive, Pageable pageable) {
-        return naiceCodeRepository.findByIsActive(isActive, pageable)
+    Page<NaicsCode> searchByActiveStatus(Boolean isActive, Pageable pageable) {
+        return naicsCodeRepository.findByIsActive(isActive, pageable)
+    }
+
+    /**
+     * Find NAICS codes by level.
+     */
+    Page<NaicsCode> findByLevel(Integer level, Pageable pageable) {
+        if (level == null || level < 1 || level > 6) {
+            throw new IllegalArgumentException("Level must be between 1 and 6")
+        }
+        return naicsCodeRepository.findByLevel(level, pageable)
     }
 
     /**
      * Search NAICS codes using full-text search.
      */
-    Page<Map<String, Object>> searchNaiceCodes(String query, Pageable pageable) {
+    Page<Map<String, Object>> searchNaicsCodes(String query, Pageable pageable) {
         if (!query || query.trim().isEmpty()) {
             throw new IllegalArgumentException("Search query cannot be empty")
         }
@@ -123,21 +134,21 @@ class NaiceCodeService {
         log.info("tsQuery: ${tsQuery}")
 
         // Get the total count
-        long totalCount = naiceCodeRepository.countByFullTextSearch(tsQuery)
+        long totalCount = naicsCodeRepository.countByFullTextSearch(tsQuery)
 
         // Get the paginated results
-        Page<Object[]> searchResults = naiceCodeRepository.searchByFullText(tsQuery, pageable)
+        Page<Object[]> searchResults = naicsCodeRepository.searchByFullText(tsQuery, pageable)
 
         // Transform the results into a list of maps
         List<Map<String, Object>> transformedResults = searchResults.getContent().collect { Object[] row ->
-            def naiceCode
-            if (row[0] instanceof NaiceCode) {
-                naiceCode = row[0]
+            def naicsCode
+            if (row[0] instanceof NaicsCode) {
+                naicsCode = row[0]
             } else if (row[0] instanceof String) {
-                naiceCode = naiceCodeRepository.findById(row[0].toString()).orElse(null)
+                naicsCode = naicsCodeRepository.findById(row[0].toString()).orElse(null)
             } else {
                 log.warn "Unexpected type for row[0]: ${row[0]?.class?.name}"
-                naiceCode = null
+                naicsCode = null
             }
 
             Float rank = row.length > 1 ? (row[1] as Float) : 0.0f
@@ -145,7 +156,7 @@ class NaiceCodeService {
             String highlightedDescription = row.length > 3 ? (row[3] as String) : ""
 
             return [
-                naiceCode: naiceCode,
+                naicsCode: naicsCode,
                 rank: rank,
                 highlightedTitle: highlightedTitle,
                 highlightedDescription: highlightedDescription
@@ -180,7 +191,7 @@ class NaiceCodeService {
         // Process each record
         records.each { CSVRecord record ->
             try {
-                NaiceCode naiceCode = new NaiceCode(
+                NaicsCode naicsCode = new NaicsCode(
                     code: record.get("Code"),
                     title: record.get("Title"),
                     description: record.get("Description"),
@@ -199,7 +210,7 @@ class NaiceCodeService {
                     isActive: parseBoolean(record.get("IsActive"), true)
                 )
 
-                naiceCodeRepository.save(naiceCode)
+                naicsCodeRepository.save(naicsCode)
                 count++
 
                 if (count % 100 == 0) {
@@ -221,7 +232,7 @@ class NaiceCodeService {
         if (!value || value.trim() == "" || value.trim() == "N/A") {
             return null
         }
-        
+
         try {
             return Integer.parseInt(value.trim())
         } catch (NumberFormatException e) {
@@ -237,7 +248,7 @@ class NaiceCodeService {
         if (!value || value.trim() == "" || value.trim() == "N/A") {
             return defaultValue
         }
-        
+
         value = value.trim().toLowerCase()
         if (value == "true" || value == "yes" || value == "y" || value == "1") {
             return true
