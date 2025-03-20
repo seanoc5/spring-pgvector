@@ -2,6 +2,21 @@
 
 A semantic search application built with Spring Boot, Spring AI, and pgvector to explore and compare different embedding models and vector search approaches.
 
+## Quick Start
+
+1. Clone the repository: `git clone https://github.com/oconeco/spring-pgvector-semantic-search.git`
+2. Navigate to the project directory: `cd spring-pgvector-semantic-search`
+3. Run `./gradlew bootRun` to start the application
+
+Docker Compose will start PostgreSQL, Ollama, Solr, and Zookeeper for you.
+A solr-init.sh script will load sample data into the Solr collection (sanity-check) for demo/debug of solr config _(not directly related to this project)_.
+Ollama will start on port 11434 for embedding model hosting (most likely without GPU acceleration). Comment out the `ollama` service in `docker-compose.yaml` if you want to use local embeddings.
+Spring AI and pgvector (via starters in build.gradle) will configure a single shared table for semantic search. See application.yaml for model configuration.
+
+Then navigate to http://localhost:8080/embedding/create in your browser to access the demo content upload form. The backend embedding controller and service will split the text content into paragraphs and sentences for embedding generation and storage. 
+
+You should be redirected to http://localhost:8080/embedding/list, where you can see the (hacky) list of Spring AI Documents. You can enter a search as you type in the query and see the results. 
+
 ## Project Overview
 
 This project was created as a learning journey to explore:
@@ -106,17 +121,69 @@ solr:
 
 ## Usage and Development notes
 ### Docker
-I have tried configuring docker to ease config,test,debug process for solr configuration. I am still learning docker/docker-compose, so I am open to suggestions and feedback. 
+I have tried to configuring docker to ease config,test,debug process for solr configuration. 
+I am still learning docker/docker-compose, so I am open to suggestions and feedback.
+Note: solr depends on zookeeper, so I have been able to just start solr, and docker-compose will start zookeeper.
 
-My goal is to just reload the solr image, and the the solr-init.sh script will run again. That should naively _(dangerously?)_ re-upload the solr `contracts`configset to the container.  
-**NOTE**: This will overwrite the existing `contracts` configset.
+My goal is to just reload the solr image, and the the solr-init.sh script will run again. That should naively _(dangerously?)_ re-upload the solr `sanity-check`configset to the container.  
+**NOTE**: This will overwrite the existing `sanity-check` configset.
 
+
+#### Ollama
 This is just a demo/learning app, so unlikely to have any "production" concerns, but do consider switching from docker to "real" services. 
 `Ollama` is tough to get using a local GPU, and I have not tried for this demo docker setup. But if you have a local GPU, it should be easy to comment out the docker-compose `ollama` service and use the local `ollama` service.
 
-### Intellij
-In the `services` tool, I found I can stop/start the solr container and it will be "reloaded". The image will not be rebuilt, but the container will be reloaded. This **should** reload the solr `contracts` configset as well as re `post` the sample csv data. It is a bit hacky, so any suggestions on a better way to do this are welcome.
+#### Solr
+I have had decent luck:
+* modifying the `sanity-check` solr configset and then 
+* `alt-8` in intellij to get to services tool window, then 
+* ctrl-f2 to stop the solr container, then 
+* ctrl-enter to re-start the solr container.
 
+There are likely 'smarter' ways to do this, but so far this works.
+
+**Note:** remember that zookeeper keeps the confiration for solr. 
+So if you change the solr configset, you need to re-upload it to zookeeper. 
+If things get hinky, you may want to delete/repopulate the zookeeper volumes (or just do it the **proper** way with zk commands, but that takes thought and effort...).
+
+### Intellij
+In the `services` tool, I found I can stop/start the solr container and it will be "reloaded". 
+The image will not be rebuilt, but the container will be reloaded. 
+This **should** reload the solr `sanity-check` configset as well as re `post` the sample csv data. 
+It is a bit hacky, so any suggestions on a better way to do this are welcome.
+
+
+## Searching
+### Solr
+**Note:** `solr-init.sh` loads a sample csv file into the `sanity-check` collection for demo/debug. 
+The intent is to be able to check the default configs, including field types. 
+
+The `sanity-check` collection has the following fields:
+* text_gen
+* text_en
+* shingle (custom field type)
+* sayt (custom field type)
+* bucket_tight (custom field type) -- title and description copied to a "tight" field
+* bucket_fuzzy (custom field type) -- title and description copied to a "fuzzy" field
+
+There is some minor solrschema configuration in the `sanity-check` configset:
+* synonyms
+* protected words
+* highlighting (`hl.*`)
+* faceting (`facet.*`)
+* fields to return (`fl`) 
+* query fields (edismax with boosting, `qf`)
+* phrase fields (edismax with boosting, `pf`)
+
+This provides a way to compare keyword search (solr) against dense vector embeddings (pgvector).
+
+### PGVector
+This provides a way to compare dense vector embeddings (pgvector) against keyword search (solr).
+`application.yaml` can/should be used to configure the embedding models and vector store.
+
+### Coming Soon:
+- UI for comparing search results
+- ability to compare different embedding models, distance metrics, and chunking strategies (well... perhaps not **soon**...)
 
 ## Future Development
 
