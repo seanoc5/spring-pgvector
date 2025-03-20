@@ -4,8 +4,8 @@ A semantic search application built with Spring Boot, Spring AI, and pgvector to
 
 ## Quick Start
 
-1. Clone the repository: `git clone https://github.com/oconeco/spring-pgvector-semantic-search.git`
-2. Navigate to the project directory: `cd spring-pgvector-semantic-search`
+1. Clone the repository: `git clone https://github.com/seanoc5/spring-pgvector/`
+2. Navigate to the project directory: `cd spring-pgvector`
 3. Run `./gradlew bootRun` to start the application
 
 Docker Compose will start PostgreSQL, Ollama, Solr, and Zookeeper for you.
