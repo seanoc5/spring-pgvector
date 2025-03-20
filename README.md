@@ -104,6 +104,20 @@ solr:
   port: 8983
 ```
 
+## Usage and Development notes
+### Docker
+I have tried configuring docker to ease config,test,debug process for solr configuration. I am still learning docker/docker-compose, so I am open to suggestions and feedback. 
+
+My goal is to just reload the solr image, and the the solr-init.sh script will run again. That should naively _(dangerously?)_ re-upload the solr `contracts`configset to the container.  
+**NOTE**: This will overwrite the existing `contracts` configset.
+
+This is just a demo/learning app, so unlikely to have any "production" concerns, but do consider switching from docker to "real" services. 
+`Ollama` is tough to get using a local GPU, and I have not tried for this demo docker setup. But if you have a local GPU, it should be easy to comment out the docker-compose `ollama` service and use the local `ollama` service.
+
+### Intellij
+In the `services` tool, I found I can stop/start the solr container and it will be "reloaded". The image will not be rebuilt, but the container will be reloaded. This **should** reload the solr `contracts` configset as well as re `post` the sample csv data. It is a bit hacky, so any suggestions on a better way to do this are welcome.
+
+
 ## Future Development
 
 The next phase of development will focus on:
