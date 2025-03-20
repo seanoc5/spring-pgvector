@@ -1,5 +1,9 @@
 # Informal Notes on Docker 
 
+## Links/documentation
+* https://docs.docker.com/get-started/
+* https://docs.docker.com/desktop/setup/install/mac-install/
+
 ## ChatGPT Q&A
 Below is an overview of Docker best practices and considerations for each of the three major desktop operating systems: Linux, Windows, and macOS (with a special focus on Apple Silicon). These recommendations are based on common developer workflows, typical setups, and reliability concerns.
 
