@@ -1,18 +1,9 @@
 package com.oconeco.spring_pgvector
 
 import groovy.util.logging.Slf4j
-import org.apache.solr.client.solrj.SolrClient
-import org.apache.solr.client.solrj.impl.BaseHttpSolrClient
-import org.apache.solr.client.solrj.request.CollectionAdminRequest
-import org.apache.solr.client.solrj.request.schema.FieldTypeDefinition
-import org.apache.solr.client.solrj.request.schema.SchemaRequest
-import org.apache.solr.client.solrj.response.schema.FieldTypeRepresentation
-import org.apache.solr.client.solrj.response.schema.SchemaResponse
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.context.annotation.Bean
 
 @Slf4j
 @SpringBootApplication
