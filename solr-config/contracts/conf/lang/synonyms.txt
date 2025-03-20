@@ -1,0 +1,10 @@
+java,python,scala,php,ruby,perl,go,rust,software
+coding,programming,software development
+springai,spring-ai
+springboot,spring-boot
+llm,large language model,machine learning,ml,ai
+opportunity,opportunities,job,contract
+
+search,solr,solrcloud,solr4,solr5,solr6,solr7,solr8,solr9,solr10,opensearch,elastic,fts,fulltextsearch,fulltext,google
+
+intellij idea, jetbrains idea

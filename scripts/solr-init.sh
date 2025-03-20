@@ -6,6 +6,7 @@ echo "====================== Starting Solr for upload and config...? ===========
 solr start -cloud -p 8983
 
 COLLECTION_NAME="contracts"
+CSV_FILE_PATH="/tmp/test-data.csv"
 
 # -------------------------------------------------------------------
 # Upload config set to ZooKeeper if not already uploaded
@@ -15,16 +16,16 @@ CONFIG_PATH="/opt/solr/server/solr/configsets/${CONFIG_NAME}/conf"
 
 echo "====================== Checking if config '${CONFIG_NAME}' exists in ZooKeeper..."
 # We'll parse the output of 'solr zk ls' to see if the config is uploaded
-if solr zk ls /configs -z "${ZK_HOST}" 2>&1 | grep -q "${CONFIG_NAME}"; then
-  echo "====================== Config '${CONFIG_NAME}' already present in ZooKeeper. Skipping upload."
-else
+#if solr zk ls /configs -z "${ZK_HOST}" 2>&1 | grep -q "${CONFIG_NAME}"; then
+#  echo "====================== Config '${CONFIG_NAME}' already present in ZooKeeper. Skipping upload."
+#else
   echo "====================== Uploading config '${CONFIG_NAME}' to ZooKeeper..."
   solr zk upconfig \
     -n "${CONFIG_NAME}" \
     -d "${CONFIG_PATH}" \
     -z "${ZK_HOST}"
   echo "====================== Config (${CONFIG_NAME}) uploaded."
-fi
+#fi
 
 #sleep 5
 # Wait for Solr to be available
@@ -33,7 +34,7 @@ until curl -s "http://localhost:8983/solr/admin/info/system" > /dev/null; do
   sleep 3
   echo "           Still waiting for Solr..."
 done
-echo "====================== Solr is up."
+echo "====================== Solr is up!!"
 
 
 # -------------------------------------------------------------------
@@ -48,9 +49,13 @@ else
   solr create \
     -c "${COLLECTION_NAME}" \
     -n "${CONFIG_NAME}" \
-    -z "${ZK_HOST}" \
-  echo "foo .... Collection created."
+    -z "${ZK_HOST}"
+
+  echo "...................... Collection created."
 fi
+
+echo "===================== POST sample data '${COLLECTION_NAME}' csv file:(${CSV_FILE_PATH})..."
+solr post -c "${COLLECTION_NAME}" "${CSV_FILE_PATH}"
 
 # todo -- make this better, more dockerified
 echo "---------------------- Explicitly Stopping Solr (is there a better way?)..."
