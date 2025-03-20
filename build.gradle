@@ -38,9 +38,9 @@ dependencies {
 	implementation 'org.springframework.ai:spring-ai-pgvector-store-spring-boot-starter'
 	implementation 'org.springframework.session:spring-session-core'
     implementation 'io.github.wimdeblauwe:htmx-spring-boot:4.0.1'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+//    implementation 'org.springframework.boot:spring-boot-starter-security'
+//    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
     // https://mvnrepository.com/artifact/org.apache.opennlp/opennlp-tools
     implementation 'org.apache.opennlp:opennlp-tools:2.5.3'
@@ -68,7 +68,7 @@ dependencies {
 
     runtimeOnly 'org.postgresql:postgresql'
 
-    testImplementation 'org.springframework.security:spring-security-test'
+//    testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     // For testing with Docker Compose
