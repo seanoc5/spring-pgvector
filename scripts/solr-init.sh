@@ -45,10 +45,10 @@ if echo "${LIST_OUTPUT}" | grep -q "\"${COLLECTION_NAME}\""; then
   echo "++++++++++++++++++++++ Collection '${COLLECTION_NAME}' already exists. Skipping creation."
 else
   echo "===================== Creating collection '${COLLECTION_NAME}' with config '${CONFIG_NAME}'..."
-#  solr create \
-#    -c "${COLLECTION_NAME}" \
-#    -n "${CONFIG_NAME}" \
-#    -z "${ZK_HOST}" \
+  solr create \
+    -c "${COLLECTION_NAME}" \
+    -n "${CONFIG_NAME}" \
+    -z "${ZK_HOST}" \
   echo "foo .... Collection created."
 fi
 

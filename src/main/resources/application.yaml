@@ -62,6 +62,6 @@ logging:
 
 solr:
   host: localhost
-  collection: contracting
+  collection: contracts
   port: 8983
   # Additional configuration options...

@@ -3,7 +3,6 @@ package com.oconeco.spring_pgvector
 import groovy.util.logging.Slf4j
 import org.apache.solr.client.solrj.SolrClient
 import org.apache.solr.client.solrj.impl.BaseHttpSolrClient
-import org.apache.solr.client.solrj.impl.HttpSolrClient
 import org.apache.solr.client.solrj.request.CollectionAdminRequest
 import org.apache.solr.client.solrj.request.schema.FieldTypeDefinition
 import org.apache.solr.client.solrj.request.schema.SchemaRequest
@@ -22,7 +21,7 @@ class SpringPgvectorApplication {
     @Value('${solr.host:http://localhost:8983/solr}')
     String solrUrl
 
-    @Value('${solr.collection:replaceMeDefault}')
+    @Value('${solr.collection:contracts}')
     String collectionName
 
     static void main(String[] args) {
