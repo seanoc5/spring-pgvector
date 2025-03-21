@@ -26,6 +26,8 @@ repositories {
 
 ext {
 	set('springAiVersion', "1.0.0-M6")
+	set('testcontainersVersion', "1.19.7")
+	set('spockVersion', "2.4-M1-groovy-4.0")
 }
 
 dependencies {
@@ -70,6 +72,16 @@ dependencies {
 
 //    testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    
+    // Spock Framework
+    testImplementation "org.spockframework:spock-core:${spockVersion}"
+    testImplementation "org.spockframework:spock-spring:${spockVersion}"
+    
+    // TestContainers
+    testImplementation "org.testcontainers:testcontainers:${testcontainersVersion}"
+    testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
+    testImplementation "org.testcontainers:postgresql:${testcontainersVersion}"
+    testImplementation "org.testcontainers:spock:${testcontainersVersion}"
 
     // For testing with Docker Compose
     testImplementation 'org.springframework.boot:spring-boot-docker-compose'

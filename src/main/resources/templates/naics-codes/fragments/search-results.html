@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+    <!-- Search results fragment -->
+    <div th:fragment="results">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Search Results</span>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Sort By
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" th:href="@{/naics-codes(sortBy='code',sortDir=${sortDir},query=${query},level=${activeLevel})}">Code</a></li>
+                        <li><a class="dropdown-item" th:href="@{/naics-codes(sortBy='title',sortDir=${sortDir},query=${query},level=${activeLevel})}">Title</a></li>
+                        <li><a class="dropdown-item" th:href="@{/naics-codes(sortBy='level',sortDir=${sortDir},query=${query},level=${activeLevel})}">Level</a></li>
+                        <li><a class="dropdown-item" th:href="@{/naics-codes(sortBy='sectorCode',sortDir=${sortDir},query=${query},level=${activeLevel})}">Sector</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" th:href="@{/naics-codes(sortBy=${sortBy},sortDir=${reverseSortDir},query=${query},level=${activeLevel})}">
+                            <span th:text="${sortDir == 'asc' ? 'Descending' : 'Ascending'}"></span>
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Search results with highlighting -->
+                <div th:if="${!searchResults.empty}" class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Level</th>
+                                <th>Title</th>
+                                <th>Sector</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="result : ${searchResults.content}">
+                                <td>
+                                    <a th:href="@{/naics-codes/{code}(code=${result.naicsCode.code})}" 
+                                       th:text="${result.naicsCode.code}"
+                                       class="fw-bold text-decoration-none"></a>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill bg-secondary" th:text="${result.naicsCode.level}"></span>
+                                </td>
+                                <td>
+                                    <div th:if="${result.highlightedTitle}" th:utext="${result.highlightedTitle}"></div>
+                                    <div th:unless="${result.highlightedTitle}" th:text="${result.naicsCode.title}"></div>
+                                    <div th:if="${result.highlightedDescription}" class="small text-muted mt-1" th:utext="${result.highlightedDescription}"></div>
+                                </td>
+                                <td th:text="${result.naicsCode.sectorTitle}"></td>
+                                <td>
+                                    <a th:href="@{/naics-codes/{code}(code=${result.naicsCode.code})}" 
+                                       class="btn btn-sm btn-outline-primary"
+                                       data-bs-toggle="tooltip" 
+                                       data-bs-placement="top" 
+                                       title="View details">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- No results message -->
+                <div th:if="${searchResults.empty}" class="alert alert-warning">
+                    No results found for "<span th:text="${query}"></span>"
+                    <span th:if="${activeLevel != null}"> with level <span th:text="${activeLevel}"></span></span>.
+                </div>
+                
+                <!-- Pagination -->
+                <div th:if="${searchResults.totalPages > 1}" class="d-flex justify-content-center mt-4">
+                    <nav>
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                <a class="page-link" th:href="@{/naics-codes/search(query=${query},level=${activeLevel},page=0,size=${searchResults.size})}">&laquo;</a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                <a class="page-link" th:href="@{/naics-codes/search(query=${query},level=${activeLevel},page=${currentPage - 1},size=${searchResults.size})}">&lt;</a>
+                            </li>
+                            
+                            <li class="page-item" th:each="i: ${#numbers.sequence(0, searchResults.totalPages - 1)}" 
+                                th:if="${i >= currentPage - 2 && i <= currentPage + 2}"
+                                th:classappend="${i == currentPage ? 'active' : ''}">
+                                <a class="page-link" th:href="@{/naics-codes/search(query=${query},level=${activeLevel},page=${i},size=${searchResults.size})}" th:text="${i + 1}"></a>
+                            </li>
+                            
+                            <li class="page-item" th:classappend="${currentPage == searchResults.totalPages - 1 ? 'disabled' : ''}">
+                                <a class="page-link" th:href="@{/naics-codes/search(query=${query},level=${activeLevel},page=${currentPage + 1},size=${searchResults.size})}">&gt;</a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == searchResults.totalPages - 1 ? 'disabled' : ''}">
+                                <a class="page-link" th:href="@{/naics-codes/search(query=${query},level=${activeLevel},page=${searchResults.totalPages - 1},size=${searchResults.size})}">&raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+                Found: <span th:text="${searchResults.totalElements}"></span> results for "<span th:text="${query}"></span>"
+                <span th:if="${activeLevel != null}"> with level <span th:text="${activeLevel}"></span></span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Error fragment -->
+    <div th:fragment="error">
+        <div class="alert alert-danger">
+            <span th:text="${error}"></span>
+        </div>
+    </div>
+</body>
+</html>
