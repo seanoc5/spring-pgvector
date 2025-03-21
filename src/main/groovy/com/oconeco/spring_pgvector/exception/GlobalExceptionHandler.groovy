@@ -23,12 +23,40 @@ class GlobalExceptionHandler {
 //    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class)
 
     /**
+     * Handle parameter name missing exceptions.
+     * This occurs when @RequestParam in Groovy doesn't have an explicit name parameter.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ModelAndView handleParameterNameMissingException(IllegalArgumentException ex, HttpServletRequest request) {
+        String message = ex.getMessage()
+        
+        // Check if this is the specific parameter name error
+        if (message?.contains("Name for argument of type") && message?.contains("not specified")) {
+            log.error("Parameter name missing in controller method: {}", message)
+            
+            ModelAndView modelAndView = new ModelAndView("error/400")
+            modelAndView.addObject("timestamp", new Date())
+            modelAndView.addObject("status", HttpStatus.BAD_REQUEST.value())
+            modelAndView.addObject("error", "Missing Parameter Name")
+            modelAndView.addObject("message", "A controller method is missing an explicit parameter name. In Groovy, all @RequestParam parameters must include a 'name' attribute. For example: @RequestParam(name = 'query') String query")
+            modelAndView.addObject("path", request.getRequestURI())
+            modelAndView.addObject("developerMessage", "Check controller methods and ensure all @RequestParam annotations include a 'name' attribute.")
+            
+            return modelAndView
+        }
+        
+        // If it's a different IllegalArgumentException, delegate to the general exception handler
+        return handleException(ex, request)
+    }
+
+    /**
      * Handle general exceptions.
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     ModelAndView handleException(Exception ex, HttpServletRequest request) {
-        log.error("Exception occurred: {}", ex.getMessage(), ex)
+        log.error("General Exception occurred: {}", ex.getMessage(), ex)
 
         ModelAndView modelAndView = new ModelAndView("error/general")
         modelAndView.addObject("timestamp", new Date())
