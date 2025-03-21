@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    # TestContainers will dynamically set these properties
+    # using the @DynamicPropertySource in our test classes
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none # We're using our init script instead
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        '[format_sql]': true
+    show-sql: true
+  test:
+    database:
+      replace: none
+
+# Mock Solr configuration for tests
+solr:
+  host: http://localhost:8983/solr
+  collection: contracting
+  port: 8983
