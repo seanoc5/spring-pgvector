@@ -29,10 +29,10 @@ class NaicsCodeController {
      */
     @GetMapping
     ResponseEntity<Page<NaicsCode>> getAllNaicsCodes(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "code") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir) {
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "sortBy", defaultValue = "code") String sortBy,
+            @RequestParam(name = "sortDir", defaultValue = "asc") String sortDir) {
 
         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy))
@@ -126,9 +126,9 @@ class NaicsCodeController {
      */
     @GetMapping("/search/title")
     ResponseEntity<Page<NaicsCode>> searchByTitle(
-            @RequestParam String title,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(name = "title") String title,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
 
         PageRequest pageRequest = PageRequest.of(page, size)
         Page<NaicsCode> results = naicsCodeService.searchByTitle(title, pageRequest)
@@ -140,9 +140,9 @@ class NaicsCodeController {
      */
     @GetMapping("/search/description")
     ResponseEntity<Page<NaicsCode>> searchByDescription(
-            @RequestParam String description,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(name = "description") String description,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
 
         PageRequest pageRequest = PageRequest.of(page, size)
         Page<NaicsCode> results = naicsCodeService.searchByDescription(description, pageRequest)
@@ -154,9 +154,9 @@ class NaicsCodeController {
      */
     @GetMapping("/search/sector")
     ResponseEntity<Page<NaicsCode>> searchBySectorCode(
-            @RequestParam String sectorCode,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(name = "sectorCode") String sectorCode,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
 
         PageRequest pageRequest = PageRequest.of(page, size)
         Page<NaicsCode> results = naicsCodeService.searchBySectorCode(sectorCode, pageRequest)
@@ -168,9 +168,9 @@ class NaicsCodeController {
      */
     @GetMapping("/search/active")
     ResponseEntity<Page<NaicsCode>> searchByActiveStatus(
-            @RequestParam Boolean isActive,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(name = "isActive") Boolean isActive,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
 
         PageRequest pageRequest = PageRequest.of(page, size)
         Page<NaicsCode> results = naicsCodeService.searchByActiveStatus(isActive, pageRequest)
@@ -182,9 +182,9 @@ class NaicsCodeController {
      */
     @GetMapping("/search")
     ResponseEntity<Page<Map<String, Object>>> searchNaicsCodes(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(name = "query") String query,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
 
         try {
             PageRequest pageRequest = PageRequest.of(page, size)
@@ -202,7 +202,7 @@ class NaicsCodeController {
      * Import NAICS codes from a CSV file.
      */
     @PostMapping("/import")
-    ResponseEntity<Map<String, Object>> importFromCsv(@RequestParam("file") MultipartFile file) {
+    ResponseEntity<Map<String, Object>> importFromCsv(@RequestParam(name = "file") MultipartFile file) {
         try {
             // Create a temporary file
             File tempFile = File.createTempFile("naics_codes", ".csv")

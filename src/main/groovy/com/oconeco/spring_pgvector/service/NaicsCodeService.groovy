@@ -226,6 +226,223 @@ class NaicsCodeService {
     }
 
     /**
+     * Import NAICS codes from an Excel file.
+     * 
+     * @param excelFile The Excel file to import
+     * @return The number of NAICS codes imported
+     */
+    @Transactional
+    int importFromExcel(File excelFile) {
+        log.info "Importing NAICS codes from Excel file: ${excelFile.absolutePath}"
+
+        if (!excelFile.exists()) {
+            throw new FileNotFoundException("Excel file not found: ${excelFile.absolutePath}")
+        }
+
+        // Open the Excel workbook
+        def workbook = org.apache.poi.ss.usermodel.WorkbookFactory.create(excelFile)
+        def sheet = workbook.getSheetAt(0) // Get the first sheet
+
+        // Get the header row to map column names to indices
+        def headerRow = sheet.getRow(0)
+        def columnMap = [:]
+        
+        for (int i = 0; i < headerRow.getLastCellNum(); i++) {
+            def cell = headerRow.getCell(i)
+            if (cell) {
+                columnMap[cell.getStringCellValue().trim()] = i
+            }
+        }
+        
+        // Verify required columns exist
+        def requiredColumns = ['Seq. No.', '2022 NAICS US   Code', '2022 NAICS US Title', 'Description']
+        def missingColumns = requiredColumns.findAll { !columnMap.containsKey(it) }
+        
+        if (missingColumns) {
+            throw new IllegalArgumentException("Missing required columns in Excel file: ${missingColumns.join(', ')}")
+        }
+        
+        int count = 0
+        
+        // Process each row starting from row 1 (skipping header)
+        for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
+            def row = sheet.getRow(rowNum)
+            if (row == null) continue
+            
+            try {
+                // Extract cell values
+                def codeCell = row.getCell(columnMap['2022 NAICS US   Code'])
+                if (codeCell == null) continue
+                
+                // Convert cell to string based on cell type
+                def code = getCellValueAsString(codeCell)
+                if (!code) continue
+                
+                def title = getCellValueAsString(row.getCell(columnMap['2022 NAICS US Title']))
+                def description = getCellValueAsString(row.getCell(columnMap['Description']))
+                
+                // Determine NAICS level based on code length
+                int level = determineNaicsLevel(code)
+                
+                // Create and save the NAICS code entity
+                def naicsCode = new NaicsCode(
+                    code: code,
+                    title: title,
+                    description: description,
+                    level: level,
+                    yearIntroduced: 2022, // Based on the column header "2022 NAICS US Code"
+                    isActive: true
+                )
+                
+                // Set hierarchical relationships based on code length
+                setHierarchicalRelationships(naicsCode)
+                
+                // Save to database
+                naicsCodeRepository.save(naicsCode)
+                count++
+                
+                if (count % 100 == 0) {
+                    log.info "Processed ${count} NAICS codes"
+                }
+            } catch (Exception e) {
+                log.error "Error processing NAICS code at row ${rowNum + 1}: ${e.message}", e
+            }
+        }
+        
+        // Close the workbook to release resources
+        workbook.close()
+        
+        log.info "Imported ${count} NAICS codes from Excel file"
+        return count
+    }
+    
+    /**
+     * Get cell value as string regardless of cell type
+     */
+    private String getCellValueAsString(org.apache.poi.ss.usermodel.Cell cell) {
+        if (cell == null) return ""
+        
+        switch (cell.getCellType()) {
+            case org.apache.poi.ss.usermodel.CellType.STRING:
+                return cell.getStringCellValue()?.trim()
+            case org.apache.poi.ss.usermodel.CellType.NUMERIC:
+                // Handle numeric cells, including dates
+                if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell)) {
+                    return cell.getDateCellValue()?.toString()
+                } else {
+                    // For NAICS codes that might be stored as numbers, ensure they're formatted properly
+                    def value = cell.getNumericCellValue()
+                    if (value == Math.floor(value)) {
+                        return String.format("%.0f", value)
+                    } else {
+                        return String.valueOf(value)
+                    }
+                }
+            case org.apache.poi.ss.usermodel.CellType.BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue())
+            case org.apache.poi.ss.usermodel.CellType.FORMULA:
+                // Try to evaluate the formula
+                def evaluator = cell.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator()
+                def cellValue = evaluator.evaluate(cell)
+                return getCellValueAsString(cellValue)
+            default:
+                return ""
+        }
+    }
+    
+    /**
+     * Determine NAICS level based on code length
+     */
+    private int determineNaicsLevel(String code) {
+        if (!code) return 0
+        
+        code = code.replaceAll("\\D", "") // Remove non-digits
+        
+        switch (code.length()) {
+            case 2: return 1 // Sector level (2 digits)
+            case 3: return 2 // Subsector level (3 digits)
+            case 4: return 3 // Industry Group level (4 digits)
+            case 5: return 4 // NAICS Industry level (5 digits)
+            case 6: return 5 // National Industry level (6 digits)
+            default: return 0
+        }
+    }
+    
+    /**
+     * Set hierarchical relationships for a NAICS code based on its code
+     */
+    private void setHierarchicalRelationships(NaicsCode naicsCode) {
+        if (!naicsCode.code) return
+        
+        String code = naicsCode.code.replaceAll("\\D", "") // Remove non-digits
+        
+        // Set sector (2-digit) information
+        if (code.length() >= 2) {
+            String sectorCode = code.substring(0, 2)
+            naicsCode.sectorCode = sectorCode
+            
+            // Try to get the sector title from the database
+            def sector = naicsCodeRepository.findById(sectorCode).orElse(null)
+            if (sector) {
+                naicsCode.sectorTitle = sector.title
+            }
+        }
+        
+        // Set subsector (3-digit) information
+        if (code.length() >= 3) {
+            String subsectorCode = code.substring(0, 3)
+            naicsCode.subsectorCode = subsectorCode
+            
+            // Try to get the subsector title from the database
+            def subsector = naicsCodeRepository.findById(subsectorCode).orElse(null)
+            if (subsector) {
+                naicsCode.subsectorTitle = subsector.title
+            }
+        }
+        
+        // Set industry group (4-digit) information
+        if (code.length() >= 4) {
+            String industryGroupCode = code.substring(0, 4)
+            naicsCode.industryGroupCode = industryGroupCode
+            
+            // Try to get the industry group title from the database
+            def industryGroup = naicsCodeRepository.findById(industryGroupCode).orElse(null)
+            if (industryGroup) {
+                naicsCode.industryGroupTitle = industryGroup.title
+            }
+        }
+        
+        // Set NAICS industry (5-digit) information
+        if (code.length() >= 5) {
+            String naicsIndustryCode = code.substring(0, 5)
+            naicsCode.naicsIndustryCode = naicsIndustryCode
+            
+            // Try to get the NAICS industry title from the database
+            def naicsIndustry = naicsCodeRepository.findById(naicsIndustryCode).orElse(null)
+            if (naicsIndustry) {
+                naicsCode.naicsIndustryTitle = naicsIndustry.title
+            }
+        }
+        
+        // Set national industry (6-digit) information
+        if (code.length() >= 6) {
+            String nationalIndustryCode = code.substring(0, 6)
+            naicsCode.nationalIndustryCode = nationalIndustryCode
+            
+            // If this is a 6-digit code, it is itself a national industry
+            if (code.length() == 6 && naicsCode.code == nationalIndustryCode) {
+                naicsCode.nationalIndustryTitle = naicsCode.title
+            } else {
+                // Try to get the national industry title from the database
+                def nationalIndustry = naicsCodeRepository.findById(nationalIndustryCode).orElse(null)
+                if (nationalIndustry) {
+                    naicsCode.nationalIndustryTitle = nationalIndustry.title
+                }
+            }
+        }
+    }
+
+    /**
      * Parse an integer from a string, returning null if the string is empty or invalid.
      */
     private Integer parseInteger(String value) {

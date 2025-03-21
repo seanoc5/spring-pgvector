@@ -28,10 +28,10 @@ class OpportunityController {
      */
     @GetMapping
     ResponseEntity<Page<Opportunity>> getAllOpportunities(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "lastPublishedDate") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir) {
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "sortBy", defaultValue = "lastPublishedDate") String sortBy,
+            @RequestParam(name = "sortDir", defaultValue = "desc") String sortDir) {
 
         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy))
@@ -59,9 +59,9 @@ class OpportunityController {
      */
     @GetMapping("/search")
     ResponseEntity<Page<Map<String, Object>>> searchOpportunities(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(name = "query") String query,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
 
         try {
             PageRequest pageRequest = PageRequest.of(page, size)
@@ -79,7 +79,7 @@ class OpportunityController {
      * Import opportunities from a CSV file.
      */
     @PostMapping("/import")
-    ResponseEntity<Map<String, Object>> importFromCsv(@RequestParam("file") MultipartFile file) {
+    ResponseEntity<Map<String, Object>> importFromCsv(@RequestParam(name = "file") MultipartFile file) {
         try {
             // Create a temporary file
             File tempFile = File.createTempFile("opportunities", ".csv")

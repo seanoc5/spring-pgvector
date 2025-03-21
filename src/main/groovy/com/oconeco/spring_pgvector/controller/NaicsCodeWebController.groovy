@@ -29,12 +29,12 @@ class NaicsCodeWebController {
     @GetMapping(["", "/", '/index', '/list'])
     String listNaicsCodes(
             Model model,
-            @RequestParam(required = false, name = "q") String query,
-            @RequestParam(required = false, name = "level") Integer level,
-            @RequestParam(defaultValue = "0", name = "page") int page,
-            @RequestParam(defaultValue = "20", name = "size") int size,
-            @RequestParam(defaultValue = "code", name = "sortBy") String sortBy,
-            @RequestParam(defaultValue = "asc", name = "sortDir") String sortDir) {
+            @RequestParam(name = "q", required = false) String query,
+            @RequestParam(name = "level", required = false) Integer level,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "sortBy", defaultValue = "code") String sortBy,
+            @RequestParam(name = "sortDir", defaultValue = "asc") String sortDir) {
 
         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy))
@@ -51,6 +51,7 @@ class NaicsCodeWebController {
 
         // If search query is applied
         if (query && !query.trim().isEmpty()) {
+            log.info("Listing NAICS codes for query: {}", query)
             try {
                 Page<Map<String, Object>> searchResults = naicsCodeService.searchNaicsCodes(query, pageRequest)
 
@@ -71,6 +72,7 @@ class NaicsCodeWebController {
             }
         } else if (level == null) {
             // If no filters applied
+            log.info("No filters applied, listing all NAICS codes")
             naicsCodes = naicsCodeService.getAllNaicsCodes(pageRequest)
         }
 
@@ -89,7 +91,7 @@ class NaicsCodeWebController {
      * Display a specific NAICS code.
      */
     @GetMapping("/{code}")
-    String viewNaicsCode(@PathVariable String code, Model model) {
+    String viewNaicsCode(@PathVariable(name="code") String code, Model model) {
         NaicsCode naicsCode = naicsCodeService.getNaicsCodeByCode(code)
 
         if (naicsCode) {
@@ -105,10 +107,10 @@ class NaicsCodeWebController {
      */
     @GetMapping("/search")
     String searchNaicsCodes(
-            @RequestParam String query,
-            @RequestParam(required = false) Integer level,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(name = "query") String query,
+            @RequestParam(name = "level", required = false) Integer level,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
             Model model) {
 
         try {
@@ -157,12 +159,12 @@ class NaicsCodeWebController {
      */
     @GetMapping("/filter")
     String filterByLevel(
-            @RequestParam(required = false) Integer level,
-            @RequestParam(required = false) String query,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "code") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(name = "level", required = false) Integer level,
+            @RequestParam(name = "query", required = false) String query,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "sortBy", defaultValue = "code") String sortBy,
+            @RequestParam(name = "sortDir", defaultValue = "asc") String sortDir,
             Model model) {
 
         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC

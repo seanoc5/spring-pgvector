@@ -31,10 +31,10 @@ class OpportunityWebController {
     @GetMapping
     String listOpportunities(
             Model model,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "lastPublishedDate") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir) {
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "sortBy", defaultValue = "lastPublishedDate") String sortBy,
+            @RequestParam(name = "sortDir", defaultValue = "desc") String sortDir) {
 
         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy))
@@ -80,9 +80,9 @@ class OpportunityWebController {
      */
     @GetMapping("/search/results")
     String searchResults(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(name = "query") String query,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
             Model model) {
 
         try {
@@ -116,7 +116,7 @@ class OpportunityWebController {
      */
     @PostMapping("/import")
     String importCsv(
-            @RequestParam("file") MultipartFile file,
+            @RequestParam(name = "file") MultipartFile file,
             RedirectAttributes redirectAttributes) {
 
         if (file.empty) {
