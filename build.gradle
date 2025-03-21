@@ -1,4 +1,4 @@
-plugins {
+echo plugins {
 	id 'groovy'
 	id 'org.springframework.boot' version '3.4.3'
 	id 'io.spring.dependency-management' version '1.1.7'
@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.oconeco'
-version = '0.1.2'
+version = '0.2.1'
 
 java {
 	toolchain {
@@ -54,7 +54,7 @@ dependencies {
 
     // Apache Commons CSV for parsing CSV files
     implementation 'org.apache.commons:commons-csv:1.13.0'
-    
+
     // Apache POI for Excel file processing
     implementation 'org.apache.poi:poi:5.2.5'
     implementation 'org.apache.poi:poi-ooxml:5.2.5'
@@ -76,11 +76,11 @@ dependencies {
 
 //    testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    
+
     // Spock Framework
     testImplementation "org.spockframework:spock-core:${spockVersion}"
     testImplementation "org.spockframework:spock-spring:${spockVersion}"
-    
+
     // TestContainers
     testImplementation "org.testcontainers:testcontainers:${testcontainersVersion}"
     testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
@@ -109,11 +109,11 @@ task runNaicsExcelImporter(type: JavaExec) {
 
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'com.oconeco.spring_pgvector.SpringPgvectorApplication'
-    
+
     // Set the profile and file path
     def resourcesDir = "${projectDir}/src/main/resources"
     def excelFile = new File(resourcesDir, '2022-NAICS-Codes-listed-numerically-2-Digit-through-6-Digit.xlsx')
-    
+
     args = ['--spring.profiles.active=naics-excel-import', "--file=${excelFile.absolutePath}"]
 }
 
