@@ -54,6 +54,10 @@ dependencies {
 
     // Apache Commons CSV for parsing CSV files
     implementation 'org.apache.commons:commons-csv:1.13.0'
+    
+    // Apache POI for Excel file processing
+    implementation 'org.apache.poi:poi:5.2.5'
+    implementation 'org.apache.poi:poi-ooxml:5.2.5'
 
     // https://mvnrepository.com/artifact/org.apache.solr/solr-solrj
     implementation 'org.apache.solr:solr-solrj:9.8.1'
@@ -96,6 +100,21 @@ dependencyManagement {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// Task to run the NAICS Excel importer
+task runNaicsExcelImporter(type: JavaExec) {
+    description = 'Run the NAICS Excel importer'
+    group = 'application'
+
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.oconeco.spring_pgvector.SpringPgvectorApplication'
+    
+    // Set the profile and file path
+    def resourcesDir = "${projectDir}/src/main/resources"
+    def excelFile = new File(resourcesDir, '2022-NAICS-Codes-listed-numerically-2-Digit-through-6-Digit.xlsx')
+    
+    args = ['--spring.profiles.active=naics-excel-import', "--file=${excelFile.absolutePath}"]
 }
 
 /*
@@ -159,4 +178,5 @@ task runSearch(type: JavaExec) {
 
     // Default arguments, can be overridden from command line with -Pargs="..."
     args = ['--spring.profiles.active=csv-import', '--search=' + (project.findProperty('query') ?: 'software development')]
-}*/
+}
+*/
