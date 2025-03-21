@@ -8,10 +8,13 @@ A semantic search application built with Spring Boot, Spring AI, and pgvector to
 2. Navigate to the project directory: `cd spring-pgvector`
 3. Run `./gradlew bootRun` to start the application
 
-Docker Compose will start PostgreSQL, Ollama, Solr, and Zookeeper for you.
-A solr-init.sh script will load sample data into the Solr collection (sanity-check) for demo/debug of solr config _(not directly related to this project)_.
-Ollama will start on port 11434 for embedding model hosting (most likely without GPU acceleration). Comment out the `ollama` service in `docker-compose.yaml` if you want to use local embeddings.
-Spring AI and pgvector (via starters in build.gradle) will configure a single shared table for semantic search. See application.yaml for model configuration.
+Docker Compose will start PostgreSQL, Ollama, Solr, and Zookeeper for you.  
+A solr-init.sh script will load sample data into the Solr collection (sanity-check) for demo/debug of solr config _(not directly related to this project)_.  
+Ollama will start on port 11434 for embedding model hosting (most likely without GPU acceleration). Comment out the `ollama` service in `docker-compose.yaml` if you want to use local embeddings.  Similarly, and of the 4 sould be fine running 'natively' rather than in docker.
+Spring AI and pgvector (via starters in build.gradle) will configure a single shared table for semantic search. See application.yaml for model configuration.   
+Future  efforts will likely add JPA based custom vector fields.  
+AFAIU: the vectors are converted to a csv string and sent to postgres. Postgres then (re)splits that string in to individual vectors. This might be a touch inefficent, but it seems like it is common practice (??), and I will wait until someone suggests a better way. 
+
 
 Then navigate to http://localhost:8080/embedding/create in your browser to access the demo content upload form. The backend embedding controller and service will split the text content into paragraphs and sentences for embedding generation and storage. 
 
