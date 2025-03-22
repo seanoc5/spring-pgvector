@@ -1,17 +1,27 @@
 package com.oconeco.spring_pgvector.service
 
-
 import com.oconeco.spring_pgvector.domain.NaicsCode
 import com.oconeco.spring_pgvector.repository.NaicsCodeRepository
 import groovy.util.logging.Slf4j
 import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.apache.poi.ss.usermodel.Cell
+import org.apache.poi.ss.usermodel.CellType
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
+
+import java.nio.charset.StandardCharsets
+import java.util.regex.Pattern
 
 /**
  * Service for managing US Census NAICS codes.
@@ -124,20 +134,58 @@ class NaicsCodeService {
             throw new IllegalArgumentException("Search query cannot be empty")
         }
 
-        // Convert the query to a tsquery expression
-        String tsQuery = query.trim()
-                .replaceAll(/\s+/, " ")  // Normalize whitespace
-                .split(" ")
-                .collect { word -> word + ":*" }  // Add prefix matching
-                .join(" & ")             // AND operator between words
-
-        log.info("tsQuery: ${tsQuery}")
+        // Normalize the query
+        String normalizedQuery = query.trim().replaceAll(/\s+/, " ")
+        
+        // Try different query formats for PostgreSQL full-text search
+        
+        // First attempt: Use the query directly with plainto_tsquery (handles natural language)
+        String plainTsQuery = normalizedQuery
+        
+        log.info("Search query: '${normalizedQuery}', using plain query first")
 
         // Get the total count
-        long totalCount = naicsCodeRepository.countByFullTextSearch(tsQuery)
+        long totalCount = naicsCodeRepository.countByFullTextSearch(plainTsQuery)
+        
+        // If no results, try with formatted tsquery
+        if (totalCount == 0) {
+            // Create different query formats for to_tsquery:
+            // 1. OR-based query for multiple terms: word1:* | word2:* | ...
+            // 2. Single term with prefix matching: word:*
+            String[] terms = normalizedQuery.split(" ")
+            
+            String formattedTsQuery
+            if (terms.length > 1) {
+                formattedTsQuery = terms.collect { word -> word + ":*" }.join(" | ")
+                log.info("No results with plain query, trying OR-based query: '${formattedTsQuery}'")
+            } else {
+                formattedTsQuery = normalizedQuery + ":*"
+                log.info("No results with plain query, trying prefix matching: '${formattedTsQuery}'")
+            }
+            
+            totalCount = naicsCodeRepository.countByFullTextSearch(formattedTsQuery)
+            
+            // If still no results, try with stemming by removing the :* suffix
+            if (totalCount == 0 && terms.length > 1) {
+                formattedTsQuery = terms.join(" | ")
+                log.info("No results with prefix matching, trying with stemming: '${formattedTsQuery}'")
+                totalCount = naicsCodeRepository.countByFullTextSearch(formattedTsQuery)
+            }
+            
+            // If we found results with a formatted query, use that
+            if (totalCount > 0) {
+                plainTsQuery = formattedTsQuery
+            }
+        }
+        
+        // If still no results, try simple LIKE search as fallback
+        if (totalCount == 0) {
+            log.info("No results with full-text search, falling back to LIKE search")
+            return searchByLike(normalizedQuery, pageable)
+        }
 
         // Get the paginated results
-        Page<Object[]> searchResults = naicsCodeRepository.searchByFullText(tsQuery, pageable)
+        Page<Object[]> searchResults = naicsCodeRepository.searchByFullText(plainTsQuery, pageable)
 
         // Transform the results into a list of maps
         List<Map<String, Object>> transformedResults = searchResults.getContent().collect { Object[] row ->
@@ -164,6 +212,37 @@ class NaicsCodeService {
         }
 
         return new PageImpl<>(transformedResults, pageable, totalCount)
+    }
+    
+    /**
+     * Fallback search using LIKE operator when full-text search returns no results.
+     */
+    private Page<Map<String, Object>> searchByLike(String query, Pageable pageable) {
+        // Search in title and description using LIKE
+        Page<NaicsCode> results = naicsCodeRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(query, query, pageable)
+        
+        // Transform to the same format as full-text search results
+        List<Map<String, Object>> transformedResults = results.content.collect { NaicsCode naicsCode ->
+            // Highlight the matching parts (simple implementation)
+            String highlightedTitle = naicsCode.title?.replaceAll(
+                /(?i)(${Pattern.quote(query)})/, 
+                '<b>$1</b>'
+            )
+            
+            String highlightedDescription = naicsCode.description?.replaceAll(
+                /(?i)(${Pattern.quote(query)})/, 
+                '<b>$1</b>'
+            )
+            
+            return [
+                naicsCode: naicsCode,
+                rank: 0.5f, // Default rank for LIKE results
+                highlightedTitle: highlightedTitle ?: naicsCode.title,
+                highlightedDescription: highlightedDescription ?: naicsCode.description
+            ]
+        }
+        
+        return new PageImpl<>(transformedResults, pageable, results.totalElements)
     }
 
     /**
@@ -226,8 +305,25 @@ class NaicsCodeService {
     }
 
     /**
+     * Import NAICS codes from a CSV file with option to clear existing records.
+     * @param csvFile The CSV file to import
+     * @param clearExisting Whether to clear existing NAICS codes before import
+     * @return The number of NAICS codes imported
+     */
+    @Transactional
+    int importFromCsv(File csvFile, boolean clearExisting) {
+        log.info "Importing NAICS codes from CSV file: ${csvFile.absolutePath} (clearExisting: ${clearExisting})"
+
+        if (clearExisting) {
+            clearAllNaicsCodes()
+        }
+
+        return importFromCsv(csvFile)
+    }
+
+    /**
      * Import NAICS codes from an Excel file.
-     * 
+     *
      * @param excelFile The Excel file to import
      * @return The number of NAICS codes imported
      */
@@ -246,45 +342,46 @@ class NaicsCodeService {
         // Get the header row to map column names to indices
         def headerRow = sheet.getRow(0)
         def columnMap = [:]
-        
+
         for (int i = 0; i < headerRow.getLastCellNum(); i++) {
             def cell = headerRow.getCell(i)
             if (cell) {
                 columnMap[cell.getStringCellValue().trim()] = i
             }
         }
-        
+
         // Verify required columns exist
         def requiredColumns = ['Seq. No.', '2022 NAICS US   Code', '2022 NAICS US Title', 'Description']
         def missingColumns = requiredColumns.findAll { !columnMap.containsKey(it) }
-        
+
         if (missingColumns) {
             throw new IllegalArgumentException("Missing required columns in Excel file: ${missingColumns.join(', ')}")
         }
-        
+
         int count = 0
-        
+
         // Process each row starting from row 1 (skipping header)
         for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
             def row = sheet.getRow(rowNum)
             if (row == null) continue
-            
+
             try {
                 // Extract cell values
                 def codeCell = row.getCell(columnMap['2022 NAICS US   Code'])
                 if (codeCell == null) continue
-                
+
                 // Convert cell to string based on cell type
                 def code = getCellValueAsString(codeCell)
                 if (!code) continue
-                
-                def title = getCellValueAsString(row.getCell(columnMap['2022 NAICS US Title']))
-                def description = getCellValueAsString(row.getCell(columnMap['Description']))
-                
+
+                def title = cleanTextValue(row.getCell(columnMap['2022 NAICS US Title']).getStringCellValue())
+                def description = cleanTextValue(row.getCell(columnMap['Description']).getStringCellValue())
+
                 // Determine NAICS level based on code length
                 int level = determineNaicsLevel(code)
-                
+
                 // Create and save the NAICS code entity
+                // todo -- fix hard-coded year `2022` below (not important, but good housekeeping)
                 def naicsCode = new NaicsCode(
                     code: code,
                     title: title,
@@ -293,35 +390,76 @@ class NaicsCodeService {
                     yearIntroduced: 2022, // Based on the column header "2022 NAICS US Code"
                     isActive: true
                 )
-                
+
                 // Set hierarchical relationships based on code length
                 setHierarchicalRelationships(naicsCode)
-                
+
                 // Save to database
                 naicsCodeRepository.save(naicsCode)
                 count++
-                
+
                 if (count % 100 == 0) {
-                    log.info "Processed ${count} NAICS codes"
+                    log.info "Processed ${count} NAICS codes -- current:(${naicsCode.code})"
                 }
             } catch (Exception e) {
                 log.error "Error processing NAICS code at row ${rowNum + 1}: ${e.message}", e
             }
         }
-        
+
         // Close the workbook to release resources
         workbook.close()
-        
+
         log.info "Imported ${count} NAICS codes from Excel file"
         return count
     }
-    
+
+    private String cleanTextValue(String value) {
+        if(value.trim()) {
+            if (value.endsWith('T')) {
+                log.debug("Removing trailing 'T' from value: ${value}")
+                return value.substring(0, value.length() - 1)
+            } else {
+                log.debug("No trailing 'T' found in value: ${value}")
+            }
+        } else {
+            log.debug("Value is null or empty: ${value}")
+        }
+        return value
+    }
+
+    /**
+     * Import NAICS codes from an Excel file with option to clear existing records.
+     * @param excelFile The Excel file to import
+     * @param clearExisting Whether to clear existing NAICS codes before import
+     * @return The number of NAICS codes imported
+     */
+    @Transactional
+    int importFromExcel(File excelFile, boolean clearExisting) {
+        log.info "Importing NAICS codes from Excel file: ${excelFile.absolutePath} (clearExisting: ${clearExisting})"
+
+        if (clearExisting) {
+            clearAllNaicsCodes()
+        }
+
+        return importFromExcel(excelFile)
+    }
+
+    /**
+     * Clear all NAICS codes from the database.
+     */
+    @Transactional
+    void clearAllNaicsCodes() {
+        log.warn "Clearing all NAICS codes from the database"
+        naicsCodeRepository.deleteAll()
+        log.info "All NAICS codes have been deleted"
+    }
+
     /**
      * Get cell value as string regardless of cell type
      */
     private String getCellValueAsString(org.apache.poi.ss.usermodel.Cell cell) {
         if (cell == null) return ""
-        
+
         switch (cell.getCellType()) {
             case org.apache.poi.ss.usermodel.CellType.STRING:
                 return cell.getStringCellValue()?.trim()
@@ -349,15 +487,15 @@ class NaicsCodeService {
                 return ""
         }
     }
-    
+
     /**
      * Determine NAICS level based on code length
      */
     private int determineNaicsLevel(String code) {
         if (!code) return 0
-        
+
         code = code.replaceAll("\\D", "") // Remove non-digits
-        
+
         switch (code.length()) {
             case 2: return 1 // Sector level (2 digits)
             case 3: return 2 // Subsector level (3 digits)
@@ -367,68 +505,68 @@ class NaicsCodeService {
             default: return 0
         }
     }
-    
+
     /**
      * Set hierarchical relationships for a NAICS code based on its code
      */
     private void setHierarchicalRelationships(NaicsCode naicsCode) {
         if (!naicsCode.code) return
-        
+
         String code = naicsCode.code.replaceAll("\\D", "") // Remove non-digits
-        
+
         // Set sector (2-digit) information
         if (code.length() >= 2) {
             String sectorCode = code.substring(0, 2)
             naicsCode.sectorCode = sectorCode
-            
+
             // Try to get the sector title from the database
             def sector = naicsCodeRepository.findById(sectorCode).orElse(null)
             if (sector) {
                 naicsCode.sectorTitle = sector.title
             }
         }
-        
+
         // Set subsector (3-digit) information
         if (code.length() >= 3) {
             String subsectorCode = code.substring(0, 3)
             naicsCode.subsectorCode = subsectorCode
-            
+
             // Try to get the subsector title from the database
             def subsector = naicsCodeRepository.findById(subsectorCode).orElse(null)
             if (subsector) {
                 naicsCode.subsectorTitle = subsector.title
             }
         }
-        
+
         // Set industry group (4-digit) information
         if (code.length() >= 4) {
             String industryGroupCode = code.substring(0, 4)
             naicsCode.industryGroupCode = industryGroupCode
-            
+
             // Try to get the industry group title from the database
             def industryGroup = naicsCodeRepository.findById(industryGroupCode).orElse(null)
             if (industryGroup) {
                 naicsCode.industryGroupTitle = industryGroup.title
             }
         }
-        
+
         // Set NAICS industry (5-digit) information
         if (code.length() >= 5) {
             String naicsIndustryCode = code.substring(0, 5)
             naicsCode.naicsIndustryCode = naicsIndustryCode
-            
+
             // Try to get the NAICS industry title from the database
             def naicsIndustry = naicsCodeRepository.findById(naicsIndustryCode).orElse(null)
             if (naicsIndustry) {
                 naicsCode.naicsIndustryTitle = naicsIndustry.title
             }
         }
-        
+
         // Set national industry (6-digit) information
         if (code.length() >= 6) {
             String nationalIndustryCode = code.substring(0, 6)
             naicsCode.nationalIndustryCode = nationalIndustryCode
-            
+
             // If this is a 6-digit code, it is itself a national industry
             if (code.length() == 6 && naicsCode.code == nationalIndustryCode) {
                 naicsCode.nationalIndustryTitle = naicsCode.title

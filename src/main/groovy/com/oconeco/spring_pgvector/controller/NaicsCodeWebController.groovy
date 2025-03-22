@@ -10,6 +10,8 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 
 /**
  * Web controller for NAICS codes.
@@ -128,13 +130,10 @@ class NaicsCodeWebController {
                 }
 
                 // Create a new page with filtered results
-                results = new org.springframework.data.domain.PageImpl<>(
-                    filteredResults,
-                    pageRequest,
-                    filteredResults.size()
-                )
+                results = new org.springframework.data.domain.PageImpl<>(filteredResults, pageRequest, filteredResults.size())
 
                 model.addAttribute("activeLevel", level)
+
             } else {
                 results = naicsCodeService.searchNaicsCodes(query, pageRequest)
                 model.addAttribute("activeLevel", null)
@@ -239,5 +238,85 @@ class NaicsCodeWebController {
         model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc")
 
         return "naics-codes/fragments/naics-table :: table"
+    }
+
+    /**
+     * Display the file upload page for importing NAICS codes.
+     */
+    @GetMapping("/upload")
+    String showUploadForm(Model model) {
+        return "naics-codes/upload"
+    }
+
+    /**
+     * Handle file upload for importing NAICS codes.
+     */
+    @PostMapping("/upload")
+    String handleFileUpload(
+            @RequestParam(name="file") MultipartFile file,
+            @RequestParam(name = "clearExisting", required = false, defaultValue = "false") boolean clearExisting,
+            // @RequestParam(name = "fileType", required = false) String fileType,
+            RedirectAttributes redirectAttributes) {
+
+        if (file.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Please select a file to upload")
+            return "redirect:/naics-codes/upload"
+        }
+
+        try {
+            // Create a temporary file to store the uploaded content
+            String originalFilename = file.getOriginalFilename()
+            File tempFile = File.createTempFile("naics-import-", getFileExtension(originalFilename))
+            tempFile.deleteOnExit()
+            file.transferTo(tempFile)
+
+            int importedCount = 0
+
+            // Check file type and process accordingly
+            if (isExcelFile(originalFilename)) {
+                importedCount = naicsCodeService.importFromExcel(tempFile, clearExisting)
+            } else if (isCsvFile(originalFilename)) {
+                importedCount = naicsCodeService.importFromCsv(tempFile, clearExisting)
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Unsupported file format. Please upload an Excel (.xlsx) or CSV file.")
+                return "redirect:/naics-codes/upload"
+            }
+
+            redirectAttributes.addFlashAttribute("success",
+                "Successfully imported ${importedCount} NAICS codes" +
+                (clearExisting ? " after clearing existing records." : "."))
+
+            return "redirect:/naics-codes"
+
+        } catch (Exception e) {
+            log.error "Error importing NAICS codes: ${e.message}", e
+            redirectAttributes.addFlashAttribute("error", "Failed to import NAICS codes: ${e.message}")
+            return "redirect:/naics-codes/upload"
+        }
+    }
+
+    /**
+     * Check if the file is an Excel file based on its extension.
+     */
+    private boolean isExcelFile(String filename) {
+        if (!filename) return false
+        return filename.toLowerCase().endsWith(".xlsx") || filename.toLowerCase().endsWith(".xls")
+    }
+
+    /**
+     * Check if the file is a CSV file based on its extension.
+     */
+    private boolean isCsvFile(String filename) {
+        if (!filename) return false
+        return filename.toLowerCase().endsWith(".csv")
+    }
+
+    /**
+     * Get the file extension including the dot.
+     */
+    private String getFileExtension(String filename) {
+        if (!filename) return ""
+        int lastDotIndex = filename.lastIndexOf(".")
+        return lastDotIndex > 0 ? filename.substring(lastDotIndex) : ""
     }
 }

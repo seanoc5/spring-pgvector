@@ -25,6 +25,13 @@ interface NaicsCodeRepository extends JpaRepository<NaicsCode, String> {
     Page<NaicsCode> findByDescriptionContainingIgnoreCase(String description, Pageable pageable)
 
     /**
+     * Find NAICS codes by title or description containing the search term (case insensitive).
+     * This is used as a fallback when full-text search returns no results.
+     */
+    Page<NaicsCode> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+        String title, String description, Pageable pageable)
+
+    /**
      * Find NAICS codes by sector code.
      */
     Page<NaicsCode> findBySectorCode(String sectorCode, Pageable pageable)
@@ -59,7 +66,8 @@ interface NaicsCodeRepository extends JpaRepository<NaicsCode, String> {
                ts_headline('english', n.title, to_tsquery('english', :tsQuery), 'StartSel=<b>, StopSel=</b>, MaxWords=50, MinWords=10, MaxFragments=3') AS highlighted_title,
                ts_headline('english', n.description, to_tsquery('english', :tsQuery), 'StartSel=<b>, StopSel=</b>, MaxWords=100, MinWords=20, MaxFragments=3') AS highlighted_description
         FROM naics_codes n
-        WHERE n.search_vector @@ to_tsquery('english', :tsQuery)
+        WHERE n.search_vector @@ plainto_tsquery('english', :tsQuery)
+           OR n.search_vector @@ to_tsquery('english', :tsQuery)
         ORDER BY rank DESC
     """, nativeQuery = true)
     Page<Object[]> searchByFullText(@Param("tsQuery") String tsQuery, Pageable pageable)
@@ -67,7 +75,11 @@ interface NaicsCodeRepository extends JpaRepository<NaicsCode, String> {
     /**
      * Count the total number of NAICS codes matching a search query.
      */
-    @Query(value = "SELECT COUNT(*) FROM naics_codes WHERE search_vector @@ to_tsquery('english', :tsQuery)",
-           nativeQuery = true)
+    @Query(value = """
+        SELECT COUNT(*) 
+        FROM naics_codes n
+        WHERE n.search_vector @@ plainto_tsquery('english', :tsQuery)
+           OR n.search_vector @@ to_tsquery('english', :tsQuery)
+    """, nativeQuery = true)
     long countByFullTextSearch(@Param("tsQuery") String tsQuery)
 }

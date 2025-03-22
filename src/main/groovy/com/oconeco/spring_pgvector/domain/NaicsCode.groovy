@@ -65,6 +65,13 @@ class NaicsCode {
     @Column(name = "is_active")
     Boolean isActive = true
 
+    /**
+     * PostgreSQL tsvector for full-text search.
+     * This field is managed by a database trigger and should not be modified directly.
+     */
+    @Column(name = "search_vector", columnDefinition = "tsvector", insertable = false, updatable = false)
+    private String searchVector
+
     @CreationTimestamp
     @Column(name = "created_at")
     Date createdAt

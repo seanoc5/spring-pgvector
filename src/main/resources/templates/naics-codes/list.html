@@ -1,12 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard :: layout(~{::title}, ~{::section})}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NAICS Codes</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <style>
         .level-badge {
             cursor: pointer;
@@ -40,11 +38,16 @@
     </style>
 </head>
 <body>
-    <div class="container mt-4">
+    <section>
         <div class="row mb-4">
             <div class="col">
                 <h1>NAICS Codes</h1>
                 <p class="text-muted">North American Industry Classification System</p>
+            </div>
+            <div class="col-auto">
+                <a th:href="@{/naics-codes/upload}" class="btn btn-primary">
+                    <i class="bi bi-upload me-1"></i> Upload NAICS Codes
+                </a>
             </div>
         </div>
 
@@ -119,30 +122,30 @@
             </div>
         </div>
 
-        <div id="naics-table-container" th:include="naics-codes/fragments/naics-table :: table"></div>
-    </div>
+        <div id="naics-table-container" th:insert="~{naics-codes/fragments/naics-table :: table}"></div>
 
-    <script>
-        // Highlight the active level filter
-        document.addEventListener('DOMContentLoaded', function() {
-            const levelBadges = document.querySelectorAll('.level-badge');
+        <script>
+            // Highlight the active level filter
+            document.addEventListener('DOMContentLoaded', function() {
+                const levelBadges = document.querySelectorAll('.level-badge');
 
-            levelBadges.forEach(badge => {
-                badge.addEventListener('click', function() {
-                    levelBadges.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
+                levelBadges.forEach(badge => {
+                    badge.addEventListener('click', function() {
+                        levelBadges.forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                    });
                 });
             });
-        });
 
-        // HTMX event listeners
-        document.body.addEventListener('htmx:afterSwap', function(event) {
-            // Re-initialize any Bootstrap components if needed
-            const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-            tooltips.forEach(tooltip => {
-                new bootstrap.Tooltip(tooltip);
+            // HTMX event listeners
+            document.body.addEventListener('htmx:afterSwap', function(event) {
+                // Re-initialize any Bootstrap components if needed
+                const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                tooltips.forEach(tooltip => {
+                    new bootstrap.Tooltip(tooltip);
+                });
             });
-        });
-    </script>
+        </script>
+    </section>
 </body>
 </html>

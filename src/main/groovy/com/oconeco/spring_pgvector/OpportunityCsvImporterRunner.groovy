@@ -8,6 +8,7 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
+
 /**
  * Command-line runner for importing SAM.gov contract opportunities from a CSV file.
  * This runner is only activated when the 'csv-import' profile is active.

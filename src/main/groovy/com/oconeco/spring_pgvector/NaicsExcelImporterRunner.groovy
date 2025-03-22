@@ -34,7 +34,7 @@ class NaicsExcelImporterRunner implements ApplicationRunner {
                 int count = naicsCodeService.importFromExcel(excelFile)
                 log.info "Import completed successfully. Imported ${count} NAICS codes."
             } else {
-                log.error "Excel file not found: ${excelFilePath}"
+                log.error "Excel file not found: ${excelFilePath}, failing..."
             }
         } else {
             log.info "No Excel file specified. Use --file=<path> to specify an Excel file to import."
