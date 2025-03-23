@@ -1,6 +1,7 @@
 package com.oconeco.spring_pgvector.domain
 
 import jakarta.persistence.*
+import jakarta.persistence.Converter
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import groovy.transform.ToString
@@ -72,6 +73,14 @@ class NaicsCode {
     @Column(name = "search_vector", columnDefinition = "tsvector", insertable = false, updatable = false)
     private String searchVector
 
+    /**
+     * Vector embedding for semantic search using pgvector.
+     * This field stores the embedding vector generated from the title and description.
+     */
+     @Column(name = "embedding_vector", columnDefinition = "vector(768)", nullable = true)
+     @Convert(converter = com.oconeco.spring_pgvector.hibernate.PgVectorConverter.class)
+     private float[] embeddingVector
+
     @CreationTimestamp
     @Column(name = "created_at")
     Date createdAt
@@ -79,4 +88,9 @@ class NaicsCode {
     @UpdateTimestamp
     @Column(name = "updated_at")
     Date updatedAt
+
+    @Override
+    String toString() {
+        return "$code) $title"
+    }
 }

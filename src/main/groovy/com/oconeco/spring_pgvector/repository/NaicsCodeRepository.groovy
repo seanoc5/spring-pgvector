@@ -4,6 +4,7 @@ import com.oconeco.spring_pgvector.domain.NaicsCode
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
@@ -82,4 +83,41 @@ interface NaicsCodeRepository extends JpaRepository<NaicsCode, String> {
            OR n.search_vector @@ to_tsquery('english', :tsQuery)
     """, nativeQuery = true)
     long countByFullTextSearch(@Param("tsQuery") String tsQuery)
+    
+    /**
+     * Find NAICS codes by vector similarity using pgvector's cosine distance.
+     * This query uses the embedding_vector column to find semantically similar entries.
+     */
+    @Query(value = """
+        SELECT n.*, 
+               1 - (n.embedding_vector <=> :embeddingVector) AS similarity
+        FROM naics_codes n
+        WHERE n.embedding_vector IS NOT NULL
+        ORDER BY n.embedding_vector <=> :embeddingVector
+        LIMIT :limit
+    """, nativeQuery = true)
+    List<Object[]> findSimilarByEmbedding(@Param("embeddingVector") float[] embeddingVector, @Param("limit") int limit)
+    
+    /**
+     * Find NAICS codes by vector similarity with pagination.
+     */
+    @Query(value = """
+        SELECT n.*, 
+               1 - (n.embedding_vector <=> :embeddingVector) AS similarity
+        FROM naics_codes n
+        WHERE n.embedding_vector IS NOT NULL
+        ORDER BY n.embedding_vector <=> :embeddingVector
+    """, countQuery = """
+        SELECT COUNT(*) 
+        FROM naics_codes n
+        WHERE n.embedding_vector IS NOT NULL
+    """, nativeQuery = true)
+    Page<Object[]> findSimilarByEmbeddingPaged(@Param("embeddingVector") float[] embeddingVector, Pageable pageable)
+
+    /**
+     * Delete all NAICS codes using a native query for better performance.
+     */
+    @Query(value = "TRUNCATE TABLE naics_codes", nativeQuery = true)
+    @Modifying
+    void truncateAllNaicsCodes()
 }

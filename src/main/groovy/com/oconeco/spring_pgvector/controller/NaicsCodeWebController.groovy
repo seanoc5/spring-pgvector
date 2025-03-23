@@ -173,6 +173,8 @@ class NaicsCodeWebController {
 
         // Apply both filters if both are present
         if (query && !query.trim().isEmpty() && level != null) {
+            log.info("Level filtered Query ($query) and Level ($level) filters applied")
+
             try {
                 Page<Map<String, Object>> searchResults = naicsCodeService.searchNaicsCodes(query, pageRequest)
 
@@ -201,10 +203,11 @@ class NaicsCodeWebController {
                 naicsCodes = level != null ? naicsCodeService.findByLevel(level, pageRequest) : naicsCodeService.getAllNaicsCodes(pageRequest)
             }
         } else if (level != null) {
-            // Only level filter
+            log.info("Only level filter: ($level) applied")
             naicsCodes = naicsCodeService.findByLevel(level, pageRequest)
+
         } else if (query && !query.trim().isEmpty()) {
-            // Only search query
+            log.info "Only search query: ($query)..."
             try {
                 Page<Map<String, Object>> searchResults = naicsCodeService.searchNaicsCodes(query, pageRequest)
 
@@ -318,5 +321,132 @@ class NaicsCodeWebController {
         if (!filename) return ""
         int lastDotIndex = filename.lastIndexOf(".")
         return lastDotIndex > 0 ? filename.substring(lastDotIndex) : ""
+    }
+
+    /**
+     * Display the form for creating a new NAICS code.
+     */
+    @GetMapping("/create")
+    String showCreateForm(Model model) {
+        model.addAttribute("naicsCode", new NaicsCode())
+        model.addAttribute("isNew", true)
+        return "naics-codes/form"
+    }
+
+    /**
+     * Handle the submission of a new NAICS code.
+     */
+    @PostMapping("/create")
+    String createNaicsCode(
+            @ModelAttribute NaicsCode naicsCode,
+            RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Creating new NAICS code: ${naicsCode.code} - ${naicsCode.title}")
+            NaicsCode createdNaicsCode = naicsCodeService.createNaicsCode(naicsCode)
+            redirectAttributes.addFlashAttribute("success", "NAICS code created successfully")
+            return "redirect:/naics-codes/${createdNaicsCode.code}"
+        } catch (IllegalArgumentException e) {
+            log.error("Error creating NAICS code: ${e.message}", e)
+            redirectAttributes.addFlashAttribute("error", e.message)
+            return "redirect:/naics-codes/create"
+        } catch (Exception e) {
+            log.error("Error creating NAICS code: ${e.message}", e)
+            redirectAttributes.addFlashAttribute("error", "An error occurred while creating the NAICS code: ${e.message}")
+            return "redirect:/naics-codes/create"
+        }
+    }
+
+    /**
+     * Display the form for editing an existing NAICS code.
+     */
+    @GetMapping("/{code}/edit")
+    String showEditForm(@PathVariable(name="code") String code, Model model, RedirectAttributes redirectAttributes) {
+        NaicsCode naicsCode = naicsCodeService.getNaicsCodeByCode(code)
+
+        if (naicsCode) {
+            model.addAttribute("naicsCode", naicsCode)
+            model.addAttribute("isNew", false)
+            return "naics-codes/form"
+        } else {
+            redirectAttributes.addFlashAttribute("error", "NAICS code not found")
+            return "redirect:/naics-codes"
+        }
+    }
+
+    /**
+     * Handle the submission of an edited NAICS code.
+     */
+    @PostMapping("/{code}/edit")
+    String updateNaicsCode(
+            @PathVariable(name="code") String code,
+            @ModelAttribute NaicsCode naicsCode,
+            RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Updating NAICS code: ${code}")
+            NaicsCode updatedNaicsCode = naicsCodeService.updateNaicsCode(code, naicsCode)
+            redirectAttributes.addFlashAttribute("success", "NAICS code updated successfully")
+            return "redirect:/naics-codes/${updatedNaicsCode.code}"
+        } catch (IllegalArgumentException e) {
+            log.error("Error updating NAICS code: ${e.message}", e)
+            redirectAttributes.addFlashAttribute("error", e.message)
+            return "redirect:/naics-codes/${code}/edit"
+        } catch (Exception e) {
+            log.error("Error updating NAICS code: ${e.message}", e)
+            redirectAttributes.addFlashAttribute("error", "An error occurred while updating the NAICS code: ${e.message}")
+            return "redirect:/naics-codes/${code}/edit"
+        }
+    }
+
+    /**
+     * Handle HTMX delete request for a NAICS code.
+     */
+    @DeleteMapping("/{code}")
+    @ResponseBody
+    String deleteNaicsCode(
+            @PathVariable(name="code") String code,
+            @RequestParam(name="_method", required=false) String method) {
+        try {
+            log.info("Deleting NAICS code: ${code}")
+            naicsCodeService.deleteNaicsCode(code)
+            return """
+                <div id="delete-response" hx-swap-oob="true">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        NAICS code ${code} deleted successfully
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+                <script>
+                    window.location.href = '/naics-codes';
+                </script>
+            """
+        } catch (Exception e) {
+            log.error("Error deleting NAICS code: ${e.message}", e)
+            return """
+                <div id="delete-response" hx-swap-oob="true">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        Error deleting NAICS code: ${e.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            """
+        }
+    }
+
+    /**
+     * Handle POST method for deleting a NAICS code (fallback for non-HTMX clients).
+     */
+    @PostMapping("/{code}/delete")
+    String deleteNaicsCodePost(
+            @PathVariable(name="code") String code,
+            RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Deleting NAICS code via POST: ${code}")
+            naicsCodeService.deleteNaicsCode(code)
+            redirectAttributes.addFlashAttribute("success", "NAICS code deleted successfully")
+        } catch (Exception e) {
+            log.error("Error deleting NAICS code: ${e.message}", e)
+            redirectAttributes.addFlashAttribute("error", "Error deleting NAICS code: ${e.message}")
+        }
+        return "redirect:/naics-codes"
     }
 }

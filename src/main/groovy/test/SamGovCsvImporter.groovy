@@ -28,7 +28,7 @@ class SamGovCsvImporter {
     static final String DB_URL = "jdbc:postgresql://localhost:5436/spring-pgvector"
     static final String DB_USER = "postgres"
     static final String DB_PASSWORD = "pass1234"
-    public static final String VECTOR_DIMENSION = 1536          // todo -- match this to the actual embedding model!!1!
+    public static final String VECTOR_DIMENSION = 768          // todo -- match this to the actual embedding model!!1!
 
     // CSV file path
     static final String CSV_FILE_PATH = "/home/sean/Downloads/ContractOpportunities-20250316-065253.csv"
@@ -102,7 +102,7 @@ class SamGovCsvImporter {
                     set_aside TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    vector_embedding VECTOR(1536),
+                    vector_embedding VECTOR(768),
                     search_vector TSVECTOR
                 )
             """

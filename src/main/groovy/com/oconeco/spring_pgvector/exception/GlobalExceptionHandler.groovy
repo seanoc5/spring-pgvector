@@ -64,7 +64,11 @@ class GlobalExceptionHandler {
         modelAndView.addObject("error", "Internal Server Error")
         modelAndView.addObject("message", ex.getMessage())
         modelAndView.addObject("path", request.getRequestURI())
-        modelAndView.addObject("trace", ex.getStackTrace())
+        
+        // Filter stack trace to only show application code
+        def filteredTrace = filterStackTrace(ex.getStackTrace())
+        modelAndView.addObject("trace", filteredTrace)
+        modelAndView.addObject("fullTrace", ex.getStackTrace()) // Keep full trace available if needed
 
         return modelAndView
     }
@@ -139,5 +143,18 @@ class GlobalExceptionHandler {
         modelAndView.addObject("path", request.getRequestURI())
 
         return modelAndView
+    }
+
+    /**
+     * Filter a stack trace to only show elements from application code.
+     * @param stackTrace The full stack trace
+     * @return A filtered stack trace containing only application code elements
+     */
+    private StackTraceElement[] filterStackTrace(StackTraceElement[] stackTrace) {
+        if (stackTrace == null) return new StackTraceElement[0]
+        
+        return stackTrace.findAll { element ->
+            element.className.startsWith('com.oconeco.')
+        } as StackTraceElement[]
     }
 }

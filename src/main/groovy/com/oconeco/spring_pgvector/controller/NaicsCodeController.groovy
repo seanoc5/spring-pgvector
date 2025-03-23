@@ -60,6 +60,7 @@ class NaicsCodeController {
      */
     @PostMapping
     ResponseEntity<Object> createNaicsCode(@RequestBody NaicsCode naicsCode) {
+        log.info("Create NaicsCode: ${naicsCode}...")
         try {
             NaicsCode createdNaicsCode = naicsCodeService.createNaicsCode(naicsCode)
             return ResponseEntity.status(HttpStatus.CREATED).body(createdNaicsCode)

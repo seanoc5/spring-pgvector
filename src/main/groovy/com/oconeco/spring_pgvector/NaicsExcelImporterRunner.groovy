@@ -40,6 +40,10 @@ class NaicsExcelImporterRunner implements ApplicationRunner {
             log.info "No Excel file specified. Use --file=<path> to specify an Excel file to import."
             printUsage()
         }
+
+        // Exit application
+        int exitCode = 0; // Change if you want a non-zero exit code
+        SpringApplication.exit(ctx, () -> exitCode);
     }
 
     /**
