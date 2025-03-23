@@ -1,7 +1,8 @@
+server:
+  port: 8081
 spring:
   application:
     name: spring-pgvector
-    port: 8081
   jpa:
     open-in-view: true
     show-sql: false
@@ -9,7 +10,7 @@ spring:
       ddl-auto: update
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5436/spring-pgvector
+    url: jdbc:postgresql://dell:5432/spring-pgvector
     username: postgres
     password: pass1234
 
@@ -69,3 +70,18 @@ solr:
   collection: sanity-check
   port: 8983
   # Additional configuration options...
+
+# application.yml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    shutdown:
+      access: unrestricted
+info:
+  app:
+    name: Spring PGVector
+    description: Demo/learning app for pgvector
+    version: 0.2.1

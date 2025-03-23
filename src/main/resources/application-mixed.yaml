@@ -1,8 +1,9 @@
 # mixed networking for splitting services across machines
+server:
+  port: 8081
 spring:
   application:
     name: spring-pgvector
-    port: 8081
   jpa:
     open-in-view: true
     show-sql: false
@@ -10,10 +11,13 @@ spring:
       ddl-auto: update
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://dell:5436/spring-pgvector
-    username: postgres
+    url: jdbc:postgresql://dell:5432/spring-pgvector
+    username: sean
     password: pass1234
-
+  docker:
+    compose:
+      enabled:
+        false   # set to true to use docker compose
   ai:
     ollama:
       init:
