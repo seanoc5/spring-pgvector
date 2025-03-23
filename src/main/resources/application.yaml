@@ -3,7 +3,7 @@ spring:
     name: spring-pgvector
   jpa:
     open-in-view: true
-    show-sql: false
+    show-sql: true
     hibernate:
       ddl-auto: update
   datasource:
@@ -49,6 +49,14 @@ logging:
 #    com.oconeco.spring_pgvector.transformer.ParagraphSentenceSplitter: debug
 #    org.springframework.security: debug
 #    org.springframework.web: debug
+    hibernate:
+      SQL:
+        DEBUG
+      type:
+        descriptor:
+          sql:
+            BasicBinder:
+              TRACE
 
   pattern:
     console: "%d{MM-dd HH:mm:ss} %highlight(%-5level) [%-40logger{40}]  -- %msg%n"

@@ -135,7 +135,7 @@ class NaicsCodeService {
         }
 
         String finalText = textToEmbed.toString().trim()
-        def embeddings = embeddingModel.embed(finalText)
+        float[] embeddings = embeddingModel.embed(finalText)
         naicsCode.embeddingVector = embeddings
         log.debug("Embedding: ${embeddings}")
 

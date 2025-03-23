@@ -1,10 +1,15 @@
 package com.oconeco.spring_pgvector.domain
 
+import com.oconeco.spring_pgvector.hibernate.PgVectorConverter
 import jakarta.persistence.*
-import jakarta.persistence.Converter
+import org.hibernate.annotations.Array
 import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.annotations.UpdateTimestamp
 import groovy.transform.ToString
+import org.hibernate.type.SqlTypes
+
+import java.sql.Types
 
 /**
  * Entity representing a US Census NAICS (North American Industry Classification System) code.
@@ -77,9 +82,11 @@ class NaicsCode {
      * Vector embedding for semantic search using pgvector.
      * This field stores the embedding vector generated from the title and description.
      */
-     @Column(name = "embedding_vector", columnDefinition = "vector(768)", nullable = true)
-     @Convert(converter = com.oconeco.spring_pgvector.hibernate.PgVectorConverter.class)
-     private float[] embeddingVector
+//    @Column(name = "embedding_vector", columnDefinition = "vector(768)")
+//    @Convert(converter = PgVectorConverter.class)
+    @JdbcTypeCode(SqlTypes.VECTOR)
+    @Array(length = 768)
+    private float[] embeddingVector
 
     @CreationTimestamp
     @Column(name = "created_at")
