@@ -22,9 +22,6 @@
             <h3>Admin Panel</h3>
         </div>
         <ul class="list-unstyled components">
-            <li class="active">
-                <a th:href="@{/admin/dashboard}"><i class="fas fa-home"></i> Dashboard</a>
-            </li>
             <li>
                 <a href="#embeddingsSubmenu" data-bs-toggle="collapse" aria-expanded="true" class="dropdown-toggle">
                     <i class="fas fa-vector-square"></i> Embeddings
@@ -49,14 +46,21 @@
                     <li>
                         <a th:href="@{/naics-codes/create}">Create naics</a>
                     </li>
+                    <li title="Upload NAICS Codes (excel or csv)">
+                        <a th:href="@{/naics-codes/upload}">Upload NAICS Codes</a>
+                    </li>
                 </ul>
             </li>
             <li>
-                <a th:href="@{/admin/settings}"><i class="fas fa-cog"></i>Settings (example)</a>
+                <a th:href="@{/admin/settings}"><i class="fas fa-cog"></i>Example Settings</a>
             </li>
+            <li class="active">
+                <a th:href="@{/admin/dashboard}"><i class="fas fa-home"></i>Example Dashboard </a>
+            </li>
+
             <li>
                 <a href="#reportsSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                    <i class="fas fa-chart-bar"></i> Reports (example)
+                    <i class="fas fa-chart-bar"></i> Example Reports
                 </a>
                 <ul class="collapse list-unstyled" id="reportsSubmenu">
                     <li>
@@ -67,9 +71,9 @@
                     </li>
                 </ul>
             </li>
-            <li>
-                <a th:href="@{/admin/users}"><i class="fas fa-users"></i> Users</a>
-            </li>
+<!--            <li>-->
+<!--                <a th:href="@{/admin/users}"><i class="fas fa-users"></i> Users</a>-->
+<!--            </li>-->
         </ul>
     </nav>
 

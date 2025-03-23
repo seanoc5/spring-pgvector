@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS opportunities (
     set_aside TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    vector_embedding VECTOR(1536),
+    vector_embedding VECTOR(768),
     search_vector TSVECTOR
 );
 
@@ -30,7 +30,7 @@ CREATE INDEX IF NOT EXISTS idx_opportunities_active_inactive ON opportunities(ac
 -- Create function to generate search vectors
 CREATE OR REPLACE FUNCTION opportunities_search_vector_update() RETURNS TRIGGER AS $$
 BEGIN
-    NEW.search_vector = 
+    NEW.search_vector =
         setweight(to_tsvector('english', COALESCE(NEW.title, '')), 'A') ||
         setweight(to_tsvector('english', COALESCE(NEW.description, '')), 'B');
     RETURN NEW;
@@ -50,7 +50,7 @@ EXECUTE FUNCTION opportunities_search_vector_update();
 CREATE INDEX IF NOT EXISTS idx_opportunities_search_vector ON opportunities USING GIN(search_vector);
 
 -- Update existing records to populate the search_vector (if any exist)
-UPDATE opportunities SET search_vector = 
+UPDATE opportunities SET search_vector =
     setweight(to_tsvector('english', COALESCE(title, '')), 'A') ||
     setweight(to_tsvector('english', COALESCE(description, '')), 'B')
 WHERE search_vector IS NULL;

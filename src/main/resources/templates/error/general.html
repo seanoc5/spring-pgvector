@@ -33,10 +33,25 @@
                 <div><strong>Timestamp:</strong> <span th:text="${timestamp}"></span></div>
                 <div><strong>Error:</strong> <span th:text="${error}"></span></div>
                 
+                <!-- Application Code Stack Trace -->
                 <div th:if="${trace}" class="mt-4">
-                    <p><strong>Stack Trace:</strong></p>
-                    <pre class="bg-light p-3 stack-trace">
-                        <code th:each="stackTrace : ${trace}" th:text="${stackTrace}"></code>
+                    <div class="d-flex justify-content-between">
+                        <p><strong>Application Stack Trace:</strong></p>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="toggleFullTrace">
+                            <label class="form-check-label" for="toggleFullTrace">Show Full Stack Trace</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Filtered Stack Trace (Application Code Only) -->
+                    <pre id="filteredTrace" class="bg-light p-3 stack-trace">
+                        <code th:if="${trace.length == 0}">No application code in stack trace. Toggle to see full stack trace.</code>
+                        <code th:each="stackTraceElement : ${trace}" th:text="${stackTraceElement}"></code>
+                    </pre>
+                    
+                    <!-- Full Stack Trace (Hidden by Default) -->
+                    <pre id="fullTrace" class="bg-light p-3 stack-trace" style="display: none;">
+                        <code th:each="stackTraceElement : ${fullTrace}" th:text="${stackTraceElement}"></code>
                     </pre>
                 </div>
             </div>
@@ -49,6 +64,22 @@
                 </a>
             </div>
         </div>
+        
+        <!-- JavaScript to toggle between filtered and full stack traces -->
+        <script>
+            document.getElementById('toggleFullTrace').addEventListener('change', function() {
+                const filteredTrace = document.getElementById('filteredTrace');
+                const fullTrace = document.getElementById('fullTrace');
+                
+                if (this.checked) {
+                    filteredTrace.style.display = 'none';
+                    fullTrace.style.display = 'block';
+                } else {
+                    filteredTrace.style.display = 'block';
+                    fullTrace.style.display = 'none';
+                }
+            });
+        </script>
     </section>
 </body>
 </html>
