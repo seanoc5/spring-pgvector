@@ -1,6 +1,5 @@
 package com.oconeco.spring_pgvector.domain
 
-import com.oconeco.spring_pgvector.hibernate.PgVectorConverter
 import jakarta.persistence.*
 import org.hibernate.annotations.Array
 import org.hibernate.annotations.CreationTimestamp
@@ -9,7 +8,6 @@ import org.hibernate.annotations.UpdateTimestamp
 import groovy.transform.ToString
 import org.hibernate.type.SqlTypes
 
-import java.sql.Types
 
 /**
  * Entity representing a US Census NAICS (North American Industry Classification System) code.
