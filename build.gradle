@@ -1,4 +1,4 @@
-echo plugins {
+plugins {
 	id 'groovy'
 	id 'org.springframework.boot' version '3.4.3'
 	id 'io.spring.dependency-management' version '1.1.7'
@@ -112,7 +112,8 @@ task runNaicsExcelImporter(type: JavaExec) {
 
     // Set the profile and file path
     def resourcesDir = "${projectDir}/src/main/resources"
-    def excelFile = new File(resourcesDir, '2022-NAICS-Codes-listed-numerically-2-Digit-through-6-Digit.xlsx')
+//    def excelFile = new File(resourcesDir, '2022-NAICS-Codes-listed-numerically-2-Digit-through-6-Digit.xlsx')
+    def excelFile = new File(resourcesDir, 'NAICS-test.xlsx')
 
     args = ['--spring.profiles.active=naics-excel-import', "--file=${excelFile.absolutePath}"]
 }

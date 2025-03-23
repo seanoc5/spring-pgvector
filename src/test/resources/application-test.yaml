@@ -1,4 +1,5 @@
 spring:
+
   datasource:
     # TestContainers will dynamically set these properties
     # using the @DynamicPropertySource in our test classes
@@ -20,3 +21,4 @@ solr:
   host: http://localhost:8983/solr
   collection: contracting
   port: 8983
+

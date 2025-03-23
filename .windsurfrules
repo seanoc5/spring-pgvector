@@ -1,0 +1,10 @@
+1. Use Groovy for all code
+2. Use Thymeleaf for all templates
+3. Use HTMX for all AJAX requests
+4. Use Bootstrap for all styling
+5. Use jQuery for all JavaScript
+6. Use Spring Boot for all backend code
+7. Use PostgreSQL for all database code
+8. Use pgvector for all vector database code
+9. Use Solr for all search code
+10. remember that the controllers are in groovy, and need explicitly defined parameter names due to reflection differences between groovy and java
