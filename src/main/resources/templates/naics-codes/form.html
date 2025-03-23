@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard :: layout(~{::title}, ~{::section})}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${isNew ? 'Create New NAICS Code' : 'Edit NAICS Code: ' + naicsCode.code}">NAICS Code Form</title>
+    <style>
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+        .form-section {
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-section:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/naics-codes}">NAICS Codes</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${isNew ? 'Create New' : 'Edit ' + naicsCode.code}"></li>
+            </ol>
+        </nav>
+
+        <div class="row mb-4">
+            <div class="col">
+                <h1 th:text="${isNew ? 'Create New NAICS Code' : 'Edit NAICS Code'}"></h1>
+                <p class="text-muted" th:if="${!isNew}" th:text="${naicsCode.title}"></p>
+            </div>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">NAICS Code Details</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="${isNew ? '/naics-codes/create' : '/naics-codes/' + naicsCode.code + '/edit'}"
+                      method="post"
+                      th:object="${naicsCode}">
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h5 class="mb-3">Basic Information</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="code" class="form-label required-field">Code</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="code"
+                                       name="code"
+                                       th:field="*{code}"
+                                       th:readonly="${!isNew}"
+                                       required>
+                                <div class="form-text">Unique NAICS code identifier</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="level" class="form-label required-field">Level</label>
+                                <select class="form-select" id="level" name="level" th:field="*{level}" required>
+                                    <option value="">Select Level</option>
+                                    <option th:each="level : ${#numbers.sequence(1, 6)}"
+                                            th:value="${level}"
+                                            th:text="${level}"></option>
+                                </select>
+                                <div class="form-text">Hierarchy level (1-6)</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="isActive" class="form-label">Status</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="isActive" name="isActive" th:field="*{isActive}">
+                                    <label class="form-check-label" for="isActive">Active</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-12">
+                                <label for="title" class="form-label required-field">Title</label>
+                                <input type="text" class="form-control" id="title" name="title" th:field="*{title}" required>
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-12">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" th:field="*{description}" rows="10"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hierarchy Information -->
+                    <div class="form-section">
+                        <h5 class="mb-3">Hierarchy Information</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="sectorCode" class="form-label">Sector Code</label>
+                                <input type="text" class="form-control" id="sectorCode" name="sectorCode" th:field="*{sectorCode}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sectorTitle" class="form-label">Sector Title</label>
+                                <input type="text" class="form-control" id="sectorTitle" name="sectorTitle" th:field="*{sectorTitle}">
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label for="subsectorCode" class="form-label">Subsector Code</label>
+                                <input type="text" class="form-control" id="subsectorCode" name="subsectorCode" th:field="*{subsectorCode}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="subsectorTitle" class="form-label">Subsector Title</label>
+                                <input type="text" class="form-control" id="subsectorTitle" name="subsectorTitle" th:field="*{subsectorTitle}">
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label for="industryGroupCode" class="form-label">Industry Group Code</label>
+                                <input type="text" class="form-control" id="industryGroupCode" name="industryGroupCode" th:field="*{industryGroupCode}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="industryGroupTitle" class="form-label">Industry Group Title</label>
+                                <input type="text" class="form-control" id="industryGroupTitle" name="industryGroupTitle" th:field="*{industryGroupTitle}">
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label for="naicsIndustryCode" class="form-label">NAICS Industry Code</label>
+                                <input type="text" class="form-control" id="naicsIndustryCode" name="naicsIndustryCode" th:field="*{naicsIndustryCode}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="naicsIndustryTitle" class="form-label">NAICS Industry Title</label>
+                                <input type="text" class="form-control" id="naicsIndustryTitle" name="naicsIndustryTitle" th:field="*{naicsIndustryTitle}">
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label for="nationalIndustryCode" class="form-label">National Industry Code</label>
+                                <input type="text" class="form-control" id="nationalIndustryCode" name="nationalIndustryCode" th:field="*{nationalIndustryCode}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nationalIndustryTitle" class="form-label">National Industry Title</label>
+                                <input type="text" class="form-control" id="nationalIndustryTitle" name="nationalIndustryTitle" th:field="*{nationalIndustryTitle}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="form-section">
+                        <h5 class="mb-3">Additional Information</h5>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="crossReferences" class="form-label">Cross References</label>
+                                <!-- <textarea class="form-control" id="crossReferences" name="crossReferences" th:field="*{crossReferences}" rows="2"></textarea> -->
+                                <textarea class="form-control" id="crossReferences" name="crossReferences" rows="10"></textarea>
+                                <div class="form-text">Related codes or references</div>
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-12">
+                                <label for="indexEntries" class="form-label">Index Entries</label>
+<!--                                <textarea class="form-control" id="indexEntries" name="indexEntries" th:field="*{indexEntries}" rows="2"></textarea>-->
+                                <textarea class="form-control" id="indexEntries" name="indexEntries"  rows="10"></textarea>
+                                <div class="form-text">Additional search terms or keywords</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+<!--                        <a th:href="${isNew ? '/naics-codes' : '/naics-codes/' + {code}(code=${naicsCode.code})}}" class="btn btn-secondary">Cancel</a>-->
+<!--                        th:action="${isNew ? '/naics-codes/create' : '/naics-codes/' + naicsCode.code + '/edit'}"-->
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i>
+                            <span th:text="${isNew ? 'Create' : 'Update'}"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
