@@ -1,0 +1,72 @@
+/* Search page styles */
+.search-container {
+    margin-bottom: 2rem;
+}
+
+.search-results {
+    margin-top: 1rem;
+}
+
+.nav-pills .nav-link.active {
+    background-color: #4e73df;
+}
+
+.search-method-badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    margin-left: 0.5rem;
+}
+
+.result-card {
+    height: 100%;
+    overflow-y: auto;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 200ms ease-in;
+}
+
+.htmx-request .htmx-indicator {
+    opacity: 1;
+}
+
+.htmx-request.htmx-indicator {
+    opacity: 1;
+}
+
+.spinner-border {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.5rem;
+}
+
+/* Highlighted search terms */
+.highlight {
+    background-color: #ffeb3b;
+    padding: 0.1rem 0.2rem;
+    border-radius: 0.2rem;
+    font-weight: bold;
+}
+
+/* Progress bar colors */
+.progress-bar.bg-primary {
+    background-color: #4e73df !important;
+}
+
+.progress-bar.bg-success {
+    background-color: #1cc88a !important;
+}
+
+.progress-bar.bg-info {
+    background-color: #36b9cc !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .result-card {
+        margin-bottom: 1rem;
+    }
+}

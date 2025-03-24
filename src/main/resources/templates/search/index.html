@@ -1,0 +1,125 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Multi-Method Search</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+    <section>
+        <div class="container-fluid">
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Multi-Method Search</h1>
+            </div>
+            
+            <!-- Search Form -->
+            <div class="search-container">
+                <div class="card">
+                    <div class="card-body">
+                        <form id="searchForm" th:action="@{/search}" method="get" class="row g-3">
+                            <div class="col-md-8">
+                                <label for="searchQuery" class="form-label">Search Query</label>
+                                <input type="text" class="form-control" id="searchQuery" name="q" th:value="${query}" 
+                                       placeholder="Enter your search query" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="searchMethod" class="form-label">Search Method</label>
+                                <select class="form-select" id="searchMethod" name="method">
+                                    <option value="all" th:selected="${method == 'all' || method == null}">All Methods</option>
+                                    <option value="postgres" th:selected="${method == 'postgres'}">PostgreSQL Full-Text</option>
+                                    <option value="solr" th:selected="${method == 'solr'}">Solr</option>
+                                    <option value="vector" th:selected="${method == 'vector'}">Vector Search</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Error Message (if any) -->
+            <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+            
+            <!-- Search Results -->
+            <div class="search-results" th:if="${query != null && !query.isEmpty()}">
+                <!-- Method Tabs (only shown when 'all' method is selected) -->
+                <ul class="nav nav-pills mb-3" id="search-tabs" role="tablist" th:if="${method == 'all' || method == null}">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="all-tab" data-bs-toggle="pill" data-bs-target="#all-results" 
+                                type="button" role="tab" aria-controls="all-results" aria-selected="true">
+                            All Results
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="postgres-tab" data-bs-toggle="pill" data-bs-target="#postgres-results" 
+                                type="button" role="tab" aria-controls="postgres-results" aria-selected="false">
+                            PostgreSQL
+                            <span class="badge bg-secondary search-method-badge" 
+                                  th:if="${postgresResults != null}" 
+                                  th:text="${postgresResults.totalElements}">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="solr-tab" data-bs-toggle="pill" data-bs-target="#solr-results" 
+                                type="button" role="tab" aria-controls="solr-results" aria-selected="false">
+                            Solr
+                            <span class="badge bg-secondary search-method-badge" 
+                                  th:if="${solrResults != null}" 
+                                  th:text="${solrResults.totalElements}">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="vector-tab" data-bs-toggle="pill" data-bs-target="#vector-results" 
+                                type="button" role="tab" aria-controls="vector-results" aria-selected="false">
+                            Vector
+                            <span class="badge bg-secondary search-method-badge" 
+                                  th:if="${vectorResults != null}" 
+                                  th:text="${vectorResults.totalElements}">0</span>
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Tab Content -->
+                <div class="tab-content" th:if="${method == 'all' || method == null}">
+                    <!-- All Results Tab (side by side) -->
+                    <div class="tab-pane fade show active" id="all-results" role="tabpanel" aria-labelledby="all-tab">
+                        <div th:replace="~{search/fragments/all-results :: results(${postgresResults}, ${solrResults}, ${vectorResults}, ${query}, ${pageSize}, ${sortBy}, ${sortDir})}"></div>
+                    </div>
+                    
+                    <!-- Individual Method Tabs -->
+                    <div class="tab-pane fade" id="postgres-results" role="tabpanel" aria-labelledby="postgres-tab">
+                        <div th:if="${postgresResults != null}" th:replace="~{search/fragments/search-results :: results(${postgresResults}, 'postgres', ${query}, ${pageSize}, ${sortBy}, ${sortDir})}"></div>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="solr-results" role="tabpanel" aria-labelledby="solr-tab">
+                        <div th:if="${solrResults != null}" th:replace="~{search/fragments/search-results :: results(${solrResults}, 'solr', ${query}, ${pageSize}, ${sortBy}, ${sortDir})}"></div>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="vector-results" role="tabpanel" aria-labelledby="vector-tab">
+                        <div th:if="${vectorResults != null}" th:replace="~{search/fragments/search-results :: results(${vectorResults}, 'vector', ${query}, ${pageSize}, ${sortBy}, ${sortDir})}"></div>
+                    </div>
+                </div>
+                
+                <!-- Single Method Results -->
+                <div th:if="${method != 'all' && method != null}">
+                    <!-- PostgreSQL Results -->
+                    <div th:if="${method == 'postgres' && postgresResults != null}" th:replace="~{search/fragments/search-results :: results(${postgresResults}, 'postgres', ${query}, ${pageSize}, ${sortBy}, ${sortDir})}"></div>
+                    
+                    <!-- Solr Results -->
+                    <div th:if="${method == 'solr' && solrResults != null}" th:replace="~{search/fragments/search-results :: results(${solrResults}, 'solr', ${query}, ${pageSize}, ${sortBy}, ${sortDir})}"></div>
+                    
+                    <!-- Vector Results -->
+                    <div th:if="${method == 'vector' && vectorResults != null}" th:replace="~{search/fragments/search-results :: results(${vectorResults}, 'vector', ${query}, ${pageSize}, ${sortBy}, ${sortDir})}"></div>
+                    
+                    <!-- Error Message -->
+                    <div th:if="${error != null}" th:replace="~{search/fragments/search-results :: error(${error})}"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
