@@ -2,6 +2,7 @@ package com.oconeco.spring_pgvector.service
 
 import com.oconeco.spring_pgvector.domain.NaicsCode
 import com.oconeco.spring_pgvector.repository.NaicsCodeRepository
+import com.oconeco.spring_pgvector.solr.SolrSyncService
 import groovy.util.logging.Slf4j
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
@@ -41,6 +42,9 @@ class NaicsCodeService {
     @Autowired
     private EmbeddingService embeddingService
 
+    @Autowired
+    private SolrSyncService solrSyncService
+
     NaicsCodeService() {}
 
     /**
@@ -73,7 +77,13 @@ class NaicsCodeService {
         // Generate and set the embedding vector
         List<Document> chunks = generateAndSetEmbedding(naicsCode)
 
-        return naicsCodeRepository.save(naicsCode)
+        // Save to database
+        NaicsCode savedNaicsCode = naicsCodeRepository.save(naicsCode)
+
+        // Explicitly sync with Solr (in case entity listeners are not enabled)
+        solrSyncService.save(savedNaicsCode)
+
+        return savedNaicsCode
     }
 
     /**
@@ -89,8 +99,14 @@ class NaicsCodeService {
 
         // Generate and set the embedding vector
         List<Document> chunks = generateAndSetEmbedding(naicsCode)
-        def foo = naicsCodeRepository.save(naicsCode)
-        return foo
+
+        // Save to database
+        NaicsCode updatedNaicsCode = naicsCodeRepository.save(naicsCode)
+
+        // Explicitly sync with Solr (in case entity listeners are not enabled)
+        solrSyncService.save(updatedNaicsCode)
+
+        return updatedNaicsCode
     }
 
     /**
@@ -102,7 +118,50 @@ class NaicsCodeService {
             throw new IllegalArgumentException("NAICS code ${code} not found")
         }
 
+        // Get the entity before deleting it
+        NaicsCode naicsCode = naicsCodeRepository.findById(code).orElse(null)
+
+        // Delete from database
         naicsCodeRepository.deleteById(code)
+
+        // Explicitly delete from Solr (in case entity listeners are not enabled)
+        if (naicsCode) {
+            solrSyncService.delete(naicsCode)
+        }
+    }
+
+    /**
+     * Reindex all NAICS codes in Solr.
+     * This is useful for initial setup or when Solr schema changes.
+     * @return The number of records reindexed
+     */
+    @Transactional(readOnly = true)
+    int reindexAllToSolr() {
+        log.info("Reindexing all NAICS codes to Solr")
+
+        // First, delete all existing NAICS documents from Solr
+        solrSyncService.deleteAllByType(NaicsCode.class)
+
+        // Batch process to avoid memory issues with large datasets
+        int batchSize = 500
+        int totalProcessed = 0
+        boolean hasMore = true
+        int page = 0
+
+        while (hasMore) {
+            Page<NaicsCode> batch = naicsCodeRepository.findAll(Pageable.ofSize(batchSize).withPage(page))
+            if (batch.hasContent()) {
+                int batchProcessed = solrSyncService.saveAll(batch.content)
+                totalProcessed += batchProcessed
+                log.info("Reindexed batch ${page + 1} to Solr: ${batchProcessed} records")
+            }
+
+            page++
+            hasMore = batch.hasNext()
+        }
+
+        log.info("Completed reindexing ${totalProcessed} NAICS codes to Solr")
+        return totalProcessed
     }
 
     /**

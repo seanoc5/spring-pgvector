@@ -1,5 +1,6 @@
 package com.oconeco.spring_pgvector.domain
 
+import com.oconeco.spring_pgvector.solr.SolrEntityListener
 import jakarta.persistence.*
 import org.hibernate.annotations.Array
 import org.hibernate.annotations.CreationTimestamp
@@ -14,6 +15,7 @@ import org.hibernate.type.SqlTypes
  */
 @Entity
 @Table(name = "naics_codes")
+@EntityListeners(SolrEntityListener.class)
 @ToString(includeNames = true, includePackage = false)
 class NaicsCode {
 

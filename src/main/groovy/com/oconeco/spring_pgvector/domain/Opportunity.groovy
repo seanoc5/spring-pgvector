@@ -1,5 +1,6 @@
 package com.oconeco.spring_pgvector.domain
 
+import com.oconeco.spring_pgvector.solr.SolrEntityListener
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
@@ -10,6 +11,7 @@ import groovy.transform.ToString
  */
 @Entity
 @Table(name = "opportunities")
+@EntityListeners(SolrEntityListener.class)
 @ToString(includeNames = true, includePackage = false)
 class Opportunity {
 

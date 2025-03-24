@@ -17,7 +17,7 @@ spring:
   ai:
     ollama:
       init:
-        pull-model-strategy: when_missing
+        pull-model-strategy: when-missing
         chat:
           include: false
       embedding:
@@ -41,7 +41,7 @@ spring:
       password: pass1234
 
   mvc:
-    log-request-details=true: true
+    log-request-details: true
 
 logging:
   level:
@@ -52,13 +52,11 @@ logging:
 #    org.springframework.security: debug
 #    org.springframework.web: debug
     hibernate:
-      SQL:
-        DEBUG
+      SQL: DEBUG
       type:
         descriptor:
           sql:
-            BasicBinder:
-              TRACE
+            BasicBinder: TRACE
 
   pattern:
     console: "%d{MM-dd HH:mm:ss} %highlight(%-5level) [%-40logger{40}]  -- %msg%n"

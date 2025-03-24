@@ -12,10 +12,9 @@ public class SolrConfig {
 
     @Bean
     public SolrClient solrClient(SolrProperties solrProperties) {
-        String collection = 'solr_system'
         String baseUrl = "http://${solrProperties.host}:${solrProperties.port}/solr/"
         SolrClient client = new HttpSolrClient.Builder(baseUrl).build()
-        log.info("Built Solr Client: ${client.baseURL}")
+        log.info("Built Solr Client: ${client.baseURL} for collection: ${solrProperties.collection}")
         return client
 
         // problem with http2 client, jetty something...?

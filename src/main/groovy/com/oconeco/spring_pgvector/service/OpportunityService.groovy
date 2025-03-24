@@ -2,6 +2,7 @@ package com.oconeco.spring_pgvector.service
 
 import com.oconeco.spring_pgvector.domain.Opportunity
 import com.oconeco.spring_pgvector.repository.OpportunityRepository
+import com.oconeco.spring_pgvector.solr.SolrSyncService
 import groovy.util.logging.Slf4j
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVRecord
@@ -23,6 +24,9 @@ class OpportunityService {
 
     @Autowired
     private OpportunityRepository opportunityRepository
+    
+    @Autowired
+    private SolrSyncService solrSyncService
 
     // Date format for parsing dates from the CSV
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd, yyyy hh:mm a z")
@@ -52,6 +56,8 @@ class OpportunityService {
                 .parse(csvReader)
 
         int count = 0
+        List<Opportunity> batchOpportunities = []
+        int batchSize = 100
 
         // Process each record
         records.each { CSVRecord record ->
@@ -75,19 +81,42 @@ class OpportunityService {
                     setAside: record.get("Set Aside")
                 )
 
-                opportunityRepository.save(opportunity)
+                batchOpportunities << opportunity
                 count++
 
-                if (count % 100 == 0) {
+                // Process in batches for better performance
+                if (batchOpportunities.size() >= batchSize) {
+                    saveAndSyncBatch(batchOpportunities)
                     log.info "Processed ${count} records"
+                    batchOpportunities = []
                 }
             } catch (Exception e) {
                 log.error "Error processing record: ${e.message}", e
             }
         }
 
+        // Save any remaining opportunities
+        if (batchOpportunities) {
+            saveAndSyncBatch(batchOpportunities)
+        }
+
         log.info "Imported ${count} records from CSV file"
         return count
+    }
+    
+    /**
+     * Save a batch of opportunities and sync them to Solr
+     */
+    private void saveAndSyncBatch(List<Opportunity> opportunities) {
+        if (!opportunities) return
+        
+        // Save to database
+        List<Opportunity> savedOpportunities = opportunities.collect { opportunity ->
+            opportunityRepository.save(opportunity)
+        }
+        
+        // Sync to Solr
+        solrSyncService.saveAll(savedOpportunities)
     }
 
     /**
@@ -160,6 +189,115 @@ class OpportunityService {
     Opportunity getOpportunityByNoticeId(String noticeId) {
         return opportunityRepository.findById(noticeId).orElse(null)
     }
+    
+    /**
+     * Create a new opportunity.
+     */
+    @Transactional
+    Opportunity createOpportunity(Opportunity opportunity) {
+        if (!opportunity.noticeId) {
+            throw new IllegalArgumentException("Notice ID cannot be empty")
+        }
+
+        if (opportunityRepository.existsById(opportunity.noticeId)) {
+            throw new IllegalArgumentException("Opportunity with notice ID ${opportunity.noticeId} already exists")
+        }
+
+        // Save to database
+        Opportunity savedOpportunity = opportunityRepository.save(opportunity)
+        
+        // Explicitly sync with Solr
+        solrSyncService.save(savedOpportunity)
+        
+        return savedOpportunity
+    }
+
+    /**
+     * Update an existing opportunity.
+     */
+    @Transactional
+    Opportunity updateOpportunity(String noticeId, Opportunity opportunity) {
+        if (!opportunityRepository.existsById(noticeId)) {
+            throw new IllegalArgumentException("Opportunity with notice ID ${noticeId} not found")
+        }
+
+        opportunity.noticeId = noticeId  // Ensure the notice ID is not changed
+        
+        // Save to database
+        Opportunity updatedOpportunity = opportunityRepository.save(opportunity)
+        
+        // Explicitly sync with Solr
+        solrSyncService.save(updatedOpportunity)
+        
+        return updatedOpportunity
+    }
+
+    /**
+     * Delete an opportunity.
+     */
+    @Transactional
+    void deleteOpportunity(String noticeId) {
+        if (!opportunityRepository.existsById(noticeId)) {
+            throw new IllegalArgumentException("Opportunity with notice ID ${noticeId} not found")
+        }
+        
+        // Get the entity before deleting it
+        Opportunity opportunity = opportunityRepository.findById(noticeId).orElse(null)
+        
+        // Delete from database
+        opportunityRepository.deleteById(noticeId)
+        
+        // Explicitly delete from Solr
+        if (opportunity) {
+            solrSyncService.delete(opportunity)
+        }
+    }
+    
+    /**
+     * Reindex all opportunities in Solr.
+     * This is useful for initial setup or when Solr schema changes.
+     * @return The number of records reindexed
+     */
+    @Transactional(readOnly = true)
+    int reindexAllToSolr() {
+        log.info("Reindexing all opportunities to Solr")
+        
+        // First, delete all existing opportunity documents from Solr
+        solrSyncService.deleteAllByType(Opportunity.class)
+        
+        // Batch process to avoid memory issues with large datasets
+        int batchSize = 100
+        int totalProcessed = 0
+        boolean hasMore = true
+        int page = 0
+        
+        while (hasMore) {
+            Page<Opportunity> batch = opportunityRepository.findAll(Pageable.ofSize(batchSize).withPage(page))
+            if (batch.hasContent()) {
+                int batchProcessed = solrSyncService.saveAll(batch.content)
+                totalProcessed += batchProcessed
+                log.info("Reindexed batch ${page + 1} to Solr: ${batchProcessed} records")
+            }
+            
+            page++
+            hasMore = batch.hasNext()
+        }
+        
+        log.info("Completed reindexing ${totalProcessed} opportunities to Solr")
+        return totalProcessed
+    }
+
+    /**
+     * Ensures the database schema is properly set up for opportunities.
+     * This method is called during application startup to ensure the table and required indexes exist.
+     */
+    @Transactional
+    void ensureSchemaSetup() {
+        log.info "Ensuring database schema is properly set up for opportunities..."
+
+        // This is now handled by Spring Data JPA and Hibernate
+        // Additional custom schema setup can be added here if needed
+    }
 
     /**
      * Parses a date string into a Date object.
@@ -191,17 +329,5 @@ class OpportunityService {
             log.warn "Could not parse date: ${dateStr} - ${e.message}"
             return null
         }
-    }
-
-    /**
-     * Ensures the database schema is properly set up for opportunities.
-     * This method is called during application startup to ensure the table and required indexes exist.
-     */
-    @Transactional
-    void ensureSchemaSetup() {
-        log.info "Ensuring database schema is properly set up for opportunities..."
-
-        // This is now handled by Spring Data JPA and Hibernate
-        // Additional custom schema setup can be added here if needed
     }
 }
