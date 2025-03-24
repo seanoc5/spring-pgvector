@@ -1,4 +1,4 @@
 fubar,foobar,foo,bar
-coding,programming
+coding,programming,application,development,executable,script,codebase,package,binary,module,python,java,spring boot,springboot,spring-ai,j2ee,groovy,scala,gradle,maven,junit,spock
 
 

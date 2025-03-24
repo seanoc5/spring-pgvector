@@ -68,6 +68,7 @@
             <str name="q.alt">*:*</str>
             <str name="fl">id,title,description,score</str>
             <str name="facet">on</str>
+            <str name="facet.field">type_s</str>
             <str name="facet.field">tags</str>
             <str name="defType">edismax</str>
             <str name="qf">title^5.0 title_txt_en^3 description^3 description_txt_en^2 bucket_tight^0.1 bucket_fuzzy^0.5</str>
@@ -89,6 +90,28 @@
             <str name="fl">id,title,description,score</str>
             <str name="defType">edismax</str>
             <str name="qf">title^5.0 title_txt_en^3 description^3 description_txt_en^2 bucket_tight^0.1 bucket_fuzzy^0.5</str>
+            <str name="pf">title^5.0 title_txt_en^3 description^4 description_txt_en^2</str>
+        </lst>
+    </requestHandler>
+
+    <requestHandler name="/naics" class="solr.SearchHandler">
+        <lst name="defaults">
+            <str name="echoParams">all</str>
+            <int name="rows">20</int>
+            <str name="hl">true</str>
+            <str name="hl.fl">title,sector_title,subsector_title,industry_group_title, naics_industry_title, description,code,sector_code,industry_code</str>
+            <str name="q.alt">*:*</str>
+            <str name="indent">true</str>
+            <str name="facet">on</str>
+            <str name="facet.field">sector_code</str>
+            <str name="facet.field">industry_code</str>
+            <str name="facet.field">naics_industry_code</str>
+            <str name="facet.field">sector_title</str>
+            <str name="facet.field">industry_group_title</str>
+<!--            <str name="facet.field"></str>-->
+            <str name="fl">id,title,tags,code,description,sector_title,subsector_title,industry_group_title,naics_industry_title,score</str>
+            <str name="defType">edismax</str>
+            <str name="qf">title^5.0 title_txt_en^3 description^3 description_txt_en^2 bucket_tight^1 bucket_fuzzy^0.5</str>
             <str name="pf">title^5.0 title_txt_en^3 description^4 description_txt_en^2</str>
         </lst>
     </requestHandler>
