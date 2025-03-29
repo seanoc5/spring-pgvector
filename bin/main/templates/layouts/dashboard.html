@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:replace="${title}">Admin Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3>Admin Panel</h3>
+        </div>
+        <ul class="list-unstyled components">
+            <li>
+                <a href="#embeddingsSubmenu" data-bs-toggle="collapse" aria-expanded="true" class="dropdown-toggle">
+                    <i class="fas fa-vector-square"></i> Embeddings
+                </a>
+                <ul class="collapse show list-unstyled" id="embeddingsSubmenu">
+                    <li>
+                        <a th:href="@{/embedding/}"><!--<i class="fas fa-vector-square"></i>--> List Embeddings</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/embedding/create}">Create Embedding</a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#naicsSubmenu" data-bs-toggle="collapse" aria-expanded="true" class="dropdown-toggle">
+                    <i class="fas fa-vector-square"></i> NAICS codes
+                </a>
+                <ul class="collapse show list-unstyled" id="naicsSubmenu">
+                    <li>
+                        <a th:href="@{/naics-codes/}"><!--<i class="fas fa-vector-square"></i>--> List naics</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/naics-codes/create}">Create naics</a>
+                    </li>
+                    <li title="Upload NAICS Codes (excel or csv)">
+                        <a th:href="@{/naics-codes/upload}">Upload NAICS Codes</a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a th:href="@{/admin/settings}"><i class="fas fa-cog"></i>Example Settings</a>
+            </li>
+            <li class="active">
+                <a th:href="@{/admin/dashboard}"><i class="fas fa-home"></i>Example Dashboard </a>
+            </li>
+
+            <li>
+                <a href="#reportsSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                    <i class="fas fa-chart-bar"></i> Example Reports
+                </a>
+                <ul class="collapse list-unstyled" id="reportsSubmenu">
+                    <li>
+                        <a th:href="@{/admin/reports/usage}">Usage Statistics</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/admin/reports/performance}">Performance</a>
+                    </li>
+                </ul>
+            </li>
+<!--            <li>-->
+<!--                <a th:href="@{/admin/users}"><i class="fas fa-users"></i> Users</a>-->
+<!--            </li>-->
+        </ul>
+    </nav>
+
+    <!-- Page Content -->
+    <div id="content" class="content">
+        <!-- Top Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <button type="button" id="sidebarCollapse" class="btn btn-info">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="ms-auto">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i> Admin User
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                            <li><a class="dropdown-item" th:href="@{/admin/profile}">Profile</a></li>
+                            <li><a class="dropdown-item" th:href="@{/admin/account}">Account Settings</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" th:href="@{/logout}">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="container-fluid main-content">
+            <div th:replace="${content}">
+                <!-- Page content will be inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript Libraries -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Custom JavaScript -->
+<script th:src="@{/js/dashboard.js}"></script>
+</body>
+</html>

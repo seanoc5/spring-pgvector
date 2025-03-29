@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{error/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Error - Template Not Found</title>
+</head>
+<body>
+    <section>
+        <div class="error-template">
+            <div class="error-code text-warning">
+                404
+            </div>
+            <h1>Template Not Found</h1>
+            <div class="error-message">
+                <p th:utext="${#strings.replace(#strings.escapeXml(message),'&#10;','<br/>')}">The requested template couldn't be found.</p>
+            </div>
+            <div class="error-details">
+                <div th:if="${path}"><strong>Path:</strong> <span th:text="${path}"></span></div>
+                <div><strong>Timestamp:</strong> <span th:text="${timestamp}"></span></div>
+                <div><strong>Error:</strong> <span th:utext="${#strings.replace(#strings.escapeXml(error),'&#10;','<br/>')}"></span></div>
+            </div>
+            <div class="error-actions">
+                <a href="/" class="btn btn-primary btn-lg">
+                    <i class="fas fa-home"></i> Take Me Home
+                </a>
+                <a href="/admin/dashboard" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-envelope"></i> Admin Dashboard
+                </a>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

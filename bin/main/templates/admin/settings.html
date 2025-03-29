@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Settings - Admin Dashboard</title>
+</head>
+<body>
+    <section>
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col">
+                    <h1 class="h3 mb-0 text-gray-800">System Settings</h1>
+                    <p class="mb-4">Configure your vector database and application settings.</p>
+                </div>
+            </div>
+
+            <!-- Settings Navigation Tabs -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general"
+                                    type="button" role="tab" aria-controls="general" aria-selected="true">
+                                <i class="fas fa-cog"></i> General
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="database-tab" data-bs-toggle="tab" data-bs-target="#database"
+                                    type="button" role="tab" aria-controls="database" aria-selected="false">
+                                <i class="fas fa-database"></i> Database
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="embedding-tab" data-bs-toggle="tab" data-bs-target="#embedding"
+                                    type="button" role="tab" aria-controls="embedding" aria-selected="false">
+                                <i class="fas fa-vector-square"></i> Embedding
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security"
+                                    type="button" role="tab" aria-controls="security" aria-selected="false">
+                                <i class="fas fa-shield-alt"></i> Security
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="backup-tab" data-bs-toggle="tab" data-bs-target="#backup"
+                                    type="button" role="tab" aria-controls="backup" aria-selected="false">
+                                <i class="fas fa-save"></i> Backup
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Settings Tab Content -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="tab-content" id="settingsTabContent">
+                        <!-- General Settings -->
+                        <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">General Settings</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="generalSettingsForm" hx-post="/admin/settings/general" hx-swap="none" hx-trigger="submit">
+                                        <div class="mb-3">
+                                            <label for="applicationName" class="form-label">Application Name</label>
+                                            <input type="text" class="form-control" id="applicationName" name="applicationName"
+                                                   value="Vector Database Admin" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="defaultLanguage" class="form-label">Default Language</label>
+                                            <select class="form-select" id="defaultLanguage" name="defaultLanguage">
+                                                <option value="en">English</option>
+                                                <option value="es">Spanish</option>
+                                                <option value="fr">French</option>
+                                                <option value="de">German</option>
+                                                <option value="ja">Japanese</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="timeZone" class="form-label">Time Zone</label>
+                                            <select class="form-select" id="timeZone" name="timeZone">
+                                                <option value="UTC">UTC</option>
+                                                <option value="America/New_York">Eastern Time (US & Canada)</option>
+                                                <option value="America/Chicago">Central Time (US & Canada)</option>
+                                                <option value="America/Denver">Mountain Time (US & Canada)</option>
+                                                <option value="America/Los_Angeles">Pacific Time (US & Canada)</option>
+                                                <option value="Europe/London">London</option>
+                                                <option value="Europe/Paris">Paris</option>
+                                                <option value="Asia/Tokyo">Tokyo</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" class="form-check-input" id="enableNotifications" name="enableNotifications" checked>
+                                            <label class="form-check-label" for="enableNotifications">Enable Email Notifications</label>
+                                        </div>
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" class="form-check-input" id="enableAnalytics" name="enableAnalytics" checked>
+                                            <label class="form-check-label" for="enableAnalytics">Enable Usage Analytics</label>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Save General Settings</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Database Settings -->
+                        <div class="tab-pane fade" id="database" role="tabpanel" aria-labelledby="database-tab">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Database Settings</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="databaseSettingsForm" hx-post="/admin/settings/database" hx-swap="none" hx-trigger="submit">
+                                        <div class="mb-3">
+                                            <label for="databaseUrl" class="form-label">Database URL</label>
+                                            <input type="text" class="form-control" id="databaseUrl" name="databaseUrl"
+                                                   value="jdbc:postgresql://localhost:5432/vectordb" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="databaseUsername" class="form-label">Database Username</label>
+                                            <input type="text" class="form-control" id="databaseUsername" name="databaseUsername"
+                                                   value="postgres" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="databasePassword" class="form-label">Database Password</label>
+                                            <input type="password" class="form-control" id="databasePassword" name="databasePassword"
+                                                   value="********" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="connectionPoolSize" class="form-label">Connection Pool Size</label>
+                                            <input type="number" class="form-control" id="connectionPoolSize" name="connectionPoolSize"
+                                                   value="10" min="1" max="100" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="maxQueryTime" class="form-label">Max Query Time (ms)</label>
+                                            <input type="number" class="form-control" id="maxQueryTime" name="maxQueryTime"
+                                                   value="5000" min="100" required>
+                                        </div>
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" class="form-check-input" id="enableQueryCache" name="enableQueryCache" checked>
+                                            <label class="form-check-label" for="enableQueryCache">Enable Query Cache</label>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Save Database Settings</button>
+                                        <button type="button" class="btn btn-info ms-2" id="testConnection">Test Connection</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Embedding Settings -->
+                        <div class="tab-pane fade" id="embedding" role="tabpanel" aria-labelledby="embedding-tab">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Embedding Settings</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="embeddingSettingsForm" hx-post="/admin/settings/embedding" hx-swap="none" hx-trigger="submit">
+                                        <div class="mb-3">
+                                            <label for="defaultModel" class="form-label">Default Embedding Model</label>
+                                            <select class="form-select" id="defaultModel" name="defaultModel">
+                                                <option value="openai-text-embedding-ada-002">OpenAI Ada 002</option>
+                                                <option value="openai-text-embedding-3-small">OpenAI Embedding 3 Small</option>
+                                                <option value="openai-text-embedding-3-large">OpenAI Embedding 3 Large</option>
+                                                <option value="huggingface-all-MiniLM-L6-v2">HuggingFace all-MiniLM-L6-v2</option>
+                                                <option value="huggingface-all-mpnet-base-v2">HuggingFace all-mpnet-base-v2</option>
+                                                <option value="custom">Custom Model</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="customModelPath" class="form-label">Custom Model Path</label>
+                                            <input type="text" class="form-control" id="customModelPath" name="customModelPath"
+                                                   placeholder="Path to custom model (if selected above)">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="embeddingDimension" class="form-label">Embedding Dimension</label>
+                                            <input type="number" class="form-control" id="embeddingDimension" name="embeddingDimension"
+                                                   value="768" min="1" required>
+                                            <div class="form-text">The dimension of the embedding vectors.</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="apiKey" class="form-label">API Key (if using OpenAI)</label>
+                                            <input type="password" class="form-control" id="apiKey" name="apiKey"
+                                                   placeholder="Enter your OpenAI API key">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="batchSize" class="form-label">Batch Size</label>
+                                            <input type="number" class="form-control" id="batchSize" name="batchSize"
+                                                   value="32" min="1" max="1000" required>
+                                            <div class="form-text">Number of items to process in a single batch.</div>
+                                        </div>
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" class="form-check-input" id="cacheEmbeddings" name="cacheEmbeddings" checked>
+                                            <label class="form-check-label" for="cacheEmbeddings">Cache Embeddings</label>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Save Embedding Settings</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Settings -->
+                        <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Security Settings</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="securitySettingsForm" hx-post="/admin/settings/security" hx-swap="none" hx-trigger="submit">
+                                        <div class="mb-3">
+                                            <label for="sessionTimeout" class="form-label">Session Timeout (minutes)</label>
+                                            <input type="number" class="form-control" id="sessionTimeout" name="sessionTimeout"
+                                                   value="30" min="1" max="1440" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="maxLoginAttempts" class="form-label">Max Login Attempts</label>
+                                            <input type="number" class="form-control" id="maxLoginAttempts" name="maxLoginAttempts"
+                                                   value="5" min="1" max="10" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="passwordPolicy" class="form-label">Password Policy</label>
+                                            <select class="form-select" id="passwordPolicy" name="passwordPolicy">
+                                                <option value="low">Low (min 6 characters)</option>
+                                                <option value="medium" selected>Medium (min 8 chars, 1 number, 1 uppercase)</option>
+                                                <option value="high">High (min 10 chars, numbers, mixed case, special chars)</option>
+                                                <option value="custom">Custom Policy</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" class="form-check-input" id="enableTwoFactor" name="enableTwoFactor">
+                                            <label class="form-check-label" for="enableTwoFactor">Enable Two-Factor Authentication</label>
+                                        </div>
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" class="form-check-input" id="enableSSL" name="enableSSL" checked>
+                                            <label class="form-check-label" for="enableSSL">Require SSL/TLS</label>
+                                        </div>
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" class="form-check-input" id="enableAuditLog" name="enableAuditLog" checked>
+                                            <label class="form-check-label" for="enableAuditLog">Enable Security Audit Logging</label>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Save Security Settings</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Backup Settings -->
+                        <div class="tab-pane fade" id="backup" role="tabpanel" aria-labelledby="backup-tab">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Backup & Recovery</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="backupSettingsForm" hx-post="/admin/settings/backup" hx-swap="none" hx-trigger="submit">
+                                        <div class="mb-3">
+                                            <label for="backupSchedule" class="form-label">Backup Schedule</label>
+                                            <select class="form-select" id="backupSchedule" name="backupSchedule">
+                                                <option value="daily">Daily</option>
+                                                <option value="weekly" selected>Weekly</option>
+                                                <option value="monthly">Monthly</option>
+                                                <option value="custom">Custom Schedule</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="backupTime" class="form-label">Backup Time</label>
+                                            <input type="time" class="form-control" id="backupTime" name="backupTime" value="02:00" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="backupLocation" class="form-label">Backup Location</label>
+                                            <input type="text" class="form-control" id="backupLocation" name="backupLocation"
+                                                   value="/var/backups/vectordb" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="retentionPeriod" class="form-label">Retention Period (days)</label>
+                                            <input type="number" class="form-control" id="retentionPeriod" name="retentionPeriod"
+                                                   value="30" min="1" required>
+                                        </div>
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" class="form-check-input" id="compressBackups" name="compressBackups" checked>
+                                            <label class="form-check-label" for="compressBackups">Compress Backups</label>
+                                        </div>
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" class="form-check-input" id="encryptBackups" name="encryptBackups">
+                                            <label class="form-check-label" for="encryptBackups">Encrypt Backups</label>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Save Backup Settings</button>
+                                        <button type="button" class="btn btn-success ms-2" id="runBackupNow">Run Backup Now</button>
+                                    </form>
+
+                                    <hr class="my-4">
+
+                                    <h5 class="mb-3">Restore from Backup</h5>
+                                    <div class="mb-3">
+                                        <label for="backupFile" class="form-label">Select Backup File</label>
+                                        <select class="form-select" id="backupFile" name="backupFile">
+                                            <option value="">-- Select a backup file --</option>
+                                            <option value="backup_2025-03-15.sql">backup_2025-03-15.sql (15 MB)</option>
+                                            <option value="backup_2025-03-08.sql">backup_2025-03-08.sql (14.5 MB)</option>
+                                            <option value="backup_2025-03-01.sql">backup_2025-03-01.sql (14.2 MB)</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" class="btn btn-warning" id="restoreBackup">Restore Selected Backup</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HTMX Toast Notifications -->
+    <div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+        <!-- Toast notifications will be injected here -->
+    </div>
+
+    <!-- Page specific scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Test database connection button
+            document.getElementById('testConnection').addEventListener('click', function() {
+                // Simulate testing connection
+                setTimeout(function() {
+                    showToast('Connection successful!', 'Database connection test completed successfully.', 'success');
+                }, 1000);
+            });
+
+            // Run backup now button
+            document.getElementById('runBackupNow').addEventListener('click', function() {
+                // Simulate starting backup
+                showToast('Backup Started', 'Backup process has been initiated. This may take a few minutes.', 'info');
+
+                // Simulate backup completion after 3 seconds
+                setTimeout(function() {
+                    showToast('Backup Complete', 'Backup has been successfully created.', 'success');
+                }, 3000);
+            });
+
+            // Restore backup button
+            document.getElementById('restoreBackup').addEventListener('click', function() {
+                const selectedBackup = document.getElementById('backupFile').value;
+                if (!selectedBackup) {
+                    showToast('Error', 'Please select a backup file to restore.', 'danger');
+                    return;
+                }
+
+                if (confirm('Are you sure you want to restore from backup? This will overwrite current data.')) {
+                    showToast('Restore Started', 'Database restore process has been initiated.', 'warning');
+
+                    // Simulate restore completion after 4 seconds
+                    setTimeout(function() {
+                        showToast('Restore Complete', 'Database has been successfully restored from backup.', 'success');
+                    }, 4000);
+                }
+            });
+
+            // Form submission handlers
+            document.querySelectorAll('form[hx-post]').forEach(form => {
+                form.addEventListener('htmx:beforeRequest', function() {
+                    showToast('Saving...', 'Saving your settings...', 'info');
+                });
+
+                form.addEventListener('htmx:afterRequest', function() {
+                    showToast('Settings Saved', 'Your settings have been saved successfully.', 'success');
+                });
+            });
+
+            // Toast notification helper function
+            window.showToast = function(title, message, type) {
+                const toastContainer = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `toast align-items-center text-white bg-${type} border-0`;
+                toast.setAttribute('role', 'alert');
+                toast.setAttribute('aria-live', 'assertive');
+                toast.setAttribute('aria-atomic', 'true');
+
+                toast.innerHTML = `
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <strong>${title}</strong><br>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                `;
+
+                toastContainer.appendChild(toast);
+                const bsToast = new bootstrap.Toast(toast, { autohide: true, delay: 5000 });
+                bsToast.show();
+
+                // Remove toast from DOM after it's hidden
+                toast.addEventListener('hidden.bs.toast', function() {
+                    toast.remove();
+                });
+            };
+        });
+    </script>
+</body>
+</html>

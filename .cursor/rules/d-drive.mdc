@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+assume code is on the D: drive
+for groovy code, use gstring interpolation, i.e. String name = 'sean'; println "Hello ${name}"
+ 

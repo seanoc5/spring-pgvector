@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard :: layout(~{::title}, ~{::section})}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAICS Codes</title>
+    <style>
+        .level-badge {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .level-badge:hover {
+            transform: scale(1.05);
+        }
+        .level-badge.active {
+            font-weight: bold;
+            box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.5);
+        }
+        .search-input {
+            border-radius: 20px;
+            padding-left: 15px;
+            transition: box-shadow 0.3s;
+        }
+        .search-input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            border-color: #86b7fe;
+        }
+        .search-container {
+            position: relative;
+        }
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <div class="row mb-4">
+            <div class="col">
+                <h1>NAICS Codes</h1>
+                <p class="text-muted">North American Industry Classification System</p>
+            </div>
+            <div class="col-auto">
+                <a th:href="@{/naics-codes/upload}" class="btn btn-primary">
+                    <i class="bi bi-upload me-1"></i> Upload NAICS Codes
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Search & Filter</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <!-- Search input with search-as-you-type -->
+                    <div class="col-md-8">
+                        <div class="search-container">
+                            <input
+                                type="text"
+                                class="form-control search-input"
+                                placeholder="Search by title or description..."
+                                aria-label="Search NAICS codes"
+                                hx-get="/naics-codes/search"
+                                hx-trigger="keyup changed delay:300ms, search"
+                                hx-target="#naics-table-container"
+                                hx-include="[name='level']"
+                                th:value="${query}"
+                                name="query"
+                                id="search-input">
+                            <span class="search-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Level filter badges -->
+                    <div class="col-md-4">
+                        <div class="d-flex justify-content-end align-items-center h-100">
+                            <span class="me-2">Level:</span>
+                            <input type="hidden" name="level" th:value="${activeLevel}" id="level-filter">
+
+                            <span class="badge rounded-pill bg-light text-dark border me-1 level-badge"
+                                  th:classappend="${activeLevel == null ? 'active' : ''}"
+                                  hx-get="/naics-codes/filter"
+                                  hx-include="[name='query']"
+                                  hx-target="#naics-table-container"
+                                  hx-vals='{"level": null}'
+                                  onclick="document.getElementById('level-filter').value = ''">
+                                All
+                            </span>
+
+                            <span th:each="level : ${#numbers.sequence(1, 6)}"
+                                  class="badge rounded-pill bg-light text-dark border me-1 level-badge"
+                                  th:classappend="${activeLevel == level ? 'active' : ''}"
+                                  th:text="${level}"
+                                  th:attr="onclick='document.getElementById(\'level-filter\').value = ' + ${level}"
+                                  hx-get="/naics-codes/filter"
+                                  hx-include="[name='query']"
+                                  hx-target="#naics-table-container"
+                                  th:hx-vals="${'{''level'': ' + level + '}'}">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="naics-table-container" th:insert="~{naics-codes/fragments/naics-table :: table}"></div>
+
+        <script>
+            // Highlight the active level filter
+            document.addEventListener('DOMContentLoaded', function() {
+                const levelBadges = document.querySelectorAll('.level-badge');
+
+                levelBadges.forEach(badge => {
+                    badge.addEventListener('click', function() {
+                        levelBadges.forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                });
+            });
+
+            // HTMX event listeners
+            document.body.addEventListener('htmx:afterSwap', function(event) {
+                // Re-initialize any Bootstrap components if needed
+                const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                tooltips.forEach(tooltip => {
+                    new bootstrap.Tooltip(tooltip);
+                });
+            });
+        </script>
+    </section>
+</body>
+</html>

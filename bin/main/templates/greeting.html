@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Greeting - PGVector</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+    <section>
+        <div class="container-fluid">
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Greeting</h1>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h2>Testing web template</h2>
+                            <p th:text="|Hello, ${name}!|"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

@@ -1,0 +1,72 @@
+spring:
+  application:
+    name: spring-pgvector
+  jpa:
+    open-in-view: true
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5436/spring-pgvector
+    username: postgres
+    password: pass1234
+
+  ai:
+    ollama:
+      base-url:
+        dell:11434
+      init:
+        pull-model-strategy: when_missing
+        chat:
+          include: false
+      embedding:
+        options:
+#          model: gte-large
+#          model: nomic-ai/nomic-embed-text-v1.5
+          model: nomic-embed-text     # 768
+#          model: Snowflake/snowflake-arctic-embed-m-v2.0
+    vectorstore:
+      pgvector:
+#        initialize-schema: true
+#        dimensions: 1024
+        dimensions: 768
+        index-type: hnsw
+        schema-validation: false
+        initialize-schema: true
+        remove-existing-vector-store-table: false
+#  security:
+#    user:
+#      name: sean
+#      password: pass1234
+
+  mvc:
+    log-request-details=true: true
+
+logging:
+  level:
+    root: info
+    com.oconeco: info
+#    com.oconeco.spring_pgvector.service.EmbeddingService: debug
+#    com.oconeco.spring_pgvector.transformer.ParagraphSentenceSplitter: debug
+#    org.springframework.security: debug
+#    org.springframework.web: debug
+    hibernate:
+      SQL:
+        INFO
+      type:
+        descriptor:
+          sql:
+            BasicBinder:
+              TRACE
+
+  pattern:
+    console: "%d{MM-dd HH:mm:ss} %highlight(%-5level) [%-40logger{40}]  -- %msg%n"
+  file:
+    path: logs
+
+solr:
+  host: localhost
+  collection: spring-pgvector
+  port: 8983
+  # Additional configuration options...

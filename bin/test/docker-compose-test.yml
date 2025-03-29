@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  postgres-test:
+    image: pgvector/pgvector:pg17
+    container_name: postgres-test
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass1234
+      POSTGRES_DB: spring-pgvector-test
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres-test-data:/var/lib/postgresql/data
+      - ./init_pgvector.sql:/docker-entrypoint-initdb.d/init_pgvector.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-test-data:

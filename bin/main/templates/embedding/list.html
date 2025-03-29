@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Embeddings - List</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Embeddings List</h1>
+            <a th:href="@{/embedding/create}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-plus fa-sm text-white-50"></i> Create New Embedding
+            </a>
+        </div>
+
+        <!-- Embedding List Card -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Embedded Documents</h6>
+                <!-- Search Form -->
+                <div class="col-md-6">
+                    <form class="d-flex" hx-get="/embedding/list" hx-trigger="submit" hx-target="#documentTableContainer" hx-swap="innerHTML">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            class="form-control" 
+                            placeholder="Search for similar documents..." 
+                            aria-label="Search" 
+                            th:value="${searchQuery}"
+                            hx-get="/embedding/list"
+                            hx-trigger="keyup changed delay:500ms"
+                            hx-target="#documentTableContainer"
+                            hx-swap="innerHTML"
+                            hx-include="closest form"
+                        >
+                        <button class="btn btn-primary ms-2" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="documentTableContainer">
+                    <div th:replace="~{embedding/fragments/document-table :: documentTable}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for page size selector -->
+    <script>
+        function changePageSize(size, searchQuery) {
+            window.location.href = '/embedding/list?page=0&size=' + size + '&search=' + encodeURIComponent(searchQuery || '');
+        }
+    </script>
+</section>
+</body>
+</html>
