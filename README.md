@@ -9,7 +9,7 @@ A semantic search application built with Spring Boot, Spring AI, and pgvector to
 3. Run `./gradlew bootRun` to start the application
 
 Docker Compose will start PostgreSQL, Ollama, Solr, and Zookeeper for you.  
-A solr-init.sh script will load sample data into the Solr collection (sanity-check) for demo/debug of solr config _(not directly related to this project)_.  
+A solr-init.sh script will load sample data into the Solr collection (spring-pgvector) for demo/debug of solr config _(not directly related to this project)_.  
 Ollama will start on port 11434 for embedding model hosting (most likely without GPU acceleration). Comment out the `ollama` service in `docker-compose.yaml` if you want to use local embeddings.  Similarly, and of the 4 sould be fine running 'natively' rather than in docker.
 Spring AI and pgvector (via starters in build.gradle) will configure a single shared table for semantic search. See application.yaml for model configuration.   
 Future  efforts will likely add JPA based custom vector fields.  
@@ -128,8 +128,8 @@ I have tried to configuring docker to ease config,test,debug process for solr co
 I am still learning docker/docker-compose, so I am open to suggestions and feedback.
 Note: solr depends on zookeeper, so I have been able to just start solr, and docker-compose will start zookeeper.
 
-My goal is to just reload the solr image, and the the solr-init.sh script will run again. That should naively _(dangerously?)_ re-upload the solr `sanity-check`configset to the container.  
-**NOTE**: This will overwrite the existing `sanity-check` configset.
+My goal is to just reload the solr image, and the the solr-init.sh script will run again. That should naively _(dangerously?)_ re-upload the solr `spring-pgvector`configset to the container.  
+**NOTE**: This will overwrite the existing `spring-pgvector` configset.
 
 
 #### Ollama
@@ -138,7 +138,7 @@ This is just a demo/learning app, so unlikely to have any "production" concerns,
 
 #### Solr
 I have had decent luck:
-* modifying the `sanity-check` solr configset and then 
+* modifying the `spring-pgvector` solr configset and then 
 * `alt-8` in intellij to get to services tool window, then 
 * ctrl-f2 to stop the solr container, then 
 * ctrl-enter to re-start the solr container.
@@ -152,16 +152,16 @@ If things get hinky, you may want to delete/repopulate the zookeeper volumes (or
 ### Intellij
 In the `services` tool, I found I can stop/start the solr container and it will be "reloaded". 
 The image will not be rebuilt, but the container will be reloaded. 
-This **should** reload the solr `sanity-check` configset as well as re `post` the sample csv data. 
+This **should** reload the solr `spring-pgvector` configset as well as re `post` the sample csv data. 
 It is a bit hacky, so any suggestions on a better way to do this are welcome.
 
 
 ## Searching
 ### Solr
-**Note:** `solr-init.sh` loads a sample csv file into the `sanity-check` collection for demo/debug. 
+**Note:** `solr-init.sh` loads a sample csv file into the `spring-pgvector` collection for demo/debug. 
 The intent is to be able to check the default configs, including field types. 
 
-The `sanity-check` collection has the following fields:
+The `spring-pgvector` collection has the following fields:
 * text_gen
 * text_en
 * shingle (custom field type)
@@ -169,7 +169,7 @@ The `sanity-check` collection has the following fields:
 * bucket_tight (custom field type) -- title and description copied to a "tight" field
 * bucket_fuzzy (custom field type) -- title and description copied to a "fuzzy" field
 
-There is some minor solrschema configuration in the `sanity-check` configset:
+There is some minor solrschema configuration in the `spring-pgvector` configset:
 * synonyms
 * protected words
 * highlighting (`hl.*`)

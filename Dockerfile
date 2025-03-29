@@ -2,7 +2,7 @@
 FROM solr:9.8
 # Copy in custom config
 # testing mount solr configset as volume rather than copy for better test/debug cycling
-#COPY solr-config/sanity-check  /opt/solr/server/solr/configsets/sanity-check
+#COPY solr-config/spring-pgvector  /opt/solr/server/solr/configsets/spring-pgvector
 
 # make a persistent data directory, chown to solr
 # todo - is there a better approach?

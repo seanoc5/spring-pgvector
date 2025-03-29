@@ -12,7 +12,7 @@ class SpringPgvectorApplication {
     @Value('${solr.host:http://localhost:8983/solr}')
     String solrUrl
 
-    @Value('${solr.collection:sanity-check}')
+    @Value('${solr.collection:spring-pgvector}')
     String collectionName
 
     static void main(String[] args) {

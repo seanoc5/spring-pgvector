@@ -10,7 +10,7 @@ spring:
       ddl-auto: update
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://dell:5432/spring-pgvector
+    url: jdbc:postgresql://localhost:5436/spring-pgvector
     username: postgres
     password: pass1234
 
@@ -34,11 +34,11 @@ spring:
         index-type: hnsw
         schema-validation: true
         initialize-schema: true
-#        remove-existing-vector-store-table: true
-  security:
-    user:
-      name: sean
-      password: pass1234
+        remove-existing-vector-store-table: false
+#  security:
+#    user:
+#      name: sean
+#      password: pass1234
 
   mvc:
     log-request-details: true
@@ -52,11 +52,12 @@ logging:
 #    org.springframework.security: debug
 #    org.springframework.web: debug
     hibernate:
-      SQL: DEBUG
+      SQL:
+        INFO
       type:
         descriptor:
           sql:
-            BasicBinder: TRACE
+#            BasicBinder: TRACE
 
   pattern:
     console: "%d{MM-dd HH:mm:ss} %highlight(%-5level) [%-40logger{40}]  -- %msg%n"
@@ -65,7 +66,7 @@ logging:
 
 solr:
   host: localhost
-  collection: sanity-check
+  collection: spring-pgvector
   port: 8983
   # Additional configuration options...
 

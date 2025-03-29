@@ -21,8 +21,23 @@ CREATE TABLE IF NOT EXISTS naics_codes (
     year_updated INTEGER,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP,
-    updated_at TIMESTAMP
+    updated_at TIMESTAMP,
+    search_vector tsvector
 );
+
+-- Create the vector store table
+CREATE TABLE IF NOT EXISTS vector_store (
+    id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+    content text,
+    metadata json,
+    embedding vector(768)
+);
+
+-- Create index on vector_store
+CREATE INDEX IF NOT EXISTS vector_store_embedding_idx ON vector_store USING hnsw (embedding vector_cosine_ops);
+
+-- Create index on naics_codes search_vector
+CREATE INDEX IF NOT EXISTS naics_codes_search_vector_idx ON naics_codes USING gin (search_vector);
 
 -- Note: We've temporarily removed the search_vector column and related triggers
 -- to simplify the initial test setup. These can be added back once the basic

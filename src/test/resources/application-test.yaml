@@ -4,6 +4,9 @@ spring:
     # TestContainers will dynamically set these properties
     # using the @DynamicPropertySource in our test classes
     driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5437/spring-pgvector-test
+    username: postgres
+    password: pass1234
   jpa:
     hibernate:
       ddl-auto: none # We're using our init script instead
@@ -15,6 +18,13 @@ spring:
   test:
     database:
       replace: none
+  ai:
+    vectorstore:
+      pgvector:
+        schema-validation: false
+        initialize-schema: true
+        dimensions: 768
+        index-type: hnsw
 
 # Mock Solr configuration for tests
 solr:

@@ -1,17 +1,13 @@
 package com.oconeco.spring_pgvector.service
 
+import com.oconeco.spring_pgvector.transformer.ParagraphSentenceSplitter
 import groovy.util.logging.Slf4j
 import opennlp.tools.sentdetect.SentenceDetector
 import org.apache.solr.client.solrj.SolrClient
 import org.springframework.ai.document.Document
 import org.springframework.ai.embedding.EmbeddingModel
-import org.springframework.ai.transformer.splitter.TokenTextSplitter
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.stereotype.Service
-import opennlp.tools.sentdetect.SentenceDetectorME;
-import opennlp.tools.sentdetect.SentenceDetector;
-import opennlp.tools.sentdetect.SentenceModel;
-import com.oconeco.spring_pgvector.transformer.ParagraphSentenceSplitter
 
 @Slf4j
 @Service
@@ -73,8 +69,8 @@ class EmbeddingService {
                 List<Document> docChunks = textSplitter.transform([doc]);
                 log.info("\t\tDoc chunks: (${docChunks.size()})")
                 docChunks.each { chunk ->
-                    log.info("\t\t transformed/split Doc id:(${chunk.id}) -- metadata:(${chunk.getMetadata()}) --  content size:(${chunk.getText()?.size()}) ")
-                    log.debug("\t\t transformed/split Doc id:(${chunk.id})")
+                    log.debug("\t\t transformed/split Doc id:(${chunk.id}) -- metadata:(${chunk.getMetadata()}) --  content size:(${chunk.getText()?.size()}) ")
+//                    log.debug("\t\t transformed/split Doc id:(${chunk.id})")
                     docsToEmbed.add(chunk)
                 }
             }

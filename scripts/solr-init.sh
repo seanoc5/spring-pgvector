@@ -5,7 +5,7 @@ echo "====================== Starting Solr for upload and config...? ===========
 # Start Solr in background so we can do config commands
 solr start -cloud -p 8983
 
-COLLECTION_NAME="sanity-check"
+COLLECTION_NAME="spring-pgvector"
 CSV_FILE_PATH="/tmp/test-data.csv"
 
 # -------------------------------------------------------------------
