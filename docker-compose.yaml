@@ -3,10 +3,11 @@ services:
   ollama:
     image: 'ollama/ollama:latest'
     ports:
-      - '11434:11434'
+      - '11435:11434'
     deploy:
       resources:
         reservations:
+          # NOTE: review ollama and docker compose configs for your system, this works in mine (Sean) with my RTX 4070
           devices:
             - driver: nvidia
               count: 1
