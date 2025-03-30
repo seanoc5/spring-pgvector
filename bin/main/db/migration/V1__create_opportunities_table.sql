@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS opportunities (
 
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_opportunities_last_published_date ON opportunities(last_published_date);
-CREATE INDEX IF NOT EXISTS idx_opportunities_naics ON opportunities(naics);
+CREATE INDEX IF NOT EXISTS idx_opportunities_naics ON opportunities(naics_label);
 CREATE INDEX IF NOT EXISTS idx_opportunities_active_inactive ON opportunities(active_inactive);
 
 -- Create function to generate search vectors

@@ -2,6 +2,7 @@ package com.oconeco.spring_pgvector.service
 
 import com.oconeco.spring_pgvector.domain.Opportunity
 import com.oconeco.spring_pgvector.repository.OpportunityRepository
+import com.oconeco.spring_pgvector.repository.NaicsCodeRepository
 import com.oconeco.spring_pgvector.solr.SolrSyncService
 import groovy.util.logging.Slf4j
 import org.apache.commons.csv.CSVFormat
@@ -24,6 +25,9 @@ class OpportunityService {
 
     @Autowired
     private OpportunityRepository opportunityRepository
+
+    @Autowired
+    private NaicsCodeRepository naicsCodeRepository
 
     @Autowired
     private SolrSyncService solrSyncService
@@ -76,6 +80,7 @@ class OpportunityService {
                     contractAwardNumber: record.get("Contract Award Number"),
                     contractAwardDate: parseDate(record.get("Contract Award Date")),
                     naics: record.get("NAICS"),
+                    naicsLabel: record.get("NAICS Label") ?: lookupNaicsLabel(record.get("NAICS")),
                     psc: record.get("PSC"),
                     modificationNumber: record.get("Modification Number"),
                     setAside: record.get("Set Aside")
@@ -333,6 +338,26 @@ class OpportunityService {
             }
         } catch (Exception e) {
             log.warn "Could not parse date: ${dateStr} - ${e.message}"
+            return null
+        }
+    }
+
+    /**
+     * Look up NAICS label from the code
+     * @param naicsCode The NAICS code to look up
+     * @return The NAICS label if found, or null if not found
+     */
+    private String lookupNaicsLabel(String naicsCode) {
+        if (!naicsCode) {
+            return null
+        }
+        
+        try {
+            // Try to find the NAICS code in the database
+            def naicsCodeEntity = naicsCodeRepository.findById(naicsCode).orElse(null)
+            return naicsCodeEntity?.title
+        } catch (Exception e) {
+            log.warn("Error looking up NAICS label for code ${naicsCode}: ${e.message}")
             return null
         }
     }

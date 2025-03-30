@@ -66,6 +66,10 @@ dependencies {
     implementation 'org.apache.httpcomponents:httpclient:4.5.14'
     implementation 'org.apache.httpcomponents:httpcore:4.4.16'
     implementation 'org.apache.httpcomponents:httpmime:4.5.14'
+    
+    // Flyway for database migrations
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
@@ -146,3 +150,14 @@ task runOpportunitiesSearch(type: JavaExec) {
     args = ['--spring.profiles.active=csv-import', '--search=software development']
 }
 
+// Task to clean and migrate the database using Flyway
+task flywayCleanMigrate(type: JavaExec) {
+    description = 'Clean and migrate the database using Flyway'
+    group = 'database'
+
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.oconeco.spring_pgvector.SpringPgvectorApplication'
+
+    // Set the profile to activate the Flyway clean and migrate runner
+    args = ['--spring.profiles.active=flyway-clean']
+}

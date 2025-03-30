@@ -55,6 +55,9 @@ class Opportunity {
     @Column
     String naics
 
+    @Column(name = "naics_label")
+    String naicsLabel
+
     @Column
     String psc
 

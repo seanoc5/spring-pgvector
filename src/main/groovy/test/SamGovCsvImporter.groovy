@@ -110,7 +110,7 @@ class SamGovCsvImporter {
 
             // Create indexes for better query performance
             stmt.execute("CREATE INDEX idx_opportunities_last_published_date ON opportunities(last_published_date)")
-            stmt.execute("CREATE INDEX idx_opportunities_naics ON opportunities(naics)")
+            stmt.execute("CREATE INDEX idx_opportunities_naics ON opportunities(naics_label)")
             stmt.execute("CREATE INDEX idx_opportunities_active_inactive ON opportunities(active_inactive)")
 
             // Create function to generate search vectors
@@ -242,7 +242,7 @@ class SamGovCsvImporter {
                 notice_id, title, description, current_response_date, last_modified_date, 
                 last_published_date, contract_opportunity_type, poc_information, 
                 active_inactive, awardee, contract_award_number, contract_award_date, 
-                naics, psc, modification_number, set_aside
+                naics_label, psc, modification_number, set_aside
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT (notice_id) 
             DO UPDATE SET 
@@ -257,7 +257,7 @@ class SamGovCsvImporter {
                 awardee = EXCLUDED.awardee,
                 contract_award_number = EXCLUDED.contract_award_number,
                 contract_award_date = EXCLUDED.contract_award_date,
-                naics = EXCLUDED.naics,
+                naics_label = EXCLUDED.naics_label,
                 psc = EXCLUDED.psc,
                 modification_number = EXCLUDED.modification_number,
                 set_aside = EXCLUDED.set_aside,
@@ -406,7 +406,7 @@ class SamGovCsvImporter {
                 last_published_date,
                 contract_opportunity_type,
                 active_inactive,
-                naics,
+                naics_label,
                 ts_rank(search_vector, to_tsquery('english', ?)) AS rank,
                 ts_headline('english', title, to_tsquery('english', ?), 'StartSel=<b>, StopSel=</b>, MaxWords=50, MinWords=10, MaxFragments=3') AS highlighted_title,
                 ts_headline('english', description, to_tsquery('english', ?), 'StartSel=<b>, StopSel=</b>, MaxWords=100, MinWords=20, MaxFragments=3') AS highlighted_description

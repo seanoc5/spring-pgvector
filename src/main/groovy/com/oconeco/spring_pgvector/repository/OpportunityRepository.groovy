@@ -20,9 +20,14 @@ interface OpportunityRepository extends JpaRepository<Opportunity, String> {
     Page<Opportunity> findByActiveInactive(String status, Pageable pageable)
 
     /**
-     * Find opportunities by NAICS code.
+     * Find opportunities by NAICS label.
      */
     Page<Opportunity> findByNaicsContaining(String naics, Pageable pageable)
+
+    /**
+     * Find opportunities by NAICS label.
+     */
+    Page<Opportunity> findByNaicsLabelContaining(String naicsLabel, Pageable pageable)
 
     /**
      * Find opportunities by contract opportunity type.
