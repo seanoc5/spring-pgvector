@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solr Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card {
+            margin-bottom: 20px;
+        }
+        .result-box {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+        .spinner-border {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Solr Admin Dashboard</h1>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Reindex Operations</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Use these operations to reindex your data to Solr. This is useful when:</p>
+                        <ul>
+                            <li>You've made changes to the Solr schema</li>
+                            <li>You've imported data directly to the database</li>
+                            <li>You suspect the Solr index is out of sync with the database</li>
+                        </ul>
+                        
+                        <div class="d-grid gap-2">
+                            <button id="reindex-naics" class="btn btn-primary mb-2" hx-post="/admin/solr/reindex/naics" hx-target="#naics-result" hx-indicator="#naics-spinner">
+                                <span id="naics-spinner" class="spinner-border htmx-indicator" role="status"></span>
+                                Reindex All NAICS Codes
+                            </button>
+                            <div id="naics-result" class="result-box"></div>
+                            
+                            <button id="reindex-opportunities" class="btn btn-primary mb-2" hx-post="/admin/solr/reindex/opportunities" hx-target="#opportunities-result" hx-indicator="#opportunities-spinner">
+                                <span id="opportunities-spinner" class="spinner-border htmx-indicator" role="status"></span>
+                                Reindex All Opportunities
+                            </button>
+                            <div id="opportunities-result" class="result-box"></div>
+                            
+                            <button id="reindex-all" class="btn btn-danger" hx-post="/admin/solr/reindex/all" hx-target="#all-result" hx-indicator="#all-spinner">
+                                <span id="all-spinner" class="spinner-border htmx-indicator" role="status"></span>
+                                Reindex Everything
+                            </button>
+                            <div id="all-result" class="result-box"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Solr Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Solr URL:</strong> <span th:text="${solrUrl}">http://localhost:8983/solr</span></p>
+                        <p><strong>Collection:</strong> <span th:text="${solrCollection}">contracting</span></p>
+                        <div class="d-grid">
+                            <a th:href="${solrUrl + '/admin/cores?action=STATUS'}" class="btn btn-outline-secondary" target="_blank">
+                                Open Solr Admin
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Show result boxes when they receive content
+            document.body.addEventListener('htmx:afterSwap', function(event) {
+                if (event.detail.target.innerHTML.trim() !== '') {
+                    $(event.detail.target).show();
+                }
+            });
+            
+            // Format JSON responses
+            document.body.addEventListener('htmx:beforeSwap', function(event) {
+                try {
+                    const response = JSON.parse(event.detail.serverResponse);
+                    let html = '<div class="alert ' + (response.success ? 'alert-success' : 'alert-danger') + '">';
+                    html += '<h5>' + (response.success ? 'Success!' : 'Error!') + '</h5>';
+                    html += '<p>' + response.message + '</p>';
+                    
+                    if (response.counts) {
+                        html += '<ul>';
+                        for (const [key, value] of Object.entries(response.counts)) {
+                            html += '<li>' + key + ': ' + value + '</li>';
+                        }
+                        html += '</ul>';
+                    } else if (response.count) {
+                        html += '<p>Total records: ' + response.count + '</p>';
+                    }
+                    
+                    html += '</div>';
+                    event.detail.serverResponse = html;
+                } catch (e) {
+                    // Not JSON, leave as is
+                }
+            });
+        });
+    </script>
+</body>
+</html>
