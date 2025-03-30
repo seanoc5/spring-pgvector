@@ -34,7 +34,7 @@ class ParagraphSentenceSplitter implements DocumentTransformer {
                              int maxSentencesPerChunk = 5,
                              int minSentencesPerChunk = 1,
                              boolean keepSeparator = false) {
-        log.info("Creating ParagraphSentenceSplitter with maxSentencesPerChunk: ${maxSentencesPerChunk}, minSentencesPerChunk: ${minSentencesPerChunk}, keepSeparator: ${keepSeparator}")
+//        log.info("Creating ParagraphSentenceSplitter with maxSentencesPerChunk: ${maxSentencesPerChunk}, minSentencesPerChunk: ${minSentencesPerChunk}, keepSeparator: ${keepSeparator}")
         this.sentenceDetector = sentenceDetector
         this.maxSentencesPerChunk = maxSentencesPerChunk
         this.minSentencesPerChunk = minSentencesPerChunk
@@ -45,19 +45,19 @@ class ParagraphSentenceSplitter implements DocumentTransformer {
 
     @Override
     List<Document> transform(List<Document> documents) {
-        log.info("Transforming ${documents.size()} documents (paragraph/sentence splitting)")
+        log.debug("\t\tTransforming {} documents (paragraph/sentence splitting)",  documents.size())
         int docNo = 0
         List<Document> transformedDocuments = []
         documents.each {Document document ->
             transformedDocuments << document
             docNo++
             def docId = document.getMetadata().get("docId") ?: document.getId()
-            log.info("\t\t$docNo:$docId) metadata:(${document.getMetadata()}) --  doc content size:${document.getText()?.size()}")
+            log.debug("\t\t$docNo:$docId) metadata:(${document.getMetadata()}) --  doc content size:${document.getText()?.size()}")
             log.debug("\t\t$docNo:$docId) Original document: ${document}")
 
             // SPLIT DOCUMENT
             List<Document> splitDocuments = splitDocument(document)
-            log.info("\t\t$docNo:$docId) Split into ${splitDocuments.size()} documents")
+            log.debug("\t\t$docNo:$docId) Split into ${splitDocuments.size()} documents")
             transformedDocuments.addAll( splitDocuments)
         }
 
@@ -86,7 +86,7 @@ class ParagraphSentenceSplitter implements DocumentTransformer {
 
         // First split into paragraphs
         String[] paragraphs = paragraphPattern.split(text)
-        log.info("\t\t$docId) Split into ${paragraphs.length} paragraphs")
+        log.debug("\t\t$docId) Split into ${paragraphs.length} paragraphs")
 
         int paragraphIndex = 0
         for (String paragraph : paragraphs) {
@@ -105,7 +105,7 @@ class ParagraphSentenceSplitter implements DocumentTransformer {
 
             // Then split paragraphs into sentences
             String[] sentences = sentenceDetector.sentDetect(paragraph)
-            log.info("\t\t$docId)  Paragraph ${paragraphIndex + 1} split into ${sentences.length} sentences")
+            log.debug("\t\t$docId)  Paragraph ${paragraphIndex + 1} split into ${sentences.length} sentences")
 
             // Create a document for each chunk
             int sentenceIndex = 0

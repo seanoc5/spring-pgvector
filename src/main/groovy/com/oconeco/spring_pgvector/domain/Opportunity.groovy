@@ -4,6 +4,9 @@ import com.oconeco.spring_pgvector.solr.SolrEntityListener
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.annotations.Array
+import org.hibernate.type.SqlTypes
 import groovy.transform.ToString
 
 /**
@@ -75,6 +78,19 @@ class Opportunity {
     @Column(name = "updated_at")
     Date updatedAt
 
-    // Vector embedding and search vector are managed at the database level
-    // We don't need to map them directly in the entity
+    /**
+     * Vector embedding for semantic search using pgvector.
+     * This field stores the embedding vector generated from the title and description.
+     */
+    @JdbcTypeCode(SqlTypes.VECTOR)
+    @Array(length = 768)
+    @Column(name = "vector_embedding", columnDefinition = "vector(768)")
+    private float[] vectorEmbedding
+
+    /**
+     * PostgreSQL tsvector for full-text search.
+     * This field is managed by database triggers and should not be modified directly.
+     */
+    @Column(name = "search_vector", columnDefinition = "tsvector", insertable = false, updatable = false)
+    private String searchVector
 }

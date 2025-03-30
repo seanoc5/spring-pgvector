@@ -29,8 +29,7 @@ interface NaicsCodeRepository extends JpaRepository<NaicsCode, String> {
      * Find NAICS codes by title or description containing the search term (case insensitive).
      * This is used as a fallback when full-text search returns no results.
      */
-    Page<NaicsCode> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-        String title, String description, Pageable pageable)
+    Page<NaicsCode> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String title, String description, Pageable pageable)
 
     /**
      * Find NAICS codes by sector code.
@@ -86,7 +85,7 @@ interface NaicsCodeRepository extends JpaRepository<NaicsCode, String> {
            OR n.search_vector @@ to_tsquery('english', :tsQuery)
     """, nativeQuery = true)
     long countByFullTextSearch(@Param("tsQuery") String tsQuery)
-    
+
     /**
      * Find NAICS codes by vector similarity using pgvector's cosine distance.
      * This query uses the embedding_vector column to find semantically similar entries.
@@ -100,7 +99,7 @@ interface NaicsCodeRepository extends JpaRepository<NaicsCode, String> {
         LIMIT :limit
     """, nativeQuery = true)
     List<Object[]> findSimilarByEmbedding(@Param("embeddingVector") float[] embeddingVector, @Param("limit") int limit)
-    
+
     /**
      * Find NAICS codes by vector similarity with pagination.
      */

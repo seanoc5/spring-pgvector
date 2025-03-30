@@ -202,7 +202,7 @@ class NaicsCodeService {
 
         if (finalText) {
             try {
-                log.info("Generating embedding for NAICS code ${naicsCode.code}: ${finalText.take(100)}${finalText.length() > 100 ? '...' : ''}")
+                log.debug("\t\t${naicsCode.code}): embedding ${finalText.take(100)}${finalText.length() > 100 ? '...' : ''}")
                 Document document = new Document(finalText, [code: naicsCode.code, type:'document'])
                 chunks = embeddingService.embedDocuments([document])
 
@@ -210,7 +210,7 @@ class NaicsCodeService {
 //                naicsCode.embeddingVector = null
 
                 if(chunks) {
-                    log.info("\t\tGot back (${chunks.size()}) chunks")
+                    log.debug("\t\tGot back (${chunks.size()}) chunks")
                 } else {
                     log.warn "No chunks returned??? $chunks"
                 }
@@ -483,8 +483,9 @@ class NaicsCodeService {
         // Process each record
         records.each { CSVRecord record ->
             try {
+                def code = record.get("Code")
                 NaicsCode naicsCode = new NaicsCode(
-                        code: record.get("Code"),
+                        code: code,
                         title: record.get("Title"),
                         description: record.get("Description"),
                         sectorCode: record.get("SectorCode"),
@@ -509,7 +510,7 @@ class NaicsCodeService {
                 count++
 
                 if (count % 100 == 0) {
-                    log.info "Processed ${count} NAICS codes"
+                    log.info "Processed ${count} NAICS codes -- current code: $code"
                 }
             } catch (Exception e) {
                 log.error "Error processing NAICS code record: ${e.message}", e
@@ -626,8 +627,10 @@ class NaicsCodeService {
 
         log.info("Process (${codesMap.size()}) NAICS codes...")
         codesMap.each { code, naicsCode ->
+            count++
+
             try {
-                log.info("\t\tprocessing code: $naicsCode")
+                log.info("$count) processing code: $naicsCode")
                 // Set hierarchical relationships based on code length
                 setHierarchicalRelationships(naicsCode, codesMap)
 
@@ -637,7 +640,6 @@ class NaicsCodeService {
 
                 // Save to database
                 naicsCodeRepository.save(naicsCode)
-                count++
 
                 if (count % 100 == 0) {
                     log.info "Processed ${count} NAICS codes -- current:(${naicsCode.code})"

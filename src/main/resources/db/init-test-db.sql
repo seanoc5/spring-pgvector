@@ -1,5 +1,7 @@
--- this script should be run automatically for the initial setup (may not be run if the database already exists, even un-initiated)
--- Enable the pgvector extension in the test database
+-- PostgreSQL initialization script for pgvector and other extensions
+-- This script runs when the Docker container is first initialized
+
+-- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS hstore;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

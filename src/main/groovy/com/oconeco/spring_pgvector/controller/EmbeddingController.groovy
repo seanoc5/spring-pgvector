@@ -114,7 +114,7 @@ class EmbeddingController {
         List<Document> docs = [doc]
         def chunks = embeddingService.embedDocuments(docs)
 
-        log.info("Document embedded successfully. Split into ${chunks.size()} chunks")
+        log.info("\t\tDocument embedded successfully. Split into ${chunks.size()} chunks")
 
         // Add attributes to the model for display in the template
         model.addAttribute('document', doc)

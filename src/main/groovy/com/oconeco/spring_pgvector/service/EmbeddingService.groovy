@@ -59,7 +59,7 @@ class EmbeddingService {
      * @return
      */
     List<Document> embedDocuments(List<Document> documents) {
-        log.info("Embedding documents (${documents.size()})")
+        log.debug("\t\tEmbedding documents ({})", documents.size())
         List<Document> docsToEmbed = new ArrayList<>()
         if (documents) {
             // Use our custom ParagraphSentenceSplitter instead of TokenTextSplitter
@@ -67,15 +67,18 @@ class EmbeddingService {
             // Then add chunks for each document
             documents.each { Document doc ->
                 List<Document> docChunks = textSplitter.transform([doc]);
-                log.info("\t\tDoc chunks: (${docChunks.size()})")
+                log.debug("\t\tDoc chunks: ({})", docChunks.size())
                 docChunks.each { chunk ->
-                    log.debug("\t\t transformed/split Doc id:(${chunk.id}) -- metadata:(${chunk.getMetadata()}) --  content size:(${chunk.getText()?.size()}) ")
-//                    log.debug("\t\t transformed/split Doc id:(${chunk.id})")
+                    log.debug("\t\tTransformed/split Doc id:{} -- metadata:{} --  content size:{}", chunk.id, chunk.getMetadata(), chunk.getText()?.size())
                     docsToEmbed.add(chunk)
                 }
             }
-            vectorStore.add(docsToEmbed)
-            log.info("\t\tAdded ${docsToEmbed.size()} documents to embedding service")
+//            try {
+//                vectorStore.add(docsToEmbed)
+//                log.info("\t\tAdded ${docsToEmbed.size()} documents to embedding service")
+//            } catch (Exception e) {
+//                log.error "Error adding documents to embedding service: ${e.message}", e
+//            }
         } else {
             log.warn "Got empty list of documents to embed, skipping..."
         }
