@@ -6,13 +6,13 @@ plugins {
 }
 
 group = 'com.oconeco'
-version = '0.2.1'
+version = '0.2.2'
 
-java {
+/*java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
 	}
-}
+}*/
 
 configurations {
 	compileOnly {
@@ -119,66 +119,30 @@ task runNaicsExcelImporter(type: JavaExec) {
     args = ['--spring.profiles.active=naics-excel-import', "--file=${excelFile.absolutePath}"]
 }
 
-/*
-// Task to run the CSV importer
-task runCsvImporter(type: JavaExec) {
-    description = 'Run the SAM.gov CSV importer'
+// Task to run the SAM.gov Opportunities CSV importer
+task runOpportunitiesImporter(type: JavaExec) {
+    description = 'Run the SAM.gov Opportunities CSV importer'
     group = 'application'
 
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'test.RunCsvImporter'
+    mainClass = 'com.oconeco.spring_pgvector.SpringPgvectorApplication'
+
+    // Set the profile and file path
+    def resourcesDir = "${projectDir}/src/main/resources"
+    def csvFile = new File(resourcesDir, 'data/ContractOpportunities-20250329-055041.csv')
+
+    args = ['--spring.profiles.active=csv-import', "--file=${csvFile.absolutePath}"]
 }
 
-// Define the main application class
-application {
-    mainClass = 'com.oconeco.SamGovApplication'
-}
-
-// Task to run the main Spring Boot application
-task runMainApp(type: JavaExec) {
-    description = 'Run the main Spring Boot application'
+// Task to run the SAM.gov Opportunities search demo
+task runOpportunitiesSearch(type: JavaExec) {
+    description = 'Run the SAM.gov Opportunities search demo'
     group = 'application'
 
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'com.oconeco.SamGovApplication'
+    mainClass = 'com.oconeco.spring_pgvector.SpringPgvectorApplication'
+
+    // Set the profile and search query
+    args = ['--spring.profiles.active=csv-import', '--search=software development']
 }
 
-// Task to run the CSV importer with Spring Boot
-task runCsvImporterApp(type: JavaExec) {
-    description = 'Run the Spring Boot CSV importer application'
-    group = 'application'
-
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'com.oconeco.SamGovApplication'
-    args = ['--spring.profiles.active=csv-import']
-}
-
-// Task to run the CSV importer with a specific file
-task runCsvImporterWithFile(type: JavaExec) {
-    description = 'Run the Spring Boot CSV importer with a specific file'
-    group = 'application'
-
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'com.oconeco.SamGovApplication'
-
-    // Default arguments, can be overridden from command line with -Pargs="..."
-    args = ['--spring.profiles.active=csv-import', '--file=' + project.findProperty('csvFile')]
-
-    // Only run if csvFile property is provided
-    onlyIf {
-        project.hasProperty('csvFile')
-    }
-}
-
-// Task to run the search functionality
-task runSearch(type: JavaExec) {
-    description = 'Run the Spring Boot search functionality'
-    group = 'application'
-
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'com.oconeco.SamGovApplication'
-
-    // Default arguments, can be overridden from command line with -Pargs="..."
-    args = ['--spring.profiles.active=csv-import', '--search=' + (project.findProperty('query') ?: 'software development')]
-}
-*/

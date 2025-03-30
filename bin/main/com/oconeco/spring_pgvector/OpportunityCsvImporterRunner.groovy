@@ -49,6 +49,7 @@ class OpportunityCsvImporterRunner implements ApplicationRunner {
             log.info "No CSV file specified. Use --file=<path> to specify a CSV file to import."
             printUsage()
         }
+        return
     }
 
     /**

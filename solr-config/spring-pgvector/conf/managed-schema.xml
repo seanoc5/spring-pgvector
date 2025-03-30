@@ -8,14 +8,13 @@
 
 
     <!-- SoC Customizations -->
-    <field name="code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
+    <field name="naics" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
     <field name="sector_code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
     <field name="subsector_code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
 <!--    <field name="industry_code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>-->
     <field name="naics_industry_code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
     <field name="national_industry_code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
 
-<!--    <field name="code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>-->
     <field name="level" type="pint" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
     <field name="lastUpdated" type="pdate" indexed="true" stored="true" multiValued="false" default="NOW"/>
 
@@ -32,6 +31,10 @@
     <field name="bucket_tight" type="text_general" indexed="true" stored="true" multiValued="true"/>
     <field name="bucket_fuzzy" type="text_en" indexed="true" stored="true" multiValued="true" />
 
+    <!-- ===================== Opportunity Fields ===================== -->
+    <field name="psc" type="text_en" indexed="true" stored="true" multiValued="true"/>
+    <field name="set_aside" type="text_en" indexed="true" stored="true" multiValued="true"/>
+<!--    <field name="" type="" indexed="true" stored="true" multiValued="true"/>-->
 
     <!-- ====================== Fields ====================== -->
     <dynamicField name="*_shingle" type="shingle" indexed="true" stored="true"/>
@@ -45,7 +48,7 @@
     <copyField source="title" dest="bucket_tight"/>
     <copyField source="title" dest="bucket_fuzzy"/>
 
-    <copyField source="code" dest="bucket_tight"/>
+    <copyField source="naics" dest="bucket_tight"/>
     <copyField source="naics_industry_title" dest="bucket_tight"/>
     <copyField source="national_industry_title" dest="bucket_tight"/>
 
@@ -57,6 +60,11 @@
 
     <copyField source="sector_title" dest="bucket_fuzzy"/>
     <copyField source="subsector_title" dest="bucket_fuzzy"/>
+
+    <copyField source="psc" dest="bucket_fuzzy"/>
+    <copyField source="psc" dest="psc_s"/>
+    <copyField source="set_aside" dest="bucket_fuzzy"/>
+    <copyField source="set_aside" dest="set_aside_s"/>
 
     <fieldType name="text_en" class="solr.TextField" positionIncrementGap="100" multiValued="true">
         <analyzer type="index">

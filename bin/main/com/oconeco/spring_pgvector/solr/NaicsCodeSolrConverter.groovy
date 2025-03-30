@@ -19,7 +19,7 @@ class NaicsCodeSolrConverter implements SolrDocumentConverter<NaicsCode> {
         doc.addField("type_s", "naics_code")
 
         // Core fields
-        doc.addField("code", naicsCode.code)
+        doc.addField("naics", naicsCode.code)
         doc.addField("level", naicsCode.level)
         doc.addField("title", naicsCode.title)
         doc.addField("description", naicsCode.description)

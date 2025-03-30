@@ -26,7 +26,7 @@
                             </a>
                         </td>
                     </tr>
-                    <tr th:if="${page.empty}">
+                    <tr th:if="${page.isEmpty()}">
                         <td colspan="5" class="text-center">No embeddings found</td>
                     </tr>
                 </tbody>
@@ -34,7 +34,7 @@
         </div>
 
         <!-- Pagination -->
-        <div th:if="${!page.empty}" class="d-flex justify-content-center">
+        <div th:if="${!page.isEmpty()}" class="d-flex justify-content-center">
             <nav aria-label="Embedding pagination">
                 <ul class="pagination">
                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">

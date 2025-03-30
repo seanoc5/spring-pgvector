@@ -139,35 +139,36 @@ class SearchService {
         try {
             // Create Solr query
             SolrQuery solrQuery = new SolrQuery()
+            solrQuery.setRequestHandler('/naics')
             solrQuery.setQuery(normalizedQuery)
-            
+
             // Add highlighting
-            solrQuery.setHighlight(true)
-            solrQuery.addHighlightField("title")
-            solrQuery.addHighlightField("description")
-            solrQuery.setHighlightSimplePre("<b>")
-            solrQuery.setHighlightSimplePost("</b>")
-            
+//            solrQuery.setHighlight(true)
+//            solrQuery.addHighlightField("title")
+//            solrQuery.addHighlightField("description")
+//            solrQuery.setHighlightSimplePre("<b>")
+//            solrQuery.setHighlightSimplePost("</b>")
+
             // Add pagination
             solrQuery.setStart(pageable.getPageNumber() * pageable.getPageSize())
             solrQuery.setRows(pageable.getPageSize())
-            
+
             // Execute query
             QueryResponse response = solrClient.query(solrCollection, solrQuery)
-            
+
             // Get total count
             long totalCount = response.getResults().getNumFound()
-            
+
             // Transform results
             List<Map<String, Object>> transformedResults = response.getResults().collect { SolrDocument doc ->
                 String id = doc.getFieldValue("id") as String
                 NaicsCode naicsCode = naicsCodeRepository.findById(id).orElse(null)
-                
+
                 // Get highlighting if available
                 Map<String, List<String>> highlighting = response.getHighlighting()?.get(id)
                 String highlightedTitle = highlighting?.get("title")?.join("... ") ?: naicsCode?.title
                 String highlightedDescription = highlighting?.get("description")?.join("... ") ?: naicsCode?.description
-                
+
                 return [
                     naicsCode             : naicsCode,
                     rank                  : doc.getFieldValue("score") as Float,
@@ -176,7 +177,7 @@ class SearchService {
                     searchType            : "solr"
                 ]
             }
-            
+
             return new PageImpl<>(transformedResults, pageable, totalCount)
         } catch (Exception e) {
             log.error("Error searching with Solr: ${e.message}", e)
@@ -198,24 +199,24 @@ class SearchService {
         try {
             // Generate embedding for the query
             float[] queryEmbedding = embeddingModel.embed(normalizedQuery)
-            
+
             // Search for similar documents in vector store
             List<Document> similarDocuments = vectorStore.similaritySearch(normalizedQuery, pageable.getPageSize())
-            
+
             // Transform results
             List<Map<String, Object>> transformedResults = similarDocuments.collect { Document doc ->
                 // Extract NAICS code ID from document metadata
                 String naicsCodeId = doc.getMetadata().get("naicsCodeId") as String
                 NaicsCode naicsCode = naicsCodeRepository.findById(naicsCodeId).orElse(null)
-                
+
                 // Calculate similarity score (normalized between 0 and 1)
-                float score = doc.getMetadata().get("score") != null ? 
+                float score = doc.getMetadata().get("score") != null ?
                     doc.getMetadata().get("score") as float : 0.5f
-                
+
                 // Create simple highlighting based on query terms
                 String highlightedTitle = naicsCode?.title
                 String highlightedDescription = naicsCode?.description
-                
+
                 if (naicsCode) {
                     // Simple highlighting for vector search results
                     String[] queryTerms = normalizedQuery.split(/\s+/)
@@ -227,7 +228,7 @@ class SearchService {
                         }
                     }
                 }
-                
+
                 return [
                     naicsCode             : naicsCode,
                     rank                  : score,
@@ -237,10 +238,10 @@ class SearchService {
                     content               : doc.getText() // Include the actual document content
                 ]
             }
-            
+
             // Filter out null NAICS codes (in case some documents don't have valid references)
             transformedResults = transformedResults.findAll { it.naicsCode != null }
-            
+
             return new PageImpl<>(transformedResults, pageable, transformedResults.size())
         } catch (Exception e) {
             log.error("Error searching with vector store: ${e.message}", e)
@@ -253,11 +254,11 @@ class SearchService {
      */
     Map<String, Page<Map<String, Object>>> searchWithAllMethods(String query, Pageable pageable) {
         Map<String, Page<Map<String, Object>>> results = [:]
-        
+
         results.postgres = searchWithPostgres(query, pageable)
         results.solr = searchWithSolr(query, pageable)
         results.vector = searchWithVectorStore(query, pageable)
-        
+
         return results
     }
 
@@ -292,7 +293,7 @@ class SearchService {
 
         return new PageImpl<>(transformedResults, pageable, results.totalElements)
     }
-    
+
     /**
      * Returns empty search results
      */

@@ -1,6 +1,9 @@
 package com.oconeco.spring_pgvector.controller
 
 import com.oconeco.spring_pgvector.domain.Opportunity
+import com.oconeco.spring_pgvector.exception.ResourceNotFoundException
+import com.oconeco.spring_pgvector.exception.ServiceException
+import com.oconeco.spring_pgvector.exception.ValidationException
 import com.oconeco.spring_pgvector.service.OpportunityService
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,7 +31,7 @@ class OpportunityWebController {
     /**
      * Display the opportunities list page.
      */
-    @GetMapping
+    @GetMapping(["", "/"])
     String listOpportunities(
             Model model,
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -64,6 +67,98 @@ class OpportunityWebController {
             return "opportunities/view"
         } else {
             return "redirect:/opportunities"
+        }
+    }
+
+    /**
+     * Display the create opportunity form.
+     */
+    @GetMapping("/create")
+    String createOpportunityForm(Model model) {
+        model.addAttribute("opportunity", new Opportunity())
+        return "opportunities/form"
+    }
+
+    /**
+     * Handle opportunity creation.
+     */
+    @PostMapping
+    String createOpportunity(
+            @ModelAttribute Opportunity opportunity,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Opportunity saved = opportunityService.createOpportunity(opportunity)
+            redirectAttributes.addFlashAttribute("success", "Opportunity created successfully")
+            return "redirect:/opportunities/${saved.noticeId}"
+        } catch (ValidationException e) {
+            log.error "Validation error creating opportunity: ${e.developerMessage}", e
+            redirectAttributes.addFlashAttribute("error", e.userMessage)
+            return "redirect:/opportunities/create"
+        } catch (ServiceException e) {
+            log.error "Service error creating opportunity: ${e.developerMessage}", e
+            redirectAttributes.addFlashAttribute("error", e.userMessage)
+            return "redirect:/opportunities/create"
+        }
+    }
+
+    /**
+     * Display the edit opportunity form.
+     */
+    @GetMapping("/{noticeId}/edit")
+    String editOpportunityForm(@PathVariable String noticeId, Model model) {
+        try {
+            Opportunity opportunity = opportunityService.getOpportunityByNoticeId(noticeId)
+            if (opportunity) {
+                model.addAttribute("opportunity", opportunity)
+                return "opportunities/form"
+            } else {
+                throw new ResourceNotFoundException("Opportunity", noticeId)
+            }
+        } catch (ResourceNotFoundException e) {
+            log.error "Resource not found: ${e.developerMessage}", e
+            return "redirect:/opportunities"
+        }
+    }
+
+    /**
+     * Handle opportunity update.
+     */
+    @PostMapping("/{noticeId}")
+    String updateOpportunity(
+            @PathVariable String noticeId,
+            @ModelAttribute Opportunity opportunity,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Opportunity updated = opportunityService.updateOpportunity(noticeId, opportunity)
+            redirectAttributes.addFlashAttribute("success", "Opportunity updated successfully")
+            return "redirect:/opportunities/${updated.noticeId}"
+        } catch (ValidationException e) {
+            log.error "Validation error updating opportunity: ${e.developerMessage}", e
+            redirectAttributes.addFlashAttribute("error", e.userMessage)
+            return "redirect:/opportunities/${noticeId}/edit"
+        } catch (ServiceException e) {
+            log.error "Service error updating opportunity: ${e.developerMessage}", e
+            redirectAttributes.addFlashAttribute("error", e.userMessage)
+            return "redirect:/opportunities/${noticeId}/edit"
+        } catch (ResourceNotFoundException e) {
+            log.error "Resource not found: ${e.developerMessage}", e
+            redirectAttributes.addFlashAttribute("error", e.userMessage)
+            return "redirect:/opportunities"
+        }
+    }
+
+    /**
+     * Handle opportunity deletion.
+     */
+    @DeleteMapping("/{noticeId}")
+    @ResponseBody
+    Map<String, String> deleteOpportunity(@PathVariable String noticeId) {
+        try {
+            opportunityService.deleteOpportunity(noticeId)
+            return [success: "true", message: "Opportunity deleted successfully"]
+        } catch (Exception e) {
+            log.error "Error deleting opportunity: ${e.message}", e
+            return [success: "false", message: "Error deleting opportunity: ${e.message}"]
         }
     }
 

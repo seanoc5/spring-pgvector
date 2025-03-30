@@ -37,6 +37,22 @@
                 </ul>
             </li>
             <li>
+                <a href="#opportunitiesSubmenu" data-bs-toggle="collapse" aria-expanded="true" class="dropdown-toggle">
+                    <i class="fas fa-file-contract"></i> Opportunities
+                </a>
+                <ul class="collapse show list-unstyled" id="opportunitiesSubmenu">
+                    <li>
+                        <a th:href="@{/opportunities/}">List Opportunities</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/opportunities/create}">Create Opportunity</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/opportunities/import}">Import Opportunities</a>
+                    </li>
+                </ul>
+            </li>
+            <li>
                 <a href="#naicsSubmenu" data-bs-toggle="collapse" aria-expanded="true" class="dropdown-toggle">
                     <i class="fas fa-vector-square"></i> NAICS codes
                 </a>

@@ -24,7 +24,7 @@ class OpportunityService {
 
     @Autowired
     private OpportunityRepository opportunityRepository
-    
+
     @Autowired
     private SolrSyncService solrSyncService
 
@@ -39,7 +39,7 @@ class OpportunityService {
      */
     @Transactional
     int importFromCsv(File csvFile) {
-        log.info "Importing data from CSV file: ${csvFile.absolutePath}"
+        log.debug "Importing data from CSV file: ${csvFile.absolutePath}"
 
         if (!csvFile.exists()) {
             throw new FileNotFoundException("CSV file not found: ${csvFile.absolutePath}")
@@ -103,20 +103,26 @@ class OpportunityService {
         log.info "Imported ${count} records from CSV file"
         return count
     }
-    
+
     /**
      * Save a batch of opportunities and sync them to Solr
      */
     private void saveAndSyncBatch(List<Opportunity> opportunities) {
-        if (!opportunities) return
-        
+        if (!opportunities){
+            log.warn "No opportunities to save, cowardly returning without doing anything useful"
+            return
+        }
+
         // Save to database
         List<Opportunity> savedOpportunities = opportunities.collect { opportunity ->
-            opportunityRepository.save(opportunity)
+            def rc = opportunityRepository.save(opportunity)
+            log.debug("Save result: ${rc}")
+            return rc
         }
-        
+
         // Sync to Solr
-        solrSyncService.saveAll(savedOpportunities)
+        def rc = solrSyncService.saveAll(savedOpportunities)
+        log.info("results of solrSyncService.saveAll: ${rc}")
     }
 
     /**
@@ -189,7 +195,7 @@ class OpportunityService {
     Opportunity getOpportunityByNoticeId(String noticeId) {
         return opportunityRepository.findById(noticeId).orElse(null)
     }
-    
+
     /**
      * Create a new opportunity.
      */
@@ -205,10 +211,10 @@ class OpportunityService {
 
         // Save to database
         Opportunity savedOpportunity = opportunityRepository.save(opportunity)
-        
+
         // Explicitly sync with Solr
         solrSyncService.save(savedOpportunity)
-        
+
         return savedOpportunity
     }
 
@@ -222,13 +228,13 @@ class OpportunityService {
         }
 
         opportunity.noticeId = noticeId  // Ensure the notice ID is not changed
-        
+
         // Save to database
         Opportunity updatedOpportunity = opportunityRepository.save(opportunity)
-        
+
         // Explicitly sync with Solr
         solrSyncService.save(updatedOpportunity)
-        
+
         return updatedOpportunity
     }
 
@@ -240,19 +246,19 @@ class OpportunityService {
         if (!opportunityRepository.existsById(noticeId)) {
             throw new IllegalArgumentException("Opportunity with notice ID ${noticeId} not found")
         }
-        
+
         // Get the entity before deleting it
         Opportunity opportunity = opportunityRepository.findById(noticeId).orElse(null)
-        
+
         // Delete from database
         opportunityRepository.deleteById(noticeId)
-        
+
         // Explicitly delete from Solr
         if (opportunity) {
             solrSyncService.delete(opportunity)
         }
     }
-    
+
     /**
      * Reindex all opportunities in Solr.
      * This is useful for initial setup or when Solr schema changes.
@@ -261,16 +267,16 @@ class OpportunityService {
     @Transactional(readOnly = true)
     int reindexAllToSolr() {
         log.info("Reindexing all opportunities to Solr")
-        
+
         // First, delete all existing opportunity documents from Solr
         solrSyncService.deleteAllByType(Opportunity.class)
-        
+
         // Batch process to avoid memory issues with large datasets
         int batchSize = 100
         int totalProcessed = 0
         boolean hasMore = true
         int page = 0
-        
+
         while (hasMore) {
             Page<Opportunity> batch = opportunityRepository.findAll(Pageable.ofSize(batchSize).withPage(page))
             if (batch.hasContent()) {
@@ -278,11 +284,11 @@ class OpportunityService {
                 totalProcessed += batchProcessed
                 log.info("Reindexed batch ${page + 1} to Solr: ${batchProcessed} records")
             }
-            
+
             page++
             hasMore = batch.hasNext()
         }
-        
+
         log.info("Completed reindexing ${totalProcessed} opportunities to Solr")
         return totalProcessed
     }

@@ -3,6 +3,7 @@ package com.oconeco.spring_pgvector.exception
 import groovy.util.logging.Slf4j
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -23,53 +24,95 @@ class GlobalExceptionHandler {
 //    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class)
 
     /**
-     * Handle parameter name missing exceptions.
-     * This occurs when @RequestParam in Groovy doesn't have an explicit name parameter.
+     * Handle custom base exceptions.
      */
-    @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ModelAndView handleParameterNameMissingException(IllegalArgumentException ex, HttpServletRequest request) {
-        String message = ex.getMessage()
-        
-        // Check if this is the specific parameter name error
-        if (message?.contains("Name for argument of type") && message?.contains("not specified")) {
-            log.error("Parameter name missing in controller method: {}", message)
-            
-            ModelAndView modelAndView = new ModelAndView("error/400")
-            modelAndView.addObject("timestamp", new Date())
-            modelAndView.addObject("status", HttpStatus.BAD_REQUEST.value())
-            modelAndView.addObject("error", "Missing Parameter Name")
-            modelAndView.addObject("message", "A controller method is missing an explicit parameter name. In Groovy, all @RequestParam parameters must include a 'name' attribute. For example: @RequestParam(name = 'query') String query")
-            modelAndView.addObject("path", request.getRequestURI())
-            modelAndView.addObject("developerMessage", "Check controller methods and ensure all @RequestParam annotations include a 'name' attribute.")
-            
-            return modelAndView
-        }
-        
-        // If it's a different IllegalArgumentException, delegate to the general exception handler
-        return handleException(ex, request)
-    }
-
-    /**
-     * Handle general exceptions.
-     */
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(BaseException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    ModelAndView handleException(Exception ex, HttpServletRequest request) {
-        log.error("General Exception occurred: {}", ex.getMessage(), ex)
+    Object handleBaseException(BaseException ex, HttpServletRequest request) {
+        log.error("Base exception occurred: {}", ex.getDeveloperMessage(), ex)
+        
+        if (isApiRequest(request)) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body([
+                    success: false,
+                    error: [
+                        code: ex.getErrorCode(),
+                        message: ex.getUserMessage(),
+                        developerMessage: ex.getDeveloperMessage()
+                    ]
+                ])
+        }
 
         ModelAndView modelAndView = new ModelAndView("error/general")
         modelAndView.addObject("timestamp", new Date())
         modelAndView.addObject("status", HttpStatus.INTERNAL_SERVER_ERROR.value())
-        modelAndView.addObject("error", "Internal Server Error")
-        modelAndView.addObject("message", ex.getMessage())
+        modelAndView.addObject("error", ex.getErrorCode())
+        modelAndView.addObject("message", ex.getUserMessage())
         modelAndView.addObject("path", request.getRequestURI())
+        modelAndView.addObject("developerMessage", ex.getDeveloperMessage())
         
-        // Filter stack trace to only show application code
-        def filteredTrace = filterStackTrace(ex.getStackTrace())
-        modelAndView.addObject("trace", filteredTrace)
-        modelAndView.addObject("fullTrace", ex.getStackTrace()) // Keep full trace available if needed
+        return modelAndView
+    }
 
+    /**
+     * Handle resource not found exceptions.
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    Object handleResourceNotFoundException(ResourceNotFoundException ex, HttpServletRequest request) {
+        log.error("Resource not found: {}", ex.getDeveloperMessage(), ex)
+        
+        if (isApiRequest(request)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body([
+                    success: false,
+                    error: [
+                        code: ex.getErrorCode(),
+                        message: ex.getUserMessage(),
+                        developerMessage: ex.getDeveloperMessage()
+                    ]
+                ])
+        }
+
+        ModelAndView modelAndView = new ModelAndView("error/404")
+        modelAndView.addObject("timestamp", new Date())
+        modelAndView.addObject("status", HttpStatus.NOT_FOUND.value())
+        modelAndView.addObject("error", ex.getErrorCode())
+        modelAndView.addObject("message", ex.getUserMessage())
+        modelAndView.addObject("path", request.getRequestURI())
+        modelAndView.addObject("developerMessage", ex.getDeveloperMessage())
+        
+        return modelAndView
+    }
+
+    /**
+     * Handle validation exceptions.
+     */
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    Object handleValidationException(ValidationException ex, HttpServletRequest request) {
+        log.error("Validation error: {}", ex.getDeveloperMessage(), ex)
+        
+        if (isApiRequest(request)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body([
+                    success: false,
+                    error: [
+                        code: ex.getErrorCode(),
+                        message: ex.getUserMessage(),
+                        developerMessage: ex.getDeveloperMessage()
+                    ]
+                ])
+        }
+
+        ModelAndView modelAndView = new ModelAndView("error/400")
+        modelAndView.addObject("timestamp", new Date())
+        modelAndView.addObject("status", HttpStatus.BAD_REQUEST.value())
+        modelAndView.addObject("error", ex.getErrorCode())
+        modelAndView.addObject("message", ex.getUserMessage())
+        modelAndView.addObject("path", request.getRequestURI())
+        modelAndView.addObject("developerMessage", ex.getDeveloperMessage())
+        
         return modelAndView
     }
 
@@ -84,9 +127,10 @@ class GlobalExceptionHandler {
         ModelAndView modelAndView = new ModelAndView("error/template-error")
         modelAndView.addObject("timestamp", new Date())
         modelAndView.addObject("status", HttpStatus.NOT_FOUND.value())
-        modelAndView.addObject("error", "Template Not Found")
-        modelAndView.addObject("message", ex.getMessage())
+        modelAndView.addObject("error", "TEMPLATE_NOT_FOUND")
+        modelAndView.addObject("message", "The requested page template could not be found")
         modelAndView.addObject("path", request.getRequestURI())
+        modelAndView.addObject("developerMessage", ex.getMessage())
 
         return modelAndView
     }
@@ -102,9 +146,10 @@ class GlobalExceptionHandler {
         ModelAndView modelAndView = new ModelAndView("error/404")
         modelAndView.addObject("timestamp", new Date())
         modelAndView.addObject("status", HttpStatus.NOT_FOUND.value())
-        modelAndView.addObject("error", "Resource Not Found")
-        modelAndView.addObject("message", "The static resource you are looking for could not be found: " + ex.getMessage())
+        modelAndView.addObject("error", "RESOURCE_NOT_FOUND")
+        modelAndView.addObject("message", "The requested resource could not be found")
         modelAndView.addObject("path", request.getRequestURI())
+        modelAndView.addObject("developerMessage", ex.getMessage())
 
         return modelAndView
     }
@@ -120,9 +165,10 @@ class GlobalExceptionHandler {
         ModelAndView modelAndView = new ModelAndView("error/404")
         modelAndView.addObject("timestamp", new Date())
         modelAndView.addObject("status", HttpStatus.NOT_FOUND.value())
-        modelAndView.addObject("error", "Page Not Found")
-        modelAndView.addObject("message", "The page you are looking for does not exist")
+        modelAndView.addObject("error", "PAGE_NOT_FOUND")
+        modelAndView.addObject("message", "The requested page does not exist")
         modelAndView.addObject("path", request.getRequestURI())
+        modelAndView.addObject("developerMessage", ex.getMessage())
 
         return modelAndView
     }
@@ -138,23 +184,49 @@ class GlobalExceptionHandler {
         ModelAndView modelAndView = new ModelAndView("error/403")
         modelAndView.addObject("timestamp", new Date())
         modelAndView.addObject("status", HttpStatus.FORBIDDEN.value())
-        modelAndView.addObject("error", "Access Denied")
+        modelAndView.addObject("error", "ACCESS_DENIED")
         modelAndView.addObject("message", "You do not have permission to access this resource")
         modelAndView.addObject("path", request.getRequestURI())
+        modelAndView.addObject("developerMessage", ex.getMessage())
 
         return modelAndView
     }
 
     /**
-     * Filter a stack trace to only show elements from application code.
-     * @param stackTrace The full stack trace
-     * @return A filtered stack trace containing only application code elements
+     * Handle general exceptions.
      */
-    private StackTraceElement[] filterStackTrace(StackTraceElement[] stackTrace) {
-        if (stackTrace == null) return new StackTraceElement[0]
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    Object handleException(Exception ex, HttpServletRequest request) {
+        log.error("Unexpected error occurred: {}", ex.getMessage(), ex)
+
+        if (isApiRequest(request)) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body([
+                    success: false,
+                    error: [
+                        code: "INTERNAL_ERROR",
+                        message: "An unexpected error occurred",
+                        developerMessage: ex.getMessage()
+                    ]
+                ])
+        }
+
+        ModelAndView modelAndView = new ModelAndView("error/general")
+        modelAndView.addObject("timestamp", new Date())
+        modelAndView.addObject("status", HttpStatus.INTERNAL_SERVER_ERROR.value())
+        modelAndView.addObject("error", "INTERNAL_ERROR")
+        modelAndView.addObject("message", "An unexpected error occurred")
+        modelAndView.addObject("path", request.getRequestURI())
+        modelAndView.addObject("developerMessage", ex.getMessage())
         
-        return stackTrace.findAll { element ->
-            element.className.startsWith('com.oconeco.')
-        } as StackTraceElement[]
+        return modelAndView
+    }
+
+    /**
+     * Check if the request is an API request.
+     */
+    private boolean isApiRequest(HttpServletRequest request) {
+        return request.getRequestURI().startsWith("/api/")
     }
 }

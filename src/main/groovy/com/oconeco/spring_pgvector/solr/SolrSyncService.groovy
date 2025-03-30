@@ -85,7 +85,7 @@ class SolrSyncService {
                 }
 
                 UpdateResponse respose = solrClient.add(solrProperties.collection, docs)
-                log.info("Update response: ${respose}")
+                log.info("\t\tUpdate response: ${respose}")
                 solrClient.commit(solrProperties.collection)
                 savedCount += entityList.size()
                 log.debug("Saved ${entityList.size()} ${entityClass.simpleName} entities to Solr")

@@ -17,7 +17,7 @@
                     </div>
                     <div class="card-body">
                         <!-- Results table -->
-                        <div th:if="${postgresResults != null and !postgresResults.empty}" class="table-responsive">
+                        <div th:if="${postgresResults != null and !#lists.isEmpty(postgresResults.content)}" class="table-responsive">
                             <table class="table table-sm table-hover">
                                 <thead>
                                     <tr>
@@ -51,7 +51,7 @@
                         </div>
                         
                         <!-- No results message -->
-                        <div th:if="${postgresResults != null and postgresResults.empty}" class="alert alert-warning">
+                        <div th:if="${postgresResults != null and #lists.isEmpty(postgresResults.content)}" class="alert alert-warning">
                             No PostgreSQL results found
                         </div>
                         
@@ -68,7 +68,7 @@
                     </div>
                     <div class="card-footer text-muted">
                         <div class="d-flex justify-content-between align-items-center">
-                            <small>Found: <span th:text="${postgresResults.totalElements}"></span> results</small>
+                            <small>Found: <span th:text="${postgresResults != null ? postgresResults.totalElements : 0}">0</span> results</small>
                             <a th:href="@{/search(q=${query},method='postgres',page=0,size=${pageSize},sortBy=${sortBy},sortDir=${sortDir})}"
                                class="btn btn-sm btn-outline-secondary">
                                 Full View
@@ -91,7 +91,7 @@
                     </div>
                     <div class="card-body">
                         <!-- Results table -->
-                        <div th:if="${solrResults != null and !solrResults.empty}" class="table-responsive">
+                        <div th:if="${solrResults != null and !#lists.isEmpty(solrResults.content)}" class="table-responsive">
                             <table class="table table-sm table-hover">
                                 <thead>
                                     <tr>
@@ -125,7 +125,7 @@
                         </div>
                         
                         <!-- No results message -->
-                        <div th:if="${solrResults != null and solrResults.empty}" class="alert alert-warning">
+                        <div th:if="${solrResults != null and #lists.isEmpty(solrResults.content)}" class="alert alert-warning">
                             No Solr results found
                         </div>
                         
@@ -142,7 +142,7 @@
                     </div>
                     <div class="card-footer text-muted">
                         <div class="d-flex justify-content-between align-items-center">
-                            <small>Found: <span th:text="${solrResults.totalElements}"></span> results</small>
+                            <small>Found: <span th:text="${solrResults != null ? solrResults.totalElements : 0}">0</span> results</small>
                             <a th:href="@{/search(q=${query},method='solr',page=0,size=${pageSize},sortBy=${sortBy},sortDir=${sortDir})}"
                                class="btn btn-sm btn-outline-secondary">
                                 Full View
@@ -165,7 +165,7 @@
                     </div>
                     <div class="card-body">
                         <!-- Results table -->
-                        <div th:if="${vectorResults != null and !vectorResults.empty}" class="table-responsive">
+                        <div th:if="${vectorResults != null and !#lists.isEmpty(vectorResults.content)}" class="table-responsive">
                             <table class="table table-sm table-hover">
                                 <thead>
                                     <tr>
@@ -199,7 +199,7 @@
                         </div>
                         
                         <!-- No results message -->
-                        <div th:if="${vectorResults != null and vectorResults.empty}" class="alert alert-warning">
+                        <div th:if="${vectorResults != null and #lists.isEmpty(vectorResults.content)}" class="alert alert-warning">
                             No Vector results found
                         </div>
                         
@@ -216,7 +216,7 @@
                     </div>
                     <div class="card-footer text-muted">
                         <div class="d-flex justify-content-between align-items-center">
-                            <small>Found: <span th:text="${vectorResults.totalElements}"></span> results</small>
+                            <small>Found: <span th:text="${vectorResults != null ? vectorResults.totalElements : 0}">0</span> results</small>
                             <a th:href="@{/search(q=${query},method='vector',page=0,size=${pageSize},sortBy=${sortBy},sortDir=${sortDir})}"
                                class="btn btn-sm btn-outline-secondary">
                                 Full View
