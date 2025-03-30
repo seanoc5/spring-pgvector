@@ -6,24 +6,25 @@
     <field name="_version_" type="plong" indexed="true" stored="false" docValues="true"/>
     <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
 
-    <!-- SoC Customizations -->
 
+    <!-- SoC Customizations -->
     <field name="code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
     <field name="sector_code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
-    <field name="industry_code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
+    <field name="subsector_code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
+<!--    <field name="industry_code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>-->
     <field name="naics_industry_code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
     <field name="national_industry_code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
 
 <!--    <field name="code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>-->
     <field name="level" type="pint" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
+    <field name="lastUpdated" type="pdate" indexed="true" stored="true" multiValued="false" default="NOW"/>
 
     <!--    use text_general for 'tighter' matching, then copy to text_en for 'looser' matching-->
     <field name="title" type="text_general" indexed="true" stored="true"/>
     <field name="sector_title" type="text_general" indexed="true" stored="true"/>
     <field name="subsector_title" type="text_general" indexed="true" stored="true"/>
-    <field name="industry_group_title" type="text_general" indexed="true" stored="true"/>
     <field name="naics_industry_title" type="text_general" indexed="true" stored="true"/>
-    <field name="national_industry_code_title" type="text_general" indexed="true" stored="true"/>
+    <field name="national_industry_title" type="text_general" indexed="true" stored="true"/>
 
     <field name="description" type="text_general" indexed="true" stored="true"/>
     <field name="tags" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="true"/>
@@ -45,12 +46,17 @@
     <copyField source="title" dest="bucket_fuzzy"/>
 
     <copyField source="code" dest="bucket_tight"/>
+    <copyField source="naics_industry_title" dest="bucket_tight"/>
+    <copyField source="national_industry_title" dest="bucket_tight"/>
 
     <copyField source="description" dest="description_txt_en"/>
     <copyField source="description" dest="description_shingle"/>
     <copyField source="description" dest="description_sayt"/>
     <copyField source="description" dest="bucket_tight"/>
     <copyField source="description" dest="bucket_fuzzy"/>
+
+    <copyField source="sector_title" dest="bucket_fuzzy"/>
+    <copyField source="subsector_title" dest="bucket_fuzzy"/>
 
     <fieldType name="text_en" class="solr.TextField" positionIncrementGap="100" multiValued="true">
         <analyzer type="index">

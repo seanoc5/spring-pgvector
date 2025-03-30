@@ -25,7 +25,7 @@
          Query section - these settings control query time things like caches
          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <query>
-        <maxBooleanClauses>${solr.max.booleanClauses:4096}</maxBooleanClauses>
+<!--        <maxBooleanClauses>${solr.max.booleanClauses:4096}</maxBooleanClauses>-->
         <minPrefixQueryTermLength>${solr.query.minPrefixLength:-1}</minPrefixQueryTermLength>
         <filterCache size="512" initialSize="512" autowarmCount="0"/>
         <queryResultCache size="512" initialSize="512" autowarmCount="0"/>
@@ -99,17 +99,21 @@
             <str name="echoParams">all</str>
             <int name="rows">20</int>
             <str name="hl">true</str>
-            <str name="hl.fl">title,sector_title,subsector_title,industry_group_title, naics_industry_title, description,code,sector_code,industry_code</str>
+            <str name="hl.fl">title,sector_title,subsector_title,industry_group_title, naics_industry_title,national_industry_title, description,code,sector_code,ndustry_code</str>
             <str name="q.alt">*:*</str>
             <str name="indent">true</str>
             <str name="facet">on</str>
             <str name="facet.field">sector_code</str>
-            <str name="facet.field">industry_code</str>
+            <str name="facet.field">subsector_code</str>
             <str name="facet.field">naics_industry_code</str>
+            <str name="facet.field">national_industry_code</str>
+
             <str name="facet.field">sector_title</str>
-            <str name="facet.field">industry_group_title</str>
+            <str name="facet.field">subsector_title</str>
+            <str name="facet.field">naics_industry_title</str>
+            <str name="facet.field">national_industry_title</str>
 <!--            <str name="facet.field"></str>-->
-            <str name="fl">id,title,tags,code,description,sector_title,subsector_title,industry_group_title,naics_industry_title,score</str>
+            <str name="fl">id,code,title,tags,code,description,sector_title,subsector_title,industry_group_title,naics_industry_title,score</str>
             <str name="defType">edismax</str>
             <str name="qf">title^5.0 title_txt_en^3 description^3 description_txt_en^2 bucket_tight^1 bucket_fuzzy^0.5</str>
             <str name="pf">title^5.0 title_txt_en^3 description^4 description_txt_en^2</str>

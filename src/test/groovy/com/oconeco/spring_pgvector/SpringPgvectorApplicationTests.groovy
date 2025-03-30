@@ -10,8 +10,8 @@ import spock.lang.Specification
 @ActiveProfiles("test")
 class SpringPgvectorApplicationTests extends Specification {
 
-	def "contextLoads"() {
-		expect: "Spock test framework is working"
-		true
-	}
+    def "contextLoads"() {
+        expect: "Spock test framework is working"
+        true
+    }
 }

@@ -13,6 +13,7 @@
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/search.css}">
 </head>
 <body>
 <div class="dashboard-container">
@@ -52,6 +53,35 @@
                 </ul>
             </li>
             <li>
+                <a href="#solrSubmenu" data-bs-toggle="collapse" aria-expanded="true" class="dropdown-toggle">
+                    <i class="fas fa-vector-square"></i>Solr Search
+                </a>
+                <ul class="collapse show list-unstyled" id="solrSubmenu">
+                    <li>
+                        <a th:href="@{/admin/solr/}"> Solr Admin</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/admin/solr/reindex/naics}">Reindex NAICS codes</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/admin/solr/reindex/opportunities}">Reindex Contract Opportunities</a>
+                    </li>
+                    <li title="">
+                        <a th:href="@{/admin/solr/reindex/all}">Reindex All</a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#searchSubmenu" data-bs-toggle="collapse" aria-expanded="true" class="dropdown-toggle">
+                    <i class="fas fa-search"></i> Unified Search
+                </a>
+                <ul class="collapse show list-unstyled" id="searchSubmenu">
+                    <li>
+                        <a th:href="@{/search/}"><i class="fas fa-search"></i> Multi-Method Search</a>
+                    </li>
+                </ul>
+            </li>
+            <li>
                 <a th:href="@{/admin/settings}"><i class="fas fa-cog"></i>Example Settings</a>
             </li>
             <li class="active">
@@ -70,6 +100,9 @@
                         <a th:href="@{/admin/reports/performance}">Performance</a>
                     </li>
                 </ul>
+            </li>
+            <li>
+                <a th:href="@{/actuator}"><i class="fas fa-users"></i> Actuator links</a>
             </li>
 <!--            <li>-->
 <!--                <a th:href="@{/admin/users}"><i class="fas fa-users"></i> Users</a>-->

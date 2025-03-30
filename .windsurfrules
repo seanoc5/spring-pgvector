@@ -8,3 +8,4 @@
 8. Use pgvector for all vector database code
 9. Use Solr for all search code
 10. remember that the controllers are in groovy, and need explicitly defined parameter names due to reflection differences between groovy and java
+11. use the more recent thymeleaf syntax

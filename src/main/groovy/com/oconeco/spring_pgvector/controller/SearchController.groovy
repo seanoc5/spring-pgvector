@@ -36,7 +36,7 @@ class SearchController {
             @RequestParam(name = "method", required = false, defaultValue = "all") String method,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
-            @RequestParam(name = "sortBy", defaultValue = "rank") String sortBy,
+            @RequestParam(name = "sortBy", defaultValue = "search_rank") String sortBy,
             @RequestParam(name = "sortDir", defaultValue = "desc") String sortDir) {
 
         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC
@@ -92,7 +92,7 @@ class SearchController {
             @RequestParam(name = "q") String query,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
-            @RequestParam(name = "sortBy", defaultValue = "rank") String sortBy,
+            @RequestParam(name = "sortBy", defaultValue = "search_rank") String sortBy,
             @RequestParam(name = "sortDir", defaultValue = "desc") String sortDir,
             Model model) {
 

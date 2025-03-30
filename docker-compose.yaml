@@ -75,7 +75,6 @@ services:
     volumes:
       - solr1_data:/var/solr/data
       - ./scripts/solr-init.sh:/docker-entrypoint-initdb.d/solr-init.sh
-      - ./src/main/resources/test-data.csv:/tmp/test-data.csv
       - ./solr-config/spring-pgvector:/opt/solr/server/solr/configsets/spring-pgvector    # testing mount solr configset as volume rather than copy for better test/debug cycling
     depends_on:
       - zookeeper1

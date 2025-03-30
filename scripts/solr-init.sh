@@ -6,7 +6,7 @@ echo "====================== Starting Solr for upload and config...? ===========
 solr start -cloud -p 8983
 
 COLLECTION_NAME="spring-pgvector"
-CSV_FILE_PATH="/tmp/test-data.csv"
+#CSV_FILE_PATH="/tmp/test-data.csv"
 
 # -------------------------------------------------------------------
 # Upload config set to ZooKeeper if not already uploaded
@@ -54,8 +54,8 @@ else
   echo "...................... Collection created."
 fi
 
-echo "===================== POST sample data '${COLLECTION_NAME}' csv file:(${CSV_FILE_PATH})..."
-solr post -c "${COLLECTION_NAME}" "${CSV_FILE_PATH}"
+#echo "===================== POST sample data '${COLLECTION_NAME}' csv file:(${CSV_FILE_PATH})..."
+#solr post -c "${COLLECTION_NAME}" "${CSV_FILE_PATH}"
 
 # todo -- make this better, more dockerified
 echo "---------------------- Explicitly Stopping Solr (is there a better way?)..."

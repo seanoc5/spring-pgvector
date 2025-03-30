@@ -63,13 +63,13 @@ interface NaicsCodeRepository extends JpaRepository<NaicsCode, String> {
      */
     @Query(value = """
         SELECT n.*, 
-               ts_rank(n.search_vector, to_tsquery('english', :tsQuery)) AS rank,
+               ts_rank(n.search_vector, to_tsquery('english', :tsQuery)) AS search_rank,
                ts_headline('english', n.title, to_tsquery('english', :tsQuery), 'StartSel=<b>, StopSel=</b>, MaxWords=50, MinWords=10, MaxFragments=3') AS highlighted_title,
                ts_headline('english', n.description, to_tsquery('english', :tsQuery), 'StartSel=<b>, StopSel=</b>, MaxWords=100, MinWords=20, MaxFragments=3') AS highlighted_description
         FROM naics_codes n
         WHERE n.search_vector @@ plainto_tsquery('english', :tsQuery)
            OR n.search_vector @@ to_tsquery('english', :tsQuery)
-        ORDER BY rank DESC
+        ORDER BY search_rank DESC
     """, nativeQuery = true)
     Page<Object[]> searchByFullText(@Param("tsQuery") String tsQuery, Pageable pageable)
 

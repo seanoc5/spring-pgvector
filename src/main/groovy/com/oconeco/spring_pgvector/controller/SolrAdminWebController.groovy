@@ -21,13 +21,13 @@ class SolrAdminWebController {
 
     @Value('${solr.host}')
     private String solrHost
-    
+
     @Value('${solr.collection}')
     private String solrCollection
-    
+
     @Autowired
     private SolrAdminService solrAdminService
-    
+
     /**
      * Display the Solr admin dashboard.
      * @param model The Spring MVC model
@@ -36,22 +36,22 @@ class SolrAdminWebController {
     @GetMapping
     String solrAdminDashboard(Model model) {
         log.info("Displaying Solr admin dashboard")
-        
+
         model.addAttribute("solrUrl", solrHost)
         model.addAttribute("solrCollection", solrCollection)
-        
+
         return "solr-admin"
     }
-    
+
     /**
      * Reindex all NAICS codes to Solr.
      * @return A JSON response with the number of records reindexed
      */
-    @PostMapping("/reindex/naics")
+    @RequestMapping("/reindex/naics")
     @ResponseBody
     Map<String, Object> reindexNaicsCodes() {
         log.info("Received web request to reindex all NAICS codes to Solr")
-        
+
         try {
             int count = solrAdminService.reindexNaicsCodes()
             return [
@@ -67,16 +67,17 @@ class SolrAdminWebController {
             ]
         }
     }
-    
+
     /**
      * Reindex all opportunities to Solr.
      * @return A JSON response with the number of records reindexed
      */
-    @PostMapping("/reindex/opportunities")
+    @RequestMapping("/reindex/opportunities")
+//    @PostMapping("/reindex/opportunities")
     @ResponseBody
     Map<String, Object> reindexOpportunities() {
         log.info("Received web request to reindex all opportunities to Solr")
-        
+
         try {
             int count = solrAdminService.reindexOpportunities()
             return [
@@ -92,19 +93,19 @@ class SolrAdminWebController {
             ]
         }
     }
-    
+
     /**
      * Reindex all entities to Solr.
      * @return A JSON response with the number of records reindexed by entity type
      */
-    @PostMapping("/reindex/all")
+    @RequestMapping("/reindex/all")
     @ResponseBody
     Map<String, Object> reindexAll() {
         log.info("Received web request to reindex all entities to Solr")
-        
+
         try {
             Map<String, Integer> counts = solrAdminService.reindexAll()
-            
+
             return [
                 success: true,
                 message: "Successfully reindexed all entities to Solr",

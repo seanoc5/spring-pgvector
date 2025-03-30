@@ -17,7 +17,7 @@
                     </div>
                     <div class="card-body">
                         <!-- Results table -->
-                        <div th:if="${!postgresResults.empty}" class="table-responsive">
+                        <div th:if="${postgresResults != null and !postgresResults.empty}" class="table-responsive">
                             <table class="table table-sm table-hover">
                                 <thead>
                                     <tr>
@@ -51,12 +51,12 @@
                         </div>
                         
                         <!-- No results message -->
-                        <div th:if="${postgresResults.empty}" class="alert alert-warning">
+                        <div th:if="${postgresResults != null and postgresResults.empty}" class="alert alert-warning">
                             No PostgreSQL results found
                         </div>
                         
                         <!-- Pagination -->
-                        <div th:if="${postgresResults.totalPages > 1}" class="d-flex justify-content-center mt-2">
+                        <div th:if="${postgresResults != null and postgresResults.totalPages > 1}" class="d-flex justify-content-center mt-2">
                             <a th:href="@{/search/postgres(q=${query},page=0,size=${pageSize},sortBy=${sortBy},sortDir=${sortDir})}"
                                class="btn btn-sm btn-outline-primary"
                                hx-get="[[ @{/search/postgres(q=${query},page=0,size=${pageSize},sortBy=${sortBy},sortDir=${sortDir})} ]]"
@@ -91,7 +91,7 @@
                     </div>
                     <div class="card-body">
                         <!-- Results table -->
-                        <div th:if="${!solrResults.empty}" class="table-responsive">
+                        <div th:if="${solrResults != null and !solrResults.empty}" class="table-responsive">
                             <table class="table table-sm table-hover">
                                 <thead>
                                     <tr>
@@ -125,12 +125,12 @@
                         </div>
                         
                         <!-- No results message -->
-                        <div th:if="${solrResults.empty}" class="alert alert-warning">
+                        <div th:if="${solrResults != null and solrResults.empty}" class="alert alert-warning">
                             No Solr results found
                         </div>
                         
                         <!-- Pagination -->
-                        <div th:if="${solrResults.totalPages > 1}" class="d-flex justify-content-center mt-2">
+                        <div th:if="${solrResults != null and solrResults.totalPages > 1}" class="d-flex justify-content-center mt-2">
                             <a th:href="@{/search/solr(q=${query},page=0,size=${pageSize},sortBy=${sortBy},sortDir=${sortDir})}"
                                class="btn btn-sm btn-outline-success"
                                hx-get="[[ @{/search/solr(q=${query},page=0,size=${pageSize},sortBy=${sortBy},sortDir=${sortDir})} ]]"
@@ -165,7 +165,7 @@
                     </div>
                     <div class="card-body">
                         <!-- Results table -->
-                        <div th:if="${!vectorResults.empty}" class="table-responsive">
+                        <div th:if="${vectorResults != null and !vectorResults.empty}" class="table-responsive">
                             <table class="table table-sm table-hover">
                                 <thead>
                                     <tr>
@@ -199,12 +199,12 @@
                         </div>
                         
                         <!-- No results message -->
-                        <div th:if="${vectorResults.empty}" class="alert alert-warning">
+                        <div th:if="${vectorResults != null and vectorResults.empty}" class="alert alert-warning">
                             No Vector results found
                         </div>
                         
                         <!-- Pagination -->
-                        <div th:if="${vectorResults.totalPages > 1}" class="d-flex justify-content-center mt-2">
+                        <div th:if="${vectorResults != null and vectorResults.totalPages > 1}" class="d-flex justify-content-center mt-2">
                             <a th:href="@{/search/vector(q=${query},page=0,size=${pageSize},sortBy=${sortBy},sortDir=${sortDir})}"
                                class="btn btn-sm btn-outline-info"
                                hx-get="[[ @{/search/vector(q=${query},page=0,size=${pageSize},sortBy=${sortBy},sortDir=${sortDir})} ]]"
