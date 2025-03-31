@@ -8,7 +8,7 @@
 
 
     <!-- SoC Customizations -->
-    <field name="naics" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
+    <field name="code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
     <field name="sector_code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
     <field name="subsector_code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>
 <!--    <field name="industry_code" type="string" docValues="true" indexed="true" stored="false" useDocValuesAsStored="true" multiValued="false"/>-->
@@ -48,7 +48,7 @@
     <copyField source="title" dest="bucket_tight"/>
     <copyField source="title" dest="bucket_fuzzy"/>
 
-    <copyField source="naics" dest="bucket_tight"/>
+    <copyField source="code" dest="bucket_tight"/>
     <copyField source="naics_industry_title" dest="bucket_tight"/>
     <copyField source="national_industry_title" dest="bucket_tight"/>
 
@@ -59,7 +59,13 @@
     <copyField source="description" dest="bucket_fuzzy"/>
 
     <copyField source="sector_title" dest="bucket_fuzzy"/>
+    <copyField source="sector_title" dest="sector_title_s"/>
     <copyField source="subsector_title" dest="bucket_fuzzy"/>
+    <copyField source="subsector_title" dest="subsector_title_s"/>
+    <copyField source="naics_industry_title" dest="bucket_fuzzy"/>
+    <copyField source="naics_industry_title" dest="naics_industry_title_s"/>
+    <copyField source="national_industry_title" dest="bucket_fuzzy"/>
+    <copyField source="national_industry_title" dest="national_industry_title_s"/>
 
     <copyField source="psc" dest="bucket_fuzzy"/>
     <copyField source="psc" dest="psc_s"/>

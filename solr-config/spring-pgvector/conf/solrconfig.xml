@@ -25,7 +25,7 @@
          Query section - these settings control query time things like caches
          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <query>
-<!--        <maxBooleanClauses>${solr.max.booleanClauses:4096}</maxBooleanClauses>-->
+        <!--        <maxBooleanClauses>${solr.max.booleanClauses:4096}</maxBooleanClauses>-->
         <minPrefixQueryTermLength>${solr.query.minPrefixLength:-1}</minPrefixQueryTermLength>
         <filterCache size="512" initialSize="512" autowarmCount="0"/>
         <queryResultCache size="512" initialSize="512" autowarmCount="0"/>
@@ -37,19 +37,21 @@
         <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
         <listener event="newSearcher" class="solr.QuerySenderListener">
             <arr name="queries">
-                <!--
-                   <lst><str name="q">solr</str><str name="sort">price asc</str></lst>
-                   <lst><str name="q">rocks</str><str name="sort">weight asc</str></lst>
-                  -->
+                <lst>
+                    <str name="q">naics</str>
+                    <str name="sort">code asc</str>
+                </lst>
+                <lst>
+                    <str name="q">opportunities</str>
+                    <str name="sort">type_s asc</str>
+                </lst>
             </arr>
         </listener>
         <listener event="firstSearcher" class="solr.QuerySenderListener">
             <arr name="queries">
-                <!--
                 <lst>
-                  <str name="q">static firstSearcher warming in solrconfig.xml</str>
+                    <str name="q">naics software opportunities firstSearcher contract setup</str>
                 </lst>
-                -->
             </arr>
         </listener>
         <useColdSearcher>false</useColdSearcher>
@@ -62,7 +64,7 @@
     <requestHandler name="/select" class="solr.SearchHandler">
         <lst name="defaults">
             <str name="echoParams">all</str>
-            <int name="rows">10</int>
+            <int name="rows">5</int>
             <str name="hl">true</str>
             <str name="hl.fl">*</str>
             <str name="q.alt">*:*</str>
@@ -80,7 +82,7 @@
     <requestHandler name="/query" class="solr.SearchHandler">
         <lst name="defaults">
             <str name="echoParams">all</str>
-            <int name="rows">10</int>
+            <int name="rows">5</int>
             <str name="hl">true</str>
             <str name="hl.fl">*</str>
             <str name="q.alt">*:*</str>
@@ -97,11 +99,12 @@
     <requestHandler name="/naics" class="solr.SearchHandler">
         <lst name="defaults">
             <str name="echoParams">all</str>
-            <int name="rows">20</int>
+            <int name="rows">5</int>
             <str name="hl">true</str>
             <str name="hl.fl">id,code,description,
                 title,sector_title,subsector_title,industry_group_title, naics_industry_title,national_industry_title,
-                sector_code,industry_group_code,naics_industry_code,national_industry_code</str>
+                sector_code,industry_group_code,naics_industry_code,national_industry_code
+            </str>
             <str name="q.alt">*:*</str>
             <str name="fq">type_s:naics_code</str>
             <str name="indent">true</str>
@@ -115,7 +118,7 @@
             <str name="facet.field">subsector_title</str>
             <str name="facet.field">naics_industry_title</str>
             <str name="facet.field">national_industry_title</str>
-<!--            <str name="facet.field"></str>-->
+            <!--            <str name="facet.field"></str>-->
             <str name="fl">id,code,title,tags,code,description,sector_title,subsector_title,industry_group_title,naics_industry_title,score</str>
             <str name="defType">edismax</str>
             <str name="qf">title^5.0 title_txt_en^3 description^3 description_txt_en^2 bucket_tight^1 bucket_fuzzy^0.5</str>
@@ -127,9 +130,9 @@
         <lst name="defaults">
             <str name="echoParams">all</str>
             <str name="indent">true</str>
-            <int name="rows">20</int>
+            <int name="rows">5</int>
             <str name="hl">true</str>
-            <str name="hl.fl">id, </str>
+            <str name="hl.fl">id,</str>
             <str name="q.alt">*:*</str>
             <str name="fq">type_s:opportunity</str>
             <str name="facet">on</str>
@@ -137,10 +140,10 @@
             <str name="facet.field">set_aside_s</str>
             <str name="facet.field"></str>
 
-<!--            Notice ID	Title	Description	Current Response Date	Last Modified Date	Last Published Date	Contract Opportunity Type	POC Information	Active/Inactive	Awardee	Contract Award Number	Contract Award Date	NAICS	PSC	Modification Number	Set Aside-->
-            <str name="fl">id,type_s,naics, notice_id_s,title,description,psc_s,set_aside_s,current_response_date_dt,score</str>
+            <!--            Notice ID	Title	Description	Current Response Date	Last Modified Date	Last Published Date	Contract Opportunity Type	POC Information	Active/Inactive	Awardee	Contract Award Number	Contract Award Date	NAICS	PSC	Modification Number	Set Aside-->
+            <str name="fl">id,type_s,code, notice_id_s,title,description,psc_s,set_aside_s,current_response_date_dt,score</str>
             <str name="defType">edismax</str>
-            <str name="qf">naics^10 psc^7 title^5.0 title_txt_en^3 description^3 description_txt_en^2 bucket_tight^1 bucket_fuzzy^0.5</str>
+            <str name="qf">code^10 psc^7 title^5.0 title_txt_en^3 description^3 description_txt_en^2 bucket_tight^1 bucket_fuzzy^0.5</str>
             <str name="pf">title^5.0 title_txt_en^3 description^4 description_txt_en^2</str>
         </lst>
     </requestHandler>
@@ -376,10 +379,10 @@
         <str name="pattern">[^\w-\.]</str>
         <str name="replacement">_</str>
     </updateProcessor>
-<!--    <updateProcessor class="solr.NumFieldLimitingUpdateRequestProcessorFactory" name="max-fields">-->
-<!--        <int name="maxFields">1000</int>-->
-<!--        <bool name="warnOnly">true</bool>-->
-<!--    </updateProcessor>-->
+    <!--    <updateProcessor class="solr.NumFieldLimitingUpdateRequestProcessorFactory" name="max-fields">-->
+    <!--        <int name="maxFields">1000</int>-->
+    <!--        <bool name="warnOnly">true</bool>-->
+    <!--    </updateProcessor>-->
     <updateProcessor class="solr.ParseBooleanFieldUpdateProcessorFactory" name="parse-boolean"/>
     <updateProcessor class="solr.ParseLongFieldUpdateProcessorFactory" name="parse-long"/>
     <updateProcessor class="solr.ParseDoubleFieldUpdateProcessorFactory" name="parse-double"/>
@@ -428,7 +431,7 @@
     <!-- The update.autoCreateFields property can be turned to false to disable schemaless mode -->
     <updateRequestProcessorChain name="add-unknown-fields-to-the-schema" default="${update.autoCreateFields:true}"
                                  processor="uuid,remove-blank,field-name-mutating,parse-boolean,parse-long,parse-double,parse-date,add-schema-fields">
-<!--                                 processor="uuid,remove-blank,field-name-mutating,max-fields,parse-boolean,parse-long,parse-double,parse-date,add-schema-fields">-->
+        <!--                                 processor="uuid,remove-blank,field-name-mutating,max-fields,parse-boolean,parse-long,parse-double,parse-date,add-schema-fields">-->
         <processor class="solr.LogUpdateProcessorFactory"/>
         <processor class="solr.DistributedUpdateProcessorFactory"/>
         <processor class="solr.RunUpdateProcessorFactory"/>
