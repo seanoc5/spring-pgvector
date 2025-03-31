@@ -33,6 +33,7 @@ class OpportunityController {
             @RequestParam(name = "sortBy", defaultValue = "lastPublishedDate") String sortBy,
             @RequestParam(name = "sortDir", defaultValue = "desc") String sortDir) {
 
+        log.info "Getting all opportunities with pagination: page={}, size={}, sortBy={}, sortDir={}", page, size, sortBy, sortDir
         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy))
 
@@ -47,6 +48,7 @@ class OpportunityController {
     ResponseEntity<Opportunity> getOpportunityByNoticeId(@PathVariable String noticeId) {
         Opportunity opportunity = opportunityService.getOpportunityByNoticeId(noticeId)
 
+        log.info "Getting opportunity by notice ID: {}", noticeId
         if (opportunity) {
             return ResponseEntity.ok(opportunity)
         } else {
@@ -63,6 +65,7 @@ class OpportunityController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
 
+        log.info "Searching opportunities: query={}, page={}, size={}", query, page, size
         try {
             PageRequest pageRequest = PageRequest.of(page, size)
             Page<Map<String, Object>> results = opportunityService.searchOpportunities(query, pageRequest)
@@ -80,6 +83,7 @@ class OpportunityController {
      */
     @PostMapping("/import")
     ResponseEntity<Map<String, Object>> importFromCsv(@RequestParam(name = "file") MultipartFile file) {
+        log.info "Importing opportunities from CSV: $file"
         try {
             // Create a temporary file
             File tempFile = File.createTempFile("opportunities", ".csv")

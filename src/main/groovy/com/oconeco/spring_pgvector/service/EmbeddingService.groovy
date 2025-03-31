@@ -73,12 +73,13 @@ class EmbeddingService {
                     docsToEmbed.add(chunk)
                 }
             }
-//            try {
-//                vectorStore.add(docsToEmbed)
-//                log.info("\t\tAdded ${docsToEmbed.size()} documents to embedding service")
-//            } catch (Exception e) {
-//                log.error "Error adding documents to embedding service: ${e.message}", e
-//            }
+            try {
+                vectorStore.add(docsToEmbed)
+                log.info("\t\tAdded ${docsToEmbed.size()} documents to embedding service")
+            } catch (Exception e) {
+                log.error "Error adding documents to embedding service: ${e.message}", e
+            }
+
         } else {
             log.warn "Got empty list of documents to embed, skipping..."
         }

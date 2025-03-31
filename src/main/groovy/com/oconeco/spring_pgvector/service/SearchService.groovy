@@ -9,6 +9,7 @@ import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.common.SolrDocument
 import org.springframework.ai.document.Document
 import org.springframework.ai.embedding.EmbeddingModel
+import org.springframework.ai.vectorstore.SearchRequest
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -48,7 +49,10 @@ class SearchService {
      * Search using PostgreSQL full-text search
      */
     Page<Map<String, Object>> searchWithPostgres(String query, Pageable pageable) {
+        log.debug("searchWithPostgres: ${query} ${pageable}")
+
         if (!query || query.trim().isEmpty()) {
+            log.warn "Query is empty"
             return emptySearchResults(pageable)
         }
 
@@ -109,9 +113,16 @@ class SearchService {
                 naicsCode = null
             }
 
-            Float rank = row.length > 1 ? (row[1] as Float) : 0.0f
-            String highlightedTitle = row.length > 2 ? (row[2] as String) : ""
-            String highlightedDescription = row.length > 3 ? (row[3] as String) : ""
+            Float rank = 0.0f  //row.length > 1 ? (row[1] as Float) : 0.0f
+            int expectedFieldCount = 24
+            String highlightedTitle = 'highlighting mismatch'
+            String highlightedDescription = 'highlighting mismatch'
+            if (row.length >= expectedFieldCount) {
+                highlightedTitle = row[22] as String
+                highlightedDescription = row[23] as String
+            } else {
+                log.warn "PostgreSQL: Unexpected row length: ${row.length} (expected at least ${expectedFieldCount})"
+            }
 
             return [
                     naicsCode             : naicsCode,
@@ -129,7 +140,9 @@ class SearchService {
      * Search using Solr
      */
     Page<Map<String, Object>> searchWithSolr(String query, Pageable pageable) {
+        log.debug("searchWithSolr: ${query} ${pageable}")
         if (!query || query.trim().isEmpty()) {
+            log.warn "Query is empty"
             return emptySearchResults(pageable)
         }
 
@@ -139,7 +152,7 @@ class SearchService {
         try {
             // Create Solr query
             SolrQuery solrQuery = new SolrQuery()
-            solrQuery.setRequestHandler('/naics')
+            solrQuery.setRequestHandler('naics')
             solrQuery.setQuery(normalizedQuery)
 
             // Add highlighting
@@ -161,24 +174,39 @@ class SearchService {
 
             // Transform results
             List<Map<String, Object>> transformedResults = response.getResults().collect { SolrDocument doc ->
-                String id = doc.getFieldValue("id") as String
-                NaicsCode naicsCode = naicsCodeRepository.findById(id).orElse(null)
+                String solrId = doc.getFieldValue("id") as String
+                String id = ''
+                NaicsCode naicsCode = null
+                if (solrId) {
+                    def parts = solrId.split('_')
+                    if (parts.size() == 2) {
+                        id = parts[1]
+                    } else {
+                        log.warn "Solr: Unexpected ID format: ${solrId} (${parts.size()} parts)"
+                    }
+                    naicsCode = naicsCodeRepository.findById(id).orElse(null)
 
-                // Get highlighting if available
-                Map<String, List<String>> highlighting = response.getHighlighting()?.get(id)
-                String highlightedTitle = highlighting?.get("title")?.join("... ") ?: naicsCode?.title
-                String highlightedDescription = highlighting?.get("description")?.join("... ") ?: naicsCode?.description
+                    // Get highlighting if available
+                    Map<String, List<String>> highlighting = response.getHighlighting()?.get(id)
+                    String highlightedTitle = highlighting?.get("title")?.join("... ") ?: naicsCode?.title
+                    String highlightedDescription = highlighting?.get("description")?.join("... ") ?: naicsCode?.description
 
-                return [
-                    naicsCode             : naicsCode,
-                    rank                  : doc.getFieldValue("score") as Float,
-                    highlightedTitle      : highlightedTitle,
-                    highlightedDescription: highlightedDescription,
-                    searchType            : "solr"
-                ]
+                    return [
+                            naicsCode             : naicsCode,
+                            code                  : naicsCode?.code,
+                            rank                  : doc.getFieldValue("score") as Float,
+                            highlightedTitle      : highlightedTitle,
+                            highlightedDescription: highlightedDescription,
+                            searchType            : "solr"
+                    ]
+                } else {
+                    log.warn "Solr: Unexpected type for row[0]: ${doc.getFieldValue("id")?.class?.name}"
+                    return null
+                }
             }
 
             return new PageImpl<>(transformedResults, pageable, totalCount)
+
         } catch (Exception e) {
             log.error("Error searching with Solr: ${e.message}", e)
             return emptySearchResults(pageable)
@@ -189,7 +217,9 @@ class SearchService {
      * Search using Spring-AI vector store
      */
     Page<Map<String, Object>> searchWithVectorStore(String query, Pageable pageable) {
+        log.debug("searchWithVectorStore: ${query} ${pageable}")
         if (!query || query.trim().isEmpty()) {
+            log.warn "Query was empty"
             return emptySearchResults(pageable)
         }
 
@@ -201,17 +231,23 @@ class SearchService {
             float[] queryEmbedding = embeddingModel.embed(normalizedQuery)
 
             // Search for similar documents in vector store
-            List<Document> similarDocuments = vectorStore.similaritySearch(normalizedQuery, pageable.getPageSize())
+            List<Document> similarDocuments = vectorStore.similaritySearch(
+                SearchRequest.builder()
+                    .query(normalizedQuery)
+                    .topK(pageable.getPageSize())
+                    .build()
+            )
 
             // Transform results
             List<Map<String, Object>> transformedResults = similarDocuments.collect { Document doc ->
                 // Extract NAICS code ID from document metadata
-                String naicsCodeId = doc.getMetadata().get("naicsCodeId") as String
+//                String naicsCodeId = doc.getMetadata().get("naicsCodeId") as String
+                String naicsCodeId = doc.getMetadata().get("code") as String
                 NaicsCode naicsCode = naicsCodeRepository.findById(naicsCodeId).orElse(null)
 
                 // Calculate similarity score (normalized between 0 and 1)
                 float score = doc.getMetadata().get("score") != null ?
-                    doc.getMetadata().get("score") as float : 0.5f
+                        doc.getMetadata().get("score") as float : 0.5f
 
                 // Create simple highlighting based on query terms
                 String highlightedTitle = naicsCode?.title
@@ -230,12 +266,12 @@ class SearchService {
                 }
 
                 return [
-                    naicsCode             : naicsCode,
-                    rank                  : score,
-                    highlightedTitle      : highlightedTitle,
-                    highlightedDescription: highlightedDescription,
-                    searchType            : "vector",
-                    content               : doc.getText() // Include the actual document content
+                        naicsCode             : naicsCode,
+                        rank                  : score,
+                        highlightedTitle      : highlightedTitle,
+                        highlightedDescription: highlightedDescription,
+                        searchType            : "vector",
+                        content               : doc.getText() // Include the actual document content
                 ]
             }
 

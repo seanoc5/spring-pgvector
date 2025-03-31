@@ -19,7 +19,7 @@ class NaicsCodeSolrConverter implements SolrDocumentConverter<NaicsCode> {
         doc.addField("type_s", "naics_code")
 
         // Core fields
-        doc.addField("naics", naicsCode.code)
+        doc.addField("code", naicsCode.code)
         doc.addField("level", naicsCode.level)
         doc.addField("title", naicsCode.title)
         doc.addField("description", naicsCode.description)
@@ -44,21 +44,6 @@ class NaicsCodeSolrConverter implements SolrDocumentConverter<NaicsCode> {
         // Dates
         doc.addField("created_dt", naicsCode.createdAt)
         doc.addField("updated_dt", naicsCode.updatedAt)
-
-        // Combined text field for general search
-/*
-        String allText = [
-            naicsCode.title,
-            naicsCode.description,
-            naicsCode.sectorTitle,
-            naicsCode.subsectorTitle,
-            naicsCode.industryGroupTitle,
-            naicsCode.naicsIndustryTitle,
-            naicsCode.nationalIndustryTitle
-        ].findAll { it }.join(" ")
-
-        doc.addField("text", allText)
-*/
 
         return doc
     }

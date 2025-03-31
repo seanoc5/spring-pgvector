@@ -10,7 +10,7 @@ spring:
       ddl-auto: update  # Changed from validate to update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -25,7 +25,7 @@ spring:
     clean-disabled: false
     # New approach: validate migration scripts before running them
     validate-on-migrate: true
-    
+
   ai:
     ollama:
       init:

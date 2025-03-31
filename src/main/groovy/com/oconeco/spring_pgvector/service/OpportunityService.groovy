@@ -6,6 +6,7 @@ import com.oconeco.spring_pgvector.repository.NaicsCodeRepository
 import com.oconeco.spring_pgvector.solr.SolrSyncService
 import groovy.util.logging.Slf4j
 import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
@@ -53,11 +54,19 @@ class OpportunityService {
         BufferedReader csvReader = csvFile.newReader('UTF-8')
 
         // todo - replace deprecated `build()` below
-        Iterable<CSVRecord> records = CSVFormat.RFC4180.builder()
+        CSVFormat csvFormat = CSVFormat.RFC4180.builder()
                 .setHeader()
-                .setSkipHeaderRecord(true)
-                .build()
-                .parse(csvReader)
+                .setSkipHeaderRecord(false)
+                .build();
+
+        Iterable<CSVRecord> records = CSVFormat.RFC4180.builder()
+          .setHeader()
+          .setSkipHeaderRecord(true)
+          .build()
+          .parse(csvReader);
+
+//        CSVParser parser = CSVParser.parse(csvReader, csvFormat);
+//        Iterable<CSVRecord> records = parser.parse(csvReader)
 
         int count = 0
         List<Opportunity> batchOpportunities = []
@@ -79,8 +88,8 @@ class OpportunityService {
                     awardee: record.get("Awardee"),
                     contractAwardNumber: record.get("Contract Award Number"),
                     contractAwardDate: parseDate(record.get("Contract Award Date")),
-                    naics: record.get("NAICS"),
-                    naicsLabel: record.get("NAICS Label") ?: lookupNaicsLabel(record.get("NAICS")),
+                    naicsLabel: record.get("NAICS"),            // this is fubar from the source: they give the naics label but make it sound like it's a code
+//                    naicsLabel: lookupNaicsLabel(record.get("NAICS")),        // todo - get code from label, just not implemented at the moment
                     psc: record.get("PSC"),
                     modificationNumber: record.get("Modification Number"),
                     setAside: record.get("Set Aside")
@@ -351,7 +360,7 @@ class OpportunityService {
         if (!naicsCode) {
             return null
         }
-        
+
         try {
             // Try to find the NAICS code in the database
             def naicsCodeEntity = naicsCodeRepository.findById(naicsCode).orElse(null)
